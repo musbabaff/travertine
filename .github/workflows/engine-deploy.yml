@@ -1,0 +1,51 @@
+name: Engine deploy
+
+# Deploys the engine to Render only after CI passed on main and only when services/engine changed. (Requested in #19.)
+# Requires: secret RENDER_DEPLOY_HOOK_URL, variable ENGINE_URL, and Auto-Deploy switched off in Render.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engine-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ENGINE_URL: ${{ vars.ENGINE_URL }}
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Did the engine change?
+        id: changed
+        run: |
+          if git diff --quiet HEAD^ HEAD -- services/engine; then echo "engine=false" >> "$GITHUB_OUTPUT"; else echo "engine=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Trigger Render deploy hook
+        if: steps.changed.outputs.engine == 'true'
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then echo "::error::RENDER_DEPLOY_HOOK_URL secret is not set"; exit 1; fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL" > /dev/null
+
+      - name: Wait for the new deploy to answer
+        if: steps.changed.outputs.engine == 'true'
+        run: |
+          sleep 60
+          for i in $(seq 1 40); do
+            curl -fsS -m 60 "$ENGINE_URL/v1/health" && exit 0
+            sleep 15
+          done
+          exit 1
