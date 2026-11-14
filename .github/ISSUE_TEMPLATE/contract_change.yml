@@ -1,0 +1,41 @@
+name: Contract change
+description: Request a change to packages/contract/openapi.yaml (new endpoint, field or type).
+title: "contract: "
+labels: [contract]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The contract is the single source of truth (CLAUDE.md §2). The web agent applies additive changes in their own
+        `contract/*` pull request, regenerates types and fixtures, and closes this issue with a comment. Breaking
+        changes need a `/v2` path or explicit agreement from both maintainers.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options: [Additive (new optional field or new endpoint), Breaking (changes or removes existing behaviour)]
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: Why the change is needed and which screen or engine feature uses it.
+    validations:
+      required: true
+  - type: textarea
+    id: fields
+    attributes:
+      label: Endpoints and fields
+      description: For each field give name, type, units, range, whether it is optional, and its meaning.
+      placeholder: "| Field | Type | Units | Meaning |\n|---|---|---|---|"
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example with real values
+      description: A real engine response or values traceable to a dataset, for the fixture.
+      render: json
+    validations:
+      required: true
