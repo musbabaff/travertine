@@ -38,6 +38,13 @@ class CropSources(BaseModel):
     root_depth: str
     p: str
     ky: str
+    n_credit: str | None = None
+
+
+class NCredit(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    first_year_kg_ha: float = Field(ge=0)
+    second_year_kg_ha: float = Field(ge=0)
 
 
 class CropParams(BaseModel):
@@ -49,6 +56,7 @@ class CropParams(BaseModel):
     is_legume: bool
     season: Literal["winter", "summer", "perennial"]
     sowing_month: int = Field(ge=1, le=12)
+    sowing_day: int = Field(ge=1, le=28)
     stages: Stages
     kc: Kc
     kc_mid_range: tuple[float, float] | None = None
@@ -58,6 +66,7 @@ class CropParams(BaseModel):
     root_depth_range_m: tuple[float, float]
     p: float = Field(gt=0, lt=1)
     ky: float | None = Field(default=None, gt=0)
+    n_credit: NCredit | None = None
     sources: CropSources
 
     @model_validator(mode="after")
@@ -65,6 +74,10 @@ class CropParams(BaseModel):
         lo, hi = self.root_depth_range_m
         if not lo <= self.root_depth_m <= hi:
             raise ValueError(f"{self.id}: root_depth_m outside its published range")
+        if (self.n_credit is not None) != (self.sources.n_credit is not None):
+            raise ValueError(f"{self.id}: n_credit and its source must be given together")
+        if self.n_credit is not None and not self.is_legume:
+            raise ValueError(f"{self.id}: only legumes carry an n_credit")
         for rng, value in ((self.kc_mid_range, self.kc.mid), (self.kc_end_range, self.kc.end)):
             if rng is not None and not rng[0] <= value <= rng[1]:
                 raise ValueError(f"{self.id}: Kc outside its published range")

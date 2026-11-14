@@ -1,0 +1,374 @@
+"""/v1/rotations/explore: rank rotations for a field under the user's priorities."""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import time
+from collections import OrderedDict
+from dataclasses import dataclass
+from functools import lru_cache
+
+import numpy as np
+
+from travertine_engine.errors import InvalidRequest
+from travertine_engine.field import FieldService, parse_field_id, power_provenance, resolve_soil
+from travertine_engine.models import (
+    Priorities,
+    Provenance,
+    Rotation,
+    RotationExploreRequest,
+    RotationExploreResponse,
+    RotationScores,
+    RotationYear,
+)
+from travertine_engine.science.climate import annual_summary
+from travertine_engine.science.crops import CropParams, load_crops
+from travertine_engine.science.rotations import (
+    Backcast,
+    FieldInputs,
+    RotationTables,
+    SoilIndicators,
+    backcast,
+    build_tables,
+    enumerate_rotations,
+    soil_indicators,
+)
+from travertine_engine.science.soil import OC_TO_OM, depth_weighted_mean, saxton_rawls_water_contents
+from travertine_engine.science.water import surface_layer
+
+log = logging.getLogger(__name__)
+
+TOP_N = 10
+TABLE_CACHE_SIZE = 16
+
+FAO56_PROVENANCE = Provenance(
+    dataset="FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
+    provider="Food and Agriculture Organization of the United Nations",
+    spatial_resolution="Not spatial (method and crop coefficients)",
+    temporal_coverage="Published 1998",
+    access_url="https://www.fao.org/4/x0490e/x0490e00.htm",
+    note=(
+        "Crop coefficients (Table 12, adjusted for local wind and humidity with eqs. 62 and 65), stage lengths "
+        "(Table 11), rooting depth and depletion fraction (Table 22), daily root-zone water balance and water-stress "
+        "coefficient Ks (chapter 8, eqs. 84–85) and bare-soil evaporation between crops (chapter 7, eqs. 73–74, "
+        "Table 19). Runoff and capillary rise are not modelled."
+    ),
+)
+A3517_PROVENANCE = Provenance(
+    dataset="Using Legumes as a Nitrogen Source (UW-Extension A3517)",
+    provider="Bundy, Kelling & Ward Good, University of Wisconsin-Extension, 1997",
+    spatial_resolution="Not spatial (rotation-study averages, Midwest US)",
+    temporal_coverage="Published 1997",
+    access_url="https://ipcm.wisc.edu/wp-content/uploads/sites/54/2022/11/Usinglegumes.pdf",
+    note=(
+        "Legume nitrogen credits to the following crop (alfalfa fair stand 160 and 50 lb N/acre in the first and "
+        "second year, soybean 40, pea and dry bean 20, applied to lentil and faba bean as the closest category). Used "
+        "only as one of four relative soil-health indicators, not as a fertilizer recommendation for this field."
+    ),
+)
+
+
+def scoring_provenance(n_windows: int, first: int, last: int, horizon: int) -> Provenance:
+    return Provenance(
+        dataset="Travertine rotation back-cast and scoring",
+        provider="Travertine engine",
+        spatial_resolution="Field point (inputs at the resolutions listed above)",
+        temporal_coverage=f"{n_windows} overlapping {horizon}-year windows of agricultural years {first}–{last}",
+        access_url="https://github.com/musbabaff/travertine/blob/main/docs/METHODOLOGY.md",
+        note=(
+            "Each rotation is simulated through every historical window with soil water carried between crops. "
+            "Yearly figures are medians across windows. Scores are relative indices between 0 and 1 under the given "
+            "priorities, not forecasts. water = median share of crop water demand met by rain and stored soil water; "
+            "risk = 1 − (0.5 × 90th-percentile unmet share of a season + 0.5 × its 10th–90th percentile spread); "
+            "soil = mean of legume nitrogen credit, family diversity, rooting-depth range and share of the year under "
+            "a crop, each scaled to the candidates considered; income = mean water-limited relative "
+            "evapotranspiration with every crop valued equally — no price or market data is used."
+        ),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class Scored:
+    rotations: np.ndarray
+    water: np.ndarray
+    income: np.ndarray
+    soil: np.ndarray
+    risk: np.ndarray
+    total: np.ndarray
+    indicators: list[SoilIndicators]
+
+
+class ExploreService:
+    def __init__(self, fields: FieldService) -> None:
+        self.fields = fields
+        self._tables: OrderedDict[
+            tuple[float, float, bool, tuple[str, ...]], tuple[RotationTables, FieldInputs]
+        ] = OrderedDict()
+        self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
+
+    async def _inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
+        (daily, api_version), soil = await asyncio.gather(
+            self.fields.daily_climate(lat, lon),
+            resolve_soil(self.fields.upstream, self.fields.cache, lat, lon),
+        )
+        df = daily.frame
+        top = [layer for layer in soil.layers if layer.bottom_cm <= 15]
+        sand = depth_weighted_mean(top, "sand_pct", 15)
+        silt = depth_weighted_mean(top, "silt_pct", 15)
+        clay = depth_weighted_mean(top, "clay_pct", 15)
+        soc = depth_weighted_mean(top, "soc_g_kg", 15)
+        theta_wp, theta_fc = saxton_rawls_water_contents(sand, clay, soc / 10.0 * OC_TO_OM)
+        first_day = df.index[0].date()
+        inputs = FieldInputs(
+            first_day=first_day,
+            et0=df["ET0"].to_numpy(dtype=float),
+            rain=np.nan_to_num(df["PRECTOTCORR"].to_numpy(dtype=float)),
+            tmax=df["T2M_MAX"].to_numpy(dtype=float),
+            tdew=df["T2MDEW"].to_numpy(dtype=float),
+            u2=df["WS2M"].to_numpy(dtype=float),
+            awc_mm_per_m=soil.soil.awc_mm,
+            surface=surface_layer(theta_fc, theta_wp, sand, silt, clay),
+            texture=soil.soil.texture,
+        )
+        years, dropped = annual_summary(daily)
+        first = years[0].year if years else self.fields.settings.first_year
+        last = years[-1].year if years else self.fields.settings.last_year
+        provenance = [power_provenance(daily, first, last, api_version, dropped), soil.provenance]
+        return inputs, provenance, soil.soil.texture
+
+    async def tables(
+        self, lat: float, lon: float, irrigated: bool, crops: tuple[CropParams, ...]
+    ) -> tuple[RotationTables, FieldInputs, list[Provenance]]:
+        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops))
+        inputs, provenance, _ = await self._inputs(lat, lon)
+        cached = self._tables.get(key)
+        if cached is not None:
+            self._tables.move_to_end(key)
+            return cached[0], cached[1], provenance
+        lock = self._locks.setdefault(key, asyncio.Lock())
+        async with lock:
+            cached = self._tables.get(key)
+            if cached is None:
+                started = time.perf_counter()
+                tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
+                log.info(
+                    "rotation tables built",
+                    extra={"elapsed_ms": round((time.perf_counter() - started) * 1000)},
+                )
+                self._tables[key] = (tables, inputs)
+                while len(self._tables) > TABLE_CACHE_SIZE:
+                    self._tables.popitem(last=False)
+                cached = self._tables[key]
+        return cached[0], cached[1], provenance
+
+    async def explore(self, req: RotationExploreRequest) -> RotationExploreResponse:
+        if req.field_id is not None:
+            lat, lon = parse_field_id(req.field_id)
+        elif req.lat is not None and req.lon is not None:
+            lat, lon = req.lat, req.lon
+        else:
+            raise InvalidRequest("Provide field_id or both lat and lon.")
+        crops = select_crops(req.crop_ids)
+        tables, inputs, provenance = await self.tables(lat, lon, req.irrigated, crops)
+        result = await asyncio.to_thread(rank, tables, inputs.texture, req.horizon_years, req.priorities)
+        rotations = describe(tables, result, inputs.texture, req)
+        n_windows = len(tables.years) - req.horizon_years + 1
+        provenance = [
+            *provenance,
+            FAO56_PROVENANCE,
+            A3517_PROVENANCE,
+            scoring_provenance(n_windows, tables.years[0], tables.years[-1], req.horizon_years),
+        ]
+        return RotationExploreResponse(rotations=rotations, provenance=provenance)
+
+
+def select_crops(crop_ids: list[str] | None) -> tuple[CropParams, ...]:
+    all_crops = load_crops()
+    if not crop_ids:
+        return all_crops
+    known = {c.id: c for c in all_crops}
+    unknown = sorted(set(crop_ids) - known.keys())
+    if unknown:
+        raise InvalidRequest("Unknown crop_ids.", details={"unknown": unknown, "known": sorted(known)})
+    chosen = tuple(c for c in all_crops if c.id in set(crop_ids))
+    if not any(c.is_legume for c in chosen):
+        raise InvalidRequest("crop_ids must include at least one legume; every rotation needs one per cycle.")
+    return chosen
+
+
+def row_percentile(values: np.ndarray, q: float) -> np.ndarray:
+    """Per-row percentile ignoring NaN, with numpy's default linear interpolation, without a Python loop."""
+    ordered = np.sort(values, axis=1)  # NaN sorts last
+    n = np.sum(~np.isnan(values), axis=1)
+    pos = (n - 1).clip(min=0) * (q / 100.0)
+    lo = np.floor(pos).astype(np.int64)
+    hi = np.minimum(lo + 1, (n - 1).clip(min=0))
+    rows = np.arange(values.shape[0])
+    a, b = ordered[rows, lo], ordered[rows, hi]
+    out = a + (b - a) * (pos - lo)
+    return np.where(n > 0, out, np.nan)
+
+
+@lru_cache(maxsize=32)
+def candidates(
+    crops: tuple[CropParams, ...], horizon: int, texture: str
+) -> tuple[np.ndarray, list[SoilIndicators]]:
+    seqs = enumerate_rotations(crops, horizon)
+    indicators = [soil_indicators([crops[i] for i in seq], texture) for seq in seqs]
+    return np.array(seqs, dtype=np.int64).reshape(len(seqs), horizon), indicators
+
+
+def _scale(values: np.ndarray) -> np.ndarray:
+    top = float(values.max()) if values.size else 0.0
+    return values / top if top > 0 else np.zeros_like(values)
+
+
+@dataclass(frozen=True, slots=True)
+class Ranked:
+    order: np.ndarray
+    scored: Scored
+    cast: Backcast
+
+
+def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
+    rot, indicators = candidates(tables.crops, horizon, texture)
+    if rot.shape[0] == 0:
+        raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
+    cast = backcast(tables, rot)
+    ok = cast.window_valid
+    if not ok.any():
+        raise InvalidRequest("The climate record is too short for this horizon.")
+
+    demand = cast.etc.sum(axis=2)
+    deficit = cast.deficit.sum(axis=2)
+    met = np.where(ok, 1.0 - deficit / np.maximum(demand, 1e-9), np.nan)
+    water = np.clip(row_percentile(met, 50), 0.0, 1.0)
+
+    unmet = cast.deficit / np.maximum(cast.etc, 1e-9)
+    unmet = np.where(ok[:, :, None], unmet, np.nan).reshape(rot.shape[0], -1)
+    p10 = row_percentile(unmet, 10)
+    p90 = row_percentile(unmet, 90)
+    risk = np.clip(1.0 - (0.5 * p90 + 0.5 * (p90 - p10)), 0.0, 1.0)
+
+    rel_et = np.where(ok[:, :, None], cast.eta / np.maximum(cast.etc, 1e-9), np.nan)
+    income = np.clip(np.nanmean(rel_et.reshape(rot.shape[0], -1), axis=1), 0.0, 1.0)
+
+    n_credit = _scale(np.array([i.n_credit_kg_ha for i in indicators]))
+    families = _scale(np.array([float(i.families) for i in indicators]))
+    roots = _scale(np.array([i.root_range_m for i in indicators]))
+    cover = _scale(np.array([i.cover_fraction for i in indicators]))
+    soil = (n_credit + families + roots + cover) / 4.0
+
+    weights = np.array([priorities.water, priorities.income, priorities.soil, priorities.risk])
+    if weights.sum() == 0:
+        weights = np.ones(4)
+    stacked = np.vstack([water, income, soil, risk])
+    total = (weights[:, None] * stacked).sum(axis=0) / weights.sum()
+    order = np.lexsort((-water, -total))  # ties broken by water score
+    return Ranked(
+        order=order,
+        scored=Scored(
+            rotations=rot,
+            water=water,
+            income=income,
+            soil=soil,
+            risk=risk,
+            total=total,
+            indicators=indicators,
+        ),
+        cast=cast,
+    )
+
+
+def _pct(x: float) -> str:
+    return f"{100 * x:.0f} %"
+
+
+def describe(
+    tables: RotationTables, ranked: Ranked, texture: str, req: RotationExploreRequest
+) -> list[Rotation]:
+    s, cast = ranked.scored, ranked.cast
+    out: list[Rotation] = []
+    first_years = [y for y, ok in zip(cast.window_years, cast.window_valid.any(axis=0), strict=True) if ok]
+    for r in ranked.order[:TOP_N]:
+        seq = [tables.crops[i] for i in s.rotations[r]]
+        ok = cast.window_valid[r]
+        etc = cast.etc[r][ok]
+        eta = cast.eta[r][ok]
+        deficit = cast.deficit[r][ok]
+        stress = 1.0 - eta / np.maximum(etc, 1e-9)
+        yearly = [
+            RotationYear(
+                year_index=k + 1,
+                crop_id=seq[k].id,
+                water_demand_mm=round(float(np.median(etc[:, k])), 1),
+                water_deficit_mm=round(float(np.median(deficit[:, k])), 1),
+                stress_index=round(float(np.clip(np.median(stress[:, k]), 0.0, 1.0)), 3),
+            )
+            for k in range(len(seq))
+        ]
+        total_demand = np.median(etc.sum(axis=1))
+        total_deficit = np.median(deficit.sum(axis=1))
+        windows = int(ok.sum())
+        span = f"{first_years[0] - 1}/{first_years[0]}–{first_years[-1] + len(seq) - 2}/{first_years[-1] + len(seq) - 1}"
+        sentences = []
+        if req.irrigated:
+            sentences.append(
+                f"Across {windows} historical {len(seq)}-year windows (agricultural years {span}), the median crop "
+                f"water demand was {total_demand:.0f} mm, of which {total_deficit:.0f} mm "
+                f"({_pct(total_deficit / max(total_demand, 1e-9))}) had to come from irrigation."
+            )
+        else:
+            sentences.append(
+                f"Across {windows} historical {len(seq)}-year windows (agricultural years {span}), the median crop "
+                f"water demand was {total_demand:.0f} mm and rain plus stored soil water left {total_deficit:.0f} mm "
+                f"({_pct(total_deficit / max(total_demand, 1e-9))}) unmet under rain-fed management."
+            )
+        unmet = (deficit / np.maximum(etc, 1e-9)).ravel()
+        worst = int(np.argmax(unmet))
+        w_window, w_year = divmod(worst, len(seq))
+        worst_ag_year = [y for y, keep in zip(cast.window_years, ok, strict=True) if keep][w_window] + w_year
+        what = "had to be irrigated" if req.irrigated else "went unmet"
+        sentences.append(
+            f"In the driest tenth of simulated seasons at least {_pct(float(np.percentile(unmet, 90)))} of crop water "
+            f"demand {what}; the most extreme season was {seq[w_year].name.lower()} in "
+            f"{worst_ag_year - 1}/{worst_ag_year} ({_pct(float(unmet[worst]))})."
+        )
+        ind = s.indicators[r]
+        legumes = [c.name.lower() for c in seq if c.is_legume]
+        if ind.n_credit_kg_ha > 0:
+            sentences.append(
+                f"Legumes ({', '.join(dict.fromkeys(legumes))}) earn an estimated {ind.n_credit_kg_ha:.0f} kg N/ha of "
+                "nitrogen credit for the crops that follow them (UW-Extension A3517 values from Midwest US trials; "
+                "local responses may differ)."
+            )
+        else:
+            reason = " on this coarse-textured soil" if texture in {"sand", "loamy sand"} else ""
+            sentences.append(
+                f"The legume year ({', '.join(dict.fromkeys(legumes))}) is not followed by a non-legume crop within the "
+                f"horizon, or earns no credit{reason}, so no nitrogen credit is counted."
+            )
+        sentences.append(
+            f"The rotation uses {ind.families} botanical families, its rooting depths span {ind.root_range_m:.2f} m "
+            f"and a crop is in the field {_pct(ind.cover_fraction)} of the time."
+        )
+        sentences.append(
+            "The income index only reflects how much of each crop's water demand was met; it uses no prices, so "
+            "treat it as a water-limited production index, not a profit estimate."
+        )
+        out.append(
+            Rotation(
+                sequence=[c.id for c in seq],
+                scores=RotationScores(
+                    water=round(float(s.water[r]), 3),
+                    income=round(float(s.income[r]), 3),
+                    soil=round(float(s.soil[r]), 3),
+                    risk=round(float(s.risk[r]), 3),
+                    total=round(float(s.total[r]), 3),
+                ),
+                yearly=yearly,
+                explanation=sentences,
+            )
+        )
+    return out

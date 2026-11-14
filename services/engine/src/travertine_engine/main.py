@@ -18,9 +18,18 @@ from travertine_engine import __version__
 from travertine_engine.cache import DiskCache
 from travertine_engine.config import Settings
 from travertine_engine.errors import EngineError, RateLimited
+from travertine_engine.explore import ExploreService
 from travertine_engine.field import FieldService
 from travertine_engine.logs import configure_logging, request_id_var
-from travertine_engine.models import Crop, ErrorBody, FieldAnalysis, FieldAnalyzeRequest, Health
+from travertine_engine.models import (
+    Crop,
+    ErrorBody,
+    FieldAnalysis,
+    FieldAnalyzeRequest,
+    Health,
+    RotationExploreRequest,
+    RotationExploreResponse,
+)
 from travertine_engine.ratelimit import RateLimiter
 from travertine_engine.science.crops import load_crops
 from travertine_engine.upstream import Upstream
@@ -43,6 +52,7 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
             timeout_s=settings.upstream_timeout_s, retries=settings.upstream_retries
         )
         app.state.fields = FieldService(settings, client, DiskCache(settings.cache_dir))
+        app.state.explore = ExploreService(app.state.fields)
         load_crops()
         log.info("engine started", extra={"version": __version__, "cache_dir": str(settings.cache_dir)})
         yield
@@ -156,6 +166,16 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
     async def analyze(body: FieldAnalyzeRequest, request: Request) -> FieldAnalysis:
         service: FieldService = request.app.state.fields
         return await service.analyze(body.lat, body.lon)
+
+    @app.post(
+        "/v1/rotations/explore",
+        response_model=RotationExploreResponse,
+        tags=["rotations"],
+        responses={"404": {"model": ErrorBody}, **ERROR_RESPONSES},
+    )
+    async def explore(body: RotationExploreRequest, request: Request) -> RotationExploreResponse:
+        service: ExploreService = request.app.state.explore
+        return await service.explore(body)
 
     return app
 
