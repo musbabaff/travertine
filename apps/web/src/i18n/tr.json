@@ -218,5 +218,13 @@
   "evidence.method": "Yöntem",
   "evidence.caveats": "Sınırlamalar",
   "evidence.language": "Yöntem ve sınırlamalar, motorun döndürdüğü haliyle İngilizce gösterilir.",
-  "evidence.toExplore": "Nöbetlere dön"
+  "evidence.toExplore": "Nöbetlere dön",
+  "nav.home": "Travertine ana sayfası",
+  "footer.source": "Kaynak kodu",
+  "notFound.title": "Sayfa bulunamadı",
+  "notFound.body": "Bu adres hiçbir sayfayla eşleşmiyor. Bağlantı eski ya da hatalı yazılmış olabilir.",
+  "notFound.cta": "Ana sayfaya git",
+  "error.title": "Bir sorun oluştu",
+  "error.body": "Sayfa yüklenemedi. Tarlanız ve öncelikleriniz adres çubuğunda duruyor.",
+  "error.retry": "Yeniden dene"
 }

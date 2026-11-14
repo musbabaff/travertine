@@ -24,8 +24,8 @@ everywhere in the product.
 | Income | `--viz-income` | `#B87800` | 3.25 |
 | Soil health | `--viz-soil` | `#007A5A` | 4.74 |
 | Risk | `--viz-risk` | `#C1480A` | 4.44 |
-| Modelled (series A) | `--viz-model` | `#13615F` (teal-700) | 6.42 |
-| Observed (series B) | `--viz-observed` | `#0F1B2D` (ink) | 15.33 |
+| Modelled (series A) | `--viz-model` | `#1F666B` (teal-700) | 5.87 |
+| Observed (series B) | `--viz-observed` | `#061832` (ink) | 15.73 |
 | Neutral / baseline | `--viz-neutral` | `#8C7F68` | 3.48 |
 | Gridlines | `--viz-grid` | `#E2DACB` | decorative |
 
