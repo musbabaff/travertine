@@ -5,9 +5,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 
-from travertine_engine.cache import DiskCache
+from travertine_engine.cache import DiskCache, snapshot_reads
 from travertine_engine.config import Settings
 from travertine_engine.errors import InvalidRequest, UpstreamUnavailable
 from travertine_engine.models import ClimateYear, FieldAnalysis, NdviYear, Provenance, Soil
@@ -79,6 +79,8 @@ def power_provenance(
     ]
     if dropped:
         notes.append(f"Years with incomplete daily records were left out: {', '.join(map(str, dropped))}.")
+    if daily.source_note:
+        notes.append(daily.source_note.strip())
     return Provenance(
         dataset=f"NASA POWER daily point data, Agroclimatology community (API {api_version})",
         provider="NASA Langley Research Center, POWER Project",
@@ -112,7 +114,8 @@ SOIL_METHOD = (
 
 async def resolve_soil(upstream: Upstream, cache: DiskCache, lat: float, lon: float) -> SoilResult:
     try:
-        profile = await fetch_soilgrids(upstream, cache, lat, lon)
+        with snapshot_reads() as reads:
+            profile = await fetch_soilgrids(upstream, cache, lat, lon)
     except (UpstreamUnavailable, SoilGridsNoData) as exc:
         log.warning("soilgrids unavailable, using default soil", extra={"reason": str(exc)})
         reason = "has no prediction at this point" if isinstance(exc, SoilGridsNoData) else "did not respond"
@@ -152,7 +155,7 @@ async def resolve_soil(upstream: Upstream, cache: DiskCache, lat: float, lon: fl
                 SOIL_METHOD
                 + f" SoilGrids 90 % prediction interval for 0–30 cm at this point: clay {clay_lo:.0f}–{clay_hi:.0f} %,"
                 f" organic carbon {soc_lo:.1f}–{soc_hi:.1f} g/kg; values derived from the mean prediction carry that"
-                " uncertainty."
+                " uncertainty." + reads.note("soilgrids")
             ),
         ),
     )
@@ -165,7 +168,7 @@ class NdviRecord:
     provenance: Provenance
 
 
-def modis_provenance(first: int, last: int, skipped: list[int]) -> Provenance:
+def modis_provenance(first: int, last: int, skipped: list[int], source_note: str = "") -> Provenance:
     note = (
         "Single 250 m pixel containing the field centre; it may include neighbouring fields, roads or buildings. "
         f"Growing-season value = mean NDVI of the {SEASON_COMPOSITES} composites starting day-of-year 97 to 241 "
@@ -174,6 +177,7 @@ def modis_provenance(first: int, last: int, skipped: list[int]) -> Provenance:
     )
     if skipped:
         note += f" Years without enough usable composites were left out: {', '.join(map(str, skipped))}."
+    note += source_note
     return Provenance(
         dataset="MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061), NDVI and pixel reliability",
         provider="NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by the ORNL DAAC MODIS web service",
@@ -191,14 +195,16 @@ class FieldService:
         self.cache = cache
 
     async def daily_climate(self, lat: float, lon: float) -> tuple[DailyClimate, str]:
-        power = await fetch_power_daily(
-            self.upstream, self.cache, lat, lon, self.settings.first_year, self.settings.last_year
-        )
-        return compute_daily_et0(power), power.api_version
+        with snapshot_reads() as reads:
+            power = await fetch_power_daily(
+                self.upstream, self.cache, lat, lon, self.settings.first_year, self.settings.last_year
+            )
+        return replace(compute_daily_et0(power), source_note=reads.note("power_daily")), power.api_version
 
     async def ndvi(self, lat: float, lon: float) -> NdviRecord:
         years = range(self.settings.first_year, self.settings.last_year + 1)
-        seasons = await fetch_ndvi_seasons(self.upstream, self.cache, lat, lon, years)
+        with snapshot_reads() as reads:
+            seasons = await fetch_ndvi_seasons(self.upstream, self.cache, lat, lon, years)
         by_year: dict[int, float] = {}
         skipped: list[int] = []
         for year in years:
@@ -207,7 +213,8 @@ class FieldService:
                 skipped.append(year)
             else:
                 by_year[year] = value
-        return NdviRecord(by_year, skipped, modis_provenance(years[0], years[-1], skipped))
+        provenance = modis_provenance(years[0], years[-1], skipped, reads.note("modis_mod13q1"))
+        return NdviRecord(by_year, skipped, provenance)
 
     async def _ndvi_or_none(self, lat: float, lon: float) -> NdviRecord | None:
         try:

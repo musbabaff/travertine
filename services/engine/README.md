@@ -42,19 +42,28 @@ uv run mypy              # strict
 
 The contract tests read `packages/contract/openapi.yaml` and validate every response against it.
 
-## Cache and pre-warming
+## Cache, snapshot and pre-warming
 
 Upstream responses are cached as JSON under `data/cache/` (git-ignored), keyed by source, coordinates rounded to
-0.001° and request parameters. Entries do not expire because the cached datasets are historical records or static
-maps.
+0.001° and request parameters, with a `.meta.json` beside each entry recording when and from which URL it was
+fetched. Entries do not expire because the cached datasets are historical records or static maps.
+
+The demo field (37.89 N, 28.98 E) does not depend on any upstream being up. `data/snapshot/` holds its NASA POWER,
+SoilGrids and MODIS responses, gzipped, with `manifest.json` listing each file's fetch time, request URL and SHA-256.
+The engine copies the snapshot into the cache at start-up (and the image does so at build), without network access.
+Responses built from snapshot entries say so in their provenance note, with the fetch date and host.
 
 ```bash
-uv run python scripts/prewarm.py                    # demo field near Sarayköy, Denizli (37.89 N, 28.98 E)
-uv run python scripts/prewarm.py 40.10,-88.20       # plus any extra lat,lon pairs
+uv run python scripts/make_snapshot.py                            # refetch everything live; refuses partial data
+uv run python scripts/make_snapshot.py --seed-modis-from data/cache  # reuse MODIS seasons already fetched
+uv run python scripts/load_snapshot.py                            # snapshot -> cache, offline
+uv run python scripts/prewarm.py                                  # fetch the demo field live into the cache
+uv run python scripts/prewarm.py 40.10,-88.20                     # plus any extra lat,lon pairs
 ```
 
-The Docker build runs the pre-warm step, so the deployed image answers the demo field even when NASA POWER or
-SoilGrids is down.
+The current snapshot (14 November 2026): POWER and SoilGrids fetched live; the 25 MODIS seasons come from a fetch
+earlier the same day because the ORNL service was answering 502 at the time, and the manifest marks them
+`seeded_from_earlier_fetch`.
 
 ## Environment variables
 
@@ -65,6 +74,7 @@ All optional. See the root `.env.example`.
 | `ENGINE_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed origins |
 | `ENGINE_CORS_ORIGIN_REGEX` | unset | Extra origins matched by a full-match regex, for preview deployments |
 | `ENGINE_CACHE_DIR` | `services/engine/data/cache` | Disk cache location |
+| `ENGINE_SNAPSHOT_DIR` | `services/engine/data/snapshot` | Bundled upstream responses loaded into the cache at start-up |
 | `ENGINE_FIRST_YEAR` / `ENGINE_LAST_YEAR` | 2001 / last full calendar year | Climate record period |
 | `ENGINE_UPSTREAM_TIMEOUT_S` | 90 | Per-request timeout for upstream calls |
 | `ENGINE_UPSTREAM_RETRIES` | 3 | Retries with exponential backoff and jitter |
@@ -78,6 +88,12 @@ All optional. See the root `.env.example`.
 docker build -t travertine-engine services/engine
 docker run -p 8000:8000 -e ENGINE_CORS_ORIGINS=http://localhost:3000 travertine-engine
 ```
+
+The image runs as an unprivileged user (uid 10001) without uv at runtime: the virtualenv is on `PATH` and the command
+is plain `uvicorn`, bound to `0.0.0.0` and `$PORT` (8000 if unset). `HOME` and `XDG_CACHE_HOME` point into `/tmp`;
+the only directory the server writes is `ENGINE_CACHE_DIR` (`/app/data/cache`), which that user owns. The build loads
+the snapshot offline and then tries a live refresh capped at 30 seconds that cannot fail the build.
+`ENGINE_LAST_YEAR` is fixed at 2025 in the image so the record matches the snapshot.
 
 Errors follow the contract `Error` schema: `invalid_request` (422), `out_of_coverage` (422), `not_found` (404),
 `rate_limited` (429, with `Retry-After`), `upstream_unavailable` (502), `internal_error` (500). Every response carries an
