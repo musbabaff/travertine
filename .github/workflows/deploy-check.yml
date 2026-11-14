@@ -1,0 +1,63 @@
+name: Production deploy check
+
+# Vercel deploys main through its GitHub webhook. If a push event is missed (seen once, after #9), production keeps
+# serving an older build. This job waits for production to report the pushed commit and, if it never does,
+# triggers a production build through a Vercel deploy hook.
+#
+# Required repository secret: VERCEL_DEPLOY_HOOK (Vercel → Project → Settings → Git → Deploy Hooks, branch main).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/contract/**"
+      - "pnpm-lock.yaml"
+
+concurrency:
+  group: deploy-check
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SITE: https://travertinefields.com
+    steps:
+      - name: Wait for production to serve this commit
+        id: wait
+        run: |
+          for i in $(seq 1 40); do
+            served=$(curl -fsSL --max-time 20 "$SITE/" | grep -o 'name="travertine-commit" content="[0-9a-f]*"' | grep -o '[0-9a-f]\{40\}' || true)
+            echo "attempt $i: production serves ${served:-unknown}"
+            if [ "$served" = "$GITHUB_SHA" ]; then echo "deployed=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+            sleep 15
+          done
+          echo "deployed=false" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger the deploy hook
+        if: steps.wait.outputs.deployed != 'true'
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::Production did not pick up $GITHUB_SHA and VERCEL_DEPLOY_HOOK is not set. Redeploy main in Vercel."
+            exit 1
+          fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "::warning::Vercel webhook missed $GITHUB_SHA; triggered a production build through the deploy hook."
+
+      - name: Confirm the hook deployment
+        if: steps.wait.outputs.deployed != 'true'
+        run: |
+          for i in $(seq 1 40); do
+            served=$(curl -fsSL --max-time 20 "$SITE/" | grep -o 'name="travertine-commit" content="[0-9a-f]*"' | grep -o '[0-9a-f]\{40\}' || true)
+            if [ "$served" = "$GITHUB_SHA" ]; then echo "Production now serves $GITHUB_SHA."; exit 0; fi
+            sleep 15
+          done
+          echo "::error::Production still does not serve $GITHUB_SHA after the deploy hook."
+          exit 1
