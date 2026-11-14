@@ -63,6 +63,7 @@ All optional. See the root `.env.example`.
 | Variable | Default | Meaning |
 |---|---|---|
 | `ENGINE_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed origins |
+| `ENGINE_CORS_ORIGIN_REGEX` | unset | Extra origins matched by a full-match regex, for preview deployments |
 | `ENGINE_CACHE_DIR` | `services/engine/data/cache` | Disk cache location |
 | `ENGINE_FIRST_YEAR` / `ENGINE_LAST_YEAR` | 2001 / last full calendar year | Climate record period |
 | `ENGINE_UPSTREAM_TIMEOUT_S` | 90 | Per-request timeout for upstream calls |

@@ -15,6 +15,7 @@ def _csv(value: str) -> list[str]:
 @dataclass(frozen=True, slots=True)
 class Settings:
     cors_origins: list[str] = field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origin_regex: str | None = None
     cache_dir: Path = ENGINE_ROOT / "data" / "cache"
     first_year: int = 2001
     last_year: int = datetime.now(UTC).year - 1
@@ -28,6 +29,7 @@ class Settings:
         defaults = cls()
         return cls(
             cors_origins=_csv(os.environ.get("ENGINE_CORS_ORIGINS", "")) or defaults.cors_origins,
+            cors_origin_regex=os.environ.get("ENGINE_CORS_ORIGIN_REGEX") or None,
             cache_dir=Path(os.environ.get("ENGINE_CACHE_DIR", str(defaults.cache_dir))),
             first_year=int(os.environ.get("ENGINE_FIRST_YEAR", defaults.first_year)),
             last_year=int(os.environ.get("ENGINE_LAST_YEAR", defaults.last_year)),

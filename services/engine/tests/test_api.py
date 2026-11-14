@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -72,3 +74,27 @@ def test_cors_allows_configured_origin(settings: Settings) -> None:
             headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"},
         )
     assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+
+def test_cors_allows_listed_and_preview_origins(settings: Settings, fake: FakeUpstream) -> None:
+    regex = r"^https://travertine-[a-z0-9-]+-musbabaffs-projects\.vercel\.app$"
+    cfg = replace(settings, cors_origins=["https://travertine-bice.vercel.app"], cors_origin_regex=regex)
+    with make_client(cfg, fake) as c:
+
+        def preflight(origin: str) -> str | None:
+            r = c.options(
+                "/v1/field/analyze",
+                headers={
+                    "Origin": origin,
+                    "Access-Control-Request-Method": "POST",
+                    "Access-Control-Request-Headers": "content-type",
+                },
+            )
+            allowed = r.headers.get("access-control-allow-origin")
+            return None if allowed is None else str(allowed)
+
+        assert preflight("https://travertine-bice.vercel.app") == "https://travertine-bice.vercel.app"
+        preview = "https://travertine-git-web-explore-musbabaffs-projects.vercel.app"
+        assert preflight(preview) == preview
+        assert preflight("https://travertine-evil.vercel.app") is None
+        assert preflight("https://travertine-x-musbabaffs-projects.vercel.app.evil.com") is None
