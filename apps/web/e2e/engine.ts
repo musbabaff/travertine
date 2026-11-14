@@ -1,0 +1,43 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import type { Page, Route } from "@playwright/test";
+import { encodePolyline, type LngLat } from "../src/lib/geo";
+
+const fixture = (name: string) => readFileSync(join(__dirname, "../../../packages/contract/fixtures", name), "utf8");
+
+const ROUTES: Record<string, string> = {
+  "/v1/health": "health.json",
+  "/v1/crops": "crops.json",
+  "/v1/field/analyze": "field-analyze.json",
+  "/v1/rotations/explore": "rotations-explore.json",
+  "/v1/validation": "validation.json",
+};
+
+const cors = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-headers": "content-type",
+  "access-control-allow-methods": "GET,POST,OPTIONS",
+};
+
+export type EngineMode = "ok" | "slow" | "error" | "down";
+
+/** Fakes the engine at http://engine.test using contract fixtures. */
+export async function fakeEngine(page: Page, mode: EngineMode = "ok") {
+  await page.route("http://engine.test/**", async (route: Route) => {
+    const req = route.request();
+    if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
+    if (mode === "down") return route.abort("connectionrefused");
+    const path = new URL(req.url()).pathname;
+    if (mode === "error") {
+      return route.fulfill({ status: 422, headers: { ...cors, "content-type": "application/json" }, body: JSON.stringify({ code: "out_of_coverage", message: "No soil data for this location." }) });
+    }
+    if (mode === "slow") await new Promise(() => {}); // never resolves: loading state
+    const file = ROUTES[path];
+    if (!file) return route.fulfill({ status: 404, headers: cors, body: "{}" });
+    return route.fulfill({ status: 200, headers: { ...cors, "content-type": "application/json" }, body: fixture(file) });
+  });
+}
+
+const demo = JSON.parse(fixture("field-analyze.request.json"));
+const ring = demo.geometry.coordinates[0].slice(0, -1) as LngLat[];
+export const DEMO_QUERY = `lat=37.88995&lon=28.98015&f=${encodeURIComponent(encodePolyline(ring))}`;

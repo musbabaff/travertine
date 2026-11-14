@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
+import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const plex = IBM_Plex_Sans({
   variable: "--font-plex",
@@ -14,10 +16,14 @@ export const metadata: Metadata = {
     "Mark a field, set your priorities and explore three- to five-year crop rotations scored with open satellite and climate records.",
 };
 
+export const viewport: Viewport = { themeColor: "#f5f1e8" };
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${plex.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

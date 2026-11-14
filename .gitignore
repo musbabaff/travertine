@@ -53,3 +53,6 @@ Thumbs.db
 
 # local Claude Code state
 .claude/settings.local.json
+
+# generated at dev/build time
+apps/web/public/maplibre-gl-worker.mjs
