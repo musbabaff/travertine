@@ -33,6 +33,7 @@ describe("contract fixtures validate against openapi.yaml", () => {
     expect(validate("RotationExploreResponse", fixture("rotations-explore.json"))).toEqual([]);
   });
   it("validation", () => expect(validate("Validation", fixture("validation.json"))).toEqual([]));
+  it("field ndvi (30 m)", () => expect(validate("FieldNdvi", fixture("field-ndvi.json"))).toEqual([]));
 });
 
 describe("fixture consistency", () => {

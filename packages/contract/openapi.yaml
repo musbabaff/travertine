@@ -53,6 +53,25 @@ paths:
                 items: { $ref: "#/components/schemas/Crop" }
         default: { $ref: "#/components/responses/Error" }
 
+  /v1/field/ndvi:
+    get:
+      tags: [field]
+      operationId: getFieldNdvi
+      summary: Field-scale (30 m) NDVI history from Harmonized Landsat Sentinel-2
+      description: "Separate from /v1/field/analyze because a cold request reads hundreds of scenes (about 2 minutes); warm requests come from the engine's cache. Load it after the field summary with its own loading state."
+      parameters:
+        - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
+        - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+      responses:
+        "200":
+          description: Clear-sky observations and growing-season summaries for the 30 m pixel at the field centre.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldNdvi" }
+        "422": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
   /v1/field/analyze:
     post:
       tags: [field]
@@ -355,6 +374,47 @@ components:
             properties:
               year: { type: integer }
               value: { type: number, description: "1 − ΣP/ΣET0 over April–September, unitless." }
+
+    NdviObservation:
+      type: object
+      required: [date, ndvi, sensor]
+      properties:
+        date: { type: string, format: date }
+        ndvi: { type: number, minimum: -1, maximum: 1, description: NDVI of one clear-sky observation (unitless). }
+        sensor: { type: string, enum: [L30, S30], description: "L30 = Landsat 8/9, S30 = Sentinel-2 (HLS v2.0 products)." }
+
+    NdviSeason:
+      type: object
+      required: [year, n_clear, n_scenes]
+      properties:
+        year: { type: integer }
+        mean_ndvi:
+          type: number
+          minimum: -1
+          maximum: 1
+          description: "Mean of clear April–September observations (unitless). Omitted when n_clear < 5."
+        n_clear: { type: integer, minimum: 0, description: Clear observations used. }
+        n_scenes: { type: integer, minimum: 0, description: Scenes looked at that year. }
+
+    FieldNdvi:
+      type: object
+      required: [observations, seasons, caveats, provenance]
+      properties:
+        observations:
+          type: array
+          description: Every clear-sky observation of the 30 m pixel at the field centre, ascending by date.
+          items: { $ref: "#/components/schemas/NdviObservation" }
+        seasons:
+          type: array
+          description: "Growing-season (April–September) summary per year, ascending by year."
+          items: { $ref: "#/components/schemas/NdviSeason" }
+        caveats:
+          type: array
+          description: Limitations. The UI renders these verbatim.
+          items: { type: string }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
 
     Validation:
       type: object

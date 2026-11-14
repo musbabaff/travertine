@@ -1,0 +1,1192 @@
+{
+  "observations": [
+    {
+      "date": "2020-01-10",
+      "ndvi": 0.627,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-04-19",
+      "ndvi": 0.487,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-05-09",
+      "ndvi": 0.516,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-05-14",
+      "ndvi": 0.525,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-05-23",
+      "ndvi": 0.473,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-05-24",
+      "ndvi": 0.43,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-05-30",
+      "ndvi": 0.476,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-06-08",
+      "ndvi": 0.454,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-06-08",
+      "ndvi": 0.431,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-06-24",
+      "ndvi": 0.524,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-06-28",
+      "ndvi": 0.457,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-07-03",
+      "ndvi": 0.414,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-07-13",
+      "ndvi": 0.455,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-07-17",
+      "ndvi": 0.535,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-07-18",
+      "ndvi": 0.484,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-07-23",
+      "ndvi": 0.412,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-07-26",
+      "ndvi": 0.471,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-07-28",
+      "ndvi": 0.443,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-08-02",
+      "ndvi": 0.457,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-08-11",
+      "ndvi": 0.502,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-08-12",
+      "ndvi": 0.46,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-08-17",
+      "ndvi": 0.485,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-08-18",
+      "ndvi": 0.461,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-08-22",
+      "ndvi": 0.407,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-08-27",
+      "ndvi": 0.444,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-08-27",
+      "ndvi": 0.443,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-09-01",
+      "ndvi": 0.398,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-09-03",
+      "ndvi": 0.453,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-09-06",
+      "ndvi": 0.484,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-09-11",
+      "ndvi": 0.386,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-09-12",
+      "ndvi": 0.427,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-09-16",
+      "ndvi": 0.513,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-09-28",
+      "ndvi": 0.465,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-10-01",
+      "ndvi": 0.487,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-10-11",
+      "ndvi": 0.472,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-10-14",
+      "ndvi": 0.507,
+      "sensor": "L30"
+    },
+    {
+      "date": "2020-10-16",
+      "ndvi": 0.502,
+      "sensor": "S30"
+    },
+    {
+      "date": "2020-11-05",
+      "ndvi": 0.561,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-02-23",
+      "ndvi": 0.568,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-03-05",
+      "ndvi": 0.45,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-03-30",
+      "ndvi": 0.534,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-05-09",
+      "ndvi": 0.418,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-05-10",
+      "ndvi": 0.453,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-05-14",
+      "ndvi": 0.403,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-05-19",
+      "ndvi": 0.402,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-05-24",
+      "ndvi": 0.41,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-05-26",
+      "ndvi": 0.433,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-05-29",
+      "ndvi": 0.409,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-06-03",
+      "ndvi": 0.419,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-06-08",
+      "ndvi": 0.407,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-06-13",
+      "ndvi": 0.412,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-06-18",
+      "ndvi": 0.399,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-06-23",
+      "ndvi": 0.396,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-06-27",
+      "ndvi": 0.46,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-06-28",
+      "ndvi": 0.406,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-07-08",
+      "ndvi": 0.447,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-07-13",
+      "ndvi": 0.465,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-07-13",
+      "ndvi": 0.434,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-07-18",
+      "ndvi": 0.432,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-07-20",
+      "ndvi": 0.465,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-07-23",
+      "ndvi": 0.427,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-07-28",
+      "ndvi": 0.441,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-07-29",
+      "ndvi": 0.497,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-08-02",
+      "ndvi": 0.447,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-08-12",
+      "ndvi": 0.467,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-08-14",
+      "ndvi": 0.457,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-08-17",
+      "ndvi": 0.424,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-08-21",
+      "ndvi": 0.465,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-08-27",
+      "ndvi": 0.374,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-08-30",
+      "ndvi": 0.392,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-09-01",
+      "ndvi": 0.408,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-09-06",
+      "ndvi": 0.417,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-09-06",
+      "ndvi": 0.393,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-09-11",
+      "ndvi": 0.389,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-09-21",
+      "ndvi": 0.411,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-09-22",
+      "ndvi": 0.46,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-09-26",
+      "ndvi": 0.431,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-10-01",
+      "ndvi": 0.436,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-10-01",
+      "ndvi": 0.437,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-10-06",
+      "ndvi": 0.446,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-10-11",
+      "ndvi": 0.453,
+      "sensor": "S30"
+    },
+    {
+      "date": "2021-11-06",
+      "ndvi": 0.517,
+      "sensor": "L30"
+    },
+    {
+      "date": "2021-11-11",
+      "ndvi": 0.535,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-01-14",
+      "ndvi": 0.594,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-04-14",
+      "ndvi": 0.548,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-04-24",
+      "ndvi": 0.555,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-04-27",
+      "ndvi": 0.531,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-05-05",
+      "ndvi": 0.561,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-05-13",
+      "ndvi": 0.499,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-05-29",
+      "ndvi": 0.416,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-06-06",
+      "ndvi": 0.459,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-06-18",
+      "ndvi": 0.466,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-06-22",
+      "ndvi": 0.553,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-07-03",
+      "ndvi": 0.516,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-07-15",
+      "ndvi": 0.605,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-07-16",
+      "ndvi": 0.577,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-07-24",
+      "ndvi": 0.551,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-08-09",
+      "ndvi": 0.578,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-08-12",
+      "ndvi": 0.524,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-08-17",
+      "ndvi": 0.499,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-09-02",
+      "ndvi": 0.567,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-09-06",
+      "ndvi": 0.549,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-09-10",
+      "ndvi": 0.608,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-09-18",
+      "ndvi": 0.576,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-09-26",
+      "ndvi": 0.582,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-09-26",
+      "ndvi": 0.498,
+      "sensor": "S30"
+    },
+    {
+      "date": "2022-10-04",
+      "ndvi": 0.49,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-10-28",
+      "ndvi": 0.456,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-11-05",
+      "ndvi": 0.387,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-11-13",
+      "ndvi": 0.428,
+      "sensor": "L30"
+    },
+    {
+      "date": "2022-12-22",
+      "ndvi": 0.474,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-02-09",
+      "ndvi": 0.537,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-04-30",
+      "ndvi": 0.49,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-05-16",
+      "ndvi": 0.479,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-06-23",
+      "ndvi": 0.556,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-06-24",
+      "ndvi": 0.564,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-06-25",
+      "ndvi": 0.555,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-06-28",
+      "ndvi": 0.522,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-07-03",
+      "ndvi": 0.492,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-07-11",
+      "ndvi": 0.503,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-07-13",
+      "ndvi": 0.497,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-07-18",
+      "ndvi": 0.493,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-07-19",
+      "ndvi": 0.482,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-07-23",
+      "ndvi": 0.458,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-07-27",
+      "ndvi": 0.4,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-07-28",
+      "ndvi": 0.456,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-08-02",
+      "ndvi": 0.461,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-08-04",
+      "ndvi": 0.444,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-08-07",
+      "ndvi": 0.435,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-08-12",
+      "ndvi": 0.413,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-08-12",
+      "ndvi": 0.431,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-08-19",
+      "ndvi": 0.425,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-08-20",
+      "ndvi": 0.403,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-08-28",
+      "ndvi": 0.468,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-09-11",
+      "ndvi": 0.465,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-09-13",
+      "ndvi": 0.453,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-09-16",
+      "ndvi": 0.456,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-09-21",
+      "ndvi": 0.442,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-09-21",
+      "ndvi": 0.429,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-10-16",
+      "ndvi": 0.456,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-10-23",
+      "ndvi": 0.433,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-11-07",
+      "ndvi": 0.437,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-11-08",
+      "ndvi": 0.458,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-11-20",
+      "ndvi": 0.501,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-12-18",
+      "ndvi": 0.586,
+      "sensor": "L30"
+    },
+    {
+      "date": "2023-12-20",
+      "ndvi": 0.539,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-12-25",
+      "ndvi": 0.564,
+      "sensor": "S30"
+    },
+    {
+      "date": "2023-12-26",
+      "ndvi": 0.577,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-01-14",
+      "ndvi": 0.641,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-01-19",
+      "ndvi": 0.715,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-01-27",
+      "ndvi": 0.645,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-03-24",
+      "ndvi": 0.555,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-05-08",
+      "ndvi": 0.367,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-05-13",
+      "ndvi": 0.425,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-05-28",
+      "ndvi": 0.409,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-06-03",
+      "ndvi": 0.4,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-06-10",
+      "ndvi": 0.415,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-06-11",
+      "ndvi": 0.352,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-06-12",
+      "ndvi": 0.361,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-06-17",
+      "ndvi": 0.361,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-06-19",
+      "ndvi": 0.378,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-06-22",
+      "ndvi": 0.351,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-06-27",
+      "ndvi": 0.369,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-06-27",
+      "ndvi": 0.376,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-07-02",
+      "ndvi": 0.374,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-07-05",
+      "ndvi": 0.389,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-07-27",
+      "ndvi": 0.435,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-07-29",
+      "ndvi": 0.435,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-08-01",
+      "ndvi": 0.427,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-08-14",
+      "ndvi": 0.394,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-08-22",
+      "ndvi": 0.379,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-08-30",
+      "ndvi": 0.424,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-09-06",
+      "ndvi": 0.523,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-09-07",
+      "ndvi": 0.482,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-09-23",
+      "ndvi": 0.463,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-10-08",
+      "ndvi": 0.435,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-10-09",
+      "ndvi": 0.441,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-10-17",
+      "ndvi": 0.433,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-11-01",
+      "ndvi": 0.413,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-11-02",
+      "ndvi": 0.385,
+      "sensor": "L30"
+    },
+    {
+      "date": "2024-11-09",
+      "ndvi": 0.393,
+      "sensor": "S30"
+    },
+    {
+      "date": "2024-12-14",
+      "ndvi": 0.48,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-04-10",
+      "ndvi": 0.615,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-04-19",
+      "ndvi": 0.561,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-05-21",
+      "ndvi": 0.42,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-05-23",
+      "ndvi": 0.402,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-06-05",
+      "ndvi": 0.449,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-06-06",
+      "ndvi": 0.42,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-06-09",
+      "ndvi": 0.426,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-06-14",
+      "ndvi": 0.418,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-06-17",
+      "ndvi": 0.394,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-06-19",
+      "ndvi": 0.416,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-06-22",
+      "ndvi": 0.424,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-06-27",
+      "ndvi": 0.385,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-07",
+      "ndvi": 0.41,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-07-07",
+      "ndvi": 0.396,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-09",
+      "ndvi": 0.382,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-12",
+      "ndvi": 0.398,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-16",
+      "ndvi": 0.404,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-07-19",
+      "ndvi": 0.413,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-23",
+      "ndvi": 0.42,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-07-24",
+      "ndvi": 0.402,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-07-27",
+      "ndvi": 0.378,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-29",
+      "ndvi": 0.382,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-07-31",
+      "ndvi": 0.367,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-08-01",
+      "ndvi": 0.382,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-08-09",
+      "ndvi": 0.405,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-08-11",
+      "ndvi": 0.382,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-08-17",
+      "ndvi": 0.382,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-08-25",
+      "ndvi": 0.373,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-08-26",
+      "ndvi": 0.362,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-08-28",
+      "ndvi": 0.386,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-08-31",
+      "ndvi": 0.371,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-09-02",
+      "ndvi": 0.395,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-09-05",
+      "ndvi": 0.351,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-09-10",
+      "ndvi": 0.356,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-09-10",
+      "ndvi": 0.354,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-09-17",
+      "ndvi": 0.346,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-09-18",
+      "ndvi": 0.375,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-09-20",
+      "ndvi": 0.332,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-09-25",
+      "ndvi": 0.341,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-09-27",
+      "ndvi": 0.349,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-10-12",
+      "ndvi": 0.425,
+      "sensor": "L30"
+    },
+    {
+      "date": "2025-10-27",
+      "ndvi": 0.515,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-10-30",
+      "ndvi": 0.557,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-11-16",
+      "ndvi": 0.511,
+      "sensor": "S30"
+    },
+    {
+      "date": "2025-12-16",
+      "ndvi": 0.586,
+      "sensor": "S30"
+    }
+  ],
+  "seasons": [
+    {
+      "year": 2020,
+      "mean_ndvi": 0.462,
+      "n_clear": 32,
+      "n_scenes": 86
+    },
+    {
+      "year": 2021,
+      "mean_ndvi": 0.427,
+      "n_clear": 36,
+      "n_scenes": 83
+    },
+    {
+      "year": 2022,
+      "mean_ndvi": 0.537,
+      "n_clear": 22,
+      "n_scenes": 92
+    },
+    {
+      "year": 2023,
+      "mean_ndvi": 0.469,
+      "n_clear": 27,
+      "n_scenes": 103
+    },
+    {
+      "year": 2024,
+      "mean_ndvi": 0.404,
+      "n_clear": 23,
+      "n_scenes": 114
+    },
+    {
+      "year": 2025,
+      "mean_ndvi": 0.398,
+      "n_clear": 40,
+      "n_scenes": 122
+    }
+  ],
+  "caveats": [
+    "Field-scale record starts in 2020: the anonymous HLS v2.0 copy on Microsoft Planetary Computer begins then. The full archive (2013 onwards) needs a NASA Earthdata login.",
+    "One 30 m pixel at the field centre; a field edge, track or tree inside that pixel changes the value.",
+    "NDVI shows green cover, not yield or crop type; bare soil after harvest and weeds both affect it."
+  ],
+  "provenance": [
+    {
+      "dataset": "Harmonized Landsat Sentinel-2 (HLS) v2.0, L30 and S30 surface reflectance and Fmask",
+      "provider": "NASA LP DAAC (Ju et al. 2025, doi:10.1016/j.rse.2025.114723), served by Microsoft Planetary Computer",
+      "spatial_resolution": "30 m",
+      "temporal_coverage": "2020–2025, every 2–3 days before clouds",
+      "access_url": "https://planetarycomputer.microsoft.com/dataset/hls2-l30",
+      "note": "The 30 m pixel containing the field centre. NDVI = (NIR − red)/(NIR + red) from nadir BRDF-adjusted reflectance: Landsat 8/9 bands B05 and B04, Sentinel-2 bands B8A and B04, bandpass-adjusted to Landsat by HLS. An observation is clear when Fmask bits 1–5 (cloud, adjacent to cloud or shadow, cloud shadow, snow/ice, water) are all 0 and the aerosol level is not high (HLS v2.0 user guide, Table 9). Scenes with more than 80 % cloud over the tile are not read; overlapping tiles are counted once per date. Season = April–September, with a mean only when at least 5 observations are clear."
+    }
+  ]
+}
