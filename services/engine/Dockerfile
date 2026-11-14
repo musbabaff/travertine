@@ -4,8 +4,8 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.1 /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    PYTHONUNBUFFERED=1 \
-    ENGINE_CACHE_DIR=/app/data/cache
+    UV_CACHE_DIR=/tmp/uv-build-cache \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
@@ -14,15 +14,26 @@ RUN uv sync --frozen --no-dev --no-install-project
 
 COPY src ./src
 COPY data/crops.yaml ./data/crops.yaml
+COPY data/snapshot ./data/snapshot
 COPY scripts ./scripts
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev && rm -rf /tmp/uv-build-cache
 
-# Bake the demo field into the image cache so the demo survives an upstream outage. Network problems at build time
-# must not break the build; the engine then fetches on first request instead.
-RUN uv run --no-sync python scripts/prewarm.py || echo "prewarm incomplete; continuing without a full demo cache"
+# From here on nothing calls uv: the virtualenv is on PATH and the server runs straight from it.
+ENV PATH=/app/.venv/bin:$PATH \
+    HOME=/tmp \
+    XDG_CACHE_HOME=/tmp/.cache \
+    PYTHONDONTWRITEBYTECODE=1 \
+    ENGINE_CACHE_DIR=/app/data/cache \
+    ENGINE_SNAPSHOT_DIR=/app/data/snapshot \
+    ENGINE_LAST_YEAR=2025
 
-RUN useradd --uid 10001 --no-create-home engine && chown -R engine /app/data
+# The demo field comes from the committed snapshot, with no network call. A live refresh may add to it, but it
+# is capped at 30 seconds and can neither fail nor hold up the build.
+RUN python scripts/load_snapshot.py
+RUN timeout 30 python scripts/prewarm.py --refresh || true
+
+RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin engine && chown -R engine /app/data
 USER engine
 
 EXPOSE 8000
-CMD ["sh", "-c", "exec uv run --no-sync uvicorn travertine_engine.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "exec uvicorn travertine_engine.main:app --host 0.0.0.0 --port \"${PORT:-8000}\" --proxy-headers --forwarded-allow-ips='*'"]

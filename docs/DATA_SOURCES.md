@@ -21,4 +21,7 @@ intervals. The engine therefore reports regional climate and modelled soil for t
 
 ## Caching
 
-Responses are cached under `services/engine/data/cache/` (git-ignored). Raw downloads are never committed.
+Responses are cached under `services/engine/data/cache/` (git-ignored), each with its fetch time and URL. The one
+exception to "no raw downloads in the repo" is `services/engine/data/snapshot/`: the demo field's responses (about
+450 KB gzipped) with a manifest of fetch times, URLs and checksums, so the demo works when an upstream is down.
+Responses served from it say so in their provenance note.

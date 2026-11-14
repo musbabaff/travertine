@@ -8,7 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from travertine_engine.cache import DiskCache
+from travertine_engine.cache import DiskCache, request_url
 from travertine_engine.errors import OutOfCoverage, UpstreamUnavailable
 from travertine_engine.upstream import Upstream
 
@@ -59,7 +59,7 @@ async def fetch_power_daily(
     if raw is None:
         raw = await upstream.get_json("NASA POWER", POWER_DAILY_URL, params)
         _check(raw)
-        cache.put(key, raw)
+        cache.put(key, raw, url=request_url(POWER_DAILY_URL, params))
     return parse_power(raw, lat, lon)
 
 

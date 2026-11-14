@@ -22,6 +22,9 @@ class DailyClimate:
     elevation_m: float
     hargreaves_days: int
     missing_days: int
+    source_note: str = (
+        ""  # appended to the provenance note, e.g. when the record came from the bundled snapshot
+    )
 
 
 def compute_daily_et0(power: PowerDaily) -> DailyClimate:
