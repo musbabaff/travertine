@@ -1,5 +1,6 @@
 "use client";
 
+import { SlowHint } from "@/components/ui/slow-hint";
 import { Columns2, Loader2, MapPinned, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -187,6 +188,7 @@ export function ExploreScreen() {
           {rotations.isPending ? (
             <div aria-busy="true" className="space-y-4">
               <span className="sr-only">{t("explore.loading")}</span>
+              <SlowHint />
               <CardSkeleton />
               <CardSkeleton />
               <CardSkeleton />

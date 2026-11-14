@@ -23,10 +23,10 @@ test.describe("Evidence screen", () => {
     await expect(page.getByTestId("baseline-note")).toHaveCount(0);
   });
 
-  test("labels the fixture as the baseline index when the engine does not serve validation", async ({ page }) => {
+  test("labels the fixture as demo data when the engine does not serve validation", async ({ page }) => {
     await fakeEngine(page, "partial");
     await page.goto(`/app/evidence?${DEMO_QUERY}`);
-    await expect(page.getByTestId("baseline-note")).toContainText("Baseline dryness index, not the Travertine model");
+    await expect(page.getByTestId("baseline-note")).toContainText("Demo data: the published back-test");
     await expect(page.getByTestId("live-badge")).toBeVisible();
   });
 

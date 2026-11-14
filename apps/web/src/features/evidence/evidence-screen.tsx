@@ -1,5 +1,6 @@
 "use client";
 
+import { SlowHint } from "@/components/ui/slow-hint";
 import { FlaskConical, MapPinned } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -102,6 +103,7 @@ export function EvidenceScreen() {
       {query.isPending ? (
         <div aria-busy="true" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <span className="sr-only">{t("evidence.loading")}</span>
+          <SlowHint className="lg:col-span-2" />
           <div className="order-2 rounded-md border border-border bg-surface p-5 lg:order-1">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="mt-2 h-3 w-1/2" />
