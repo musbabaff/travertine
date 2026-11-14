@@ -70,6 +70,40 @@ const ROUTES: Record<string, { path: string; settle: number; states: State[] }> 
       { name: "loaded-tr", mode: "ok", query: DEMO_QUERY, locale: "tr", ready: (p) => expect(p.getByText("Bu sıralamanın nedeni").first()).toBeVisible() },
     ],
   },
+  evidence: {
+    path: "/app/evidence",
+    settle: 400,
+    states: [
+      { name: "no-field", mode: "ok", query: "", ready: (p) => expect(p.getByText("Choose a field first")).toBeVisible() },
+      { name: "baseline", mode: "partial", query: DEMO_QUERY, ready: (p) => expect(p.getByTestId("baseline-note")).toBeVisible() },
+      {
+        name: "scatter",
+        mode: "ok",
+        query: DEMO_QUERY,
+        ready: (p) => expect(p.getByTestId("correlation")).toBeVisible(),
+        act: async (p) => {
+          await p.getByRole("radio", { name: "Scatter" }).click();
+          await p.getByRole("img", { name: /Back-test/ }).focus();
+          await p.keyboard.press("End");
+        },
+      },
+      {
+        name: "table",
+        mode: "ok",
+        query: DEMO_QUERY,
+        ready: (p) => expect(p.getByTestId("correlation")).toBeVisible(),
+        act: async (p) => {
+          await p.getByRole("img", { name: /Back-test/ }).focus();
+          await p.keyboard.press("ArrowRight");
+          await p.getByRole("button", { name: "View as table" }).click();
+        },
+      },
+      { name: "loading", mode: "slow", query: DEMO_QUERY, ready: (p) => expect(p.locator("[aria-busy=true]").first()).toBeVisible() },
+      { name: "error", mode: "error", query: DEMO_QUERY, ready: alert },
+      { name: "fallback", mode: "down", query: DEMO_QUERY, ready: (p) => expect(p.getByTestId("baseline-note")).toBeVisible() },
+      { name: "loaded-tr", mode: "partial", query: DEMO_QUERY, locale: "tr", ready: (p) => expect(p.getByText("Korelasyon").first()).toBeVisible() },
+    ],
+  },
 };
 
 test.describe.configure({ mode: "parallel" });

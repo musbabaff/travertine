@@ -11,6 +11,7 @@ import { SourceBadge } from "./source-badge";
 export const APP_TABS: { href: string; key: MessageKey }[] = [
   { href: "/app", key: "nav.field" },
   { href: "/app/explore", key: "nav.explore" },
+  { href: "/app/evidence", key: "nav.evidence" },
 ];
 
 export function AppHeader() {
