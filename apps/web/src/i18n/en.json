@@ -218,5 +218,13 @@
   "evidence.method": "Method",
   "evidence.caveats": "Caveats",
   "evidence.language": "The method and caveats are shown in English, exactly as the engine returns them.",
-  "evidence.toExplore": "Back to rotations"
+  "evidence.toExplore": "Back to rotations",
+  "nav.home": "Travertine home",
+  "footer.source": "Source code",
+  "notFound.title": "Page not found",
+  "notFound.body": "This address does not match any page. The link may be old or mistyped.",
+  "notFound.cta": "Go to the home page",
+  "error.title": "Something went wrong",
+  "error.body": "The page failed to load. Your field and priorities are still in the address bar.",
+  "error.retry": "Try again"
 }

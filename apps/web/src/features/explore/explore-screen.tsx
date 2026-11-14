@@ -85,7 +85,7 @@ export function ExploreScreen() {
   const isDefault = OBJECTIVES.every((k) => priorities[k] === DEFAULT_PRIORITIES[k]);
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-6 md:px-6 md:pt-8 xl:px-8">
+    <div className="mx-auto w-full max-w-[1280px] px-4 pt-6 md:px-6 md:pt-8 xl:px-8">
       <div className="mb-6">
         <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
           {t("explore.title")}
@@ -217,9 +217,9 @@ export function ExploreScreen() {
         </section>
       </div>
 
-      {/* Compare tray */}
-      {list && list.length > 1 && (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/95 px-4 py-3 shadow-3 backdrop-blur-sm md:px-6" role="region" aria-label={t("explore.compare.title")}>
+      {/* Compare tray: sticky inside the screen so it follows the viewport but never covers the site footer. */}
+      {list && list.length > 1 ? (
+        <div className="sticky bottom-0 z-20 -mx-4 mt-8 border-t border-border bg-surface/95 px-4 py-3 shadow-3 backdrop-blur-sm md:-mx-6 md:px-6 xl:-mx-8 xl:px-8" role="region" aria-label={t("explore.compare.title")}>
           <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-3">
             <Columns2 aria-hidden className="hidden size-5 text-ink-muted sm:block" strokeWidth={1.5} />
             <p className="mr-auto text-sm text-ink-2" aria-live="polite">
@@ -240,6 +240,8 @@ export function ExploreScreen() {
             </button>
           </div>
         </div>
+      ) : (
+        <div className="h-16" />
       )}
 
       <CompareDialog open={compareOpen && !!pair} onClose={() => setCompareOpen(false)} pair={pair} ranks={ranks} crops={cropMap} irrigated={field.irrigated} />

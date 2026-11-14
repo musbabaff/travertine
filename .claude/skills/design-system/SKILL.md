@@ -19,23 +19,25 @@ Contrast ratios below are measured against `--color-canvas` (#F5F1E8). Do not ch
 | Token | Hex | Use | Contrast on canvas |
 |---|---|---|---|
 | `--color-canvas` | `#F5F1E8` | App background (warm off-white) | — |
-| `--color-surface` | `#FBF9F5` | Cards, panels, popovers | — |
+| `--color-surface` | `#FAF7F2` | Cards, panels, popovers, header (brand off-white from the logo) | — |
 | `--color-sunken` | `#EDE7DB` | Inputs, tracks, table stripes | — |
 | `--color-border` | `#D8CEBB` | Dividers, card outlines (decorative) | 1.38 |
 | `--color-border-strong` | `#8C7F68` | Input/control borders (must be ≥ 3:1) | 3.48 |
-| `--color-ink` | `#0F1B2D` | Primary text, deep navy | 15.33 |
+| `--color-ink` | `#061832` | Primary text, brand navy from the logo | 15.73 |
 | `--color-ink-2` | `#5C5446` | Secondary text | 6.63 |
 | `--color-ink-muted` | `#6B6252` | Captions, metadata, units | 5.33 |
-| `--color-teal-700` | `#13615F` | Primary actions, links, selected state | 6.42 |
-| `--color-teal-600` | `#1B7774` | Hover for primary | 4.73 |
-| `--color-teal-500` | `#2A9490` | Non-text only (map field outline, focus halo) | 3.25 |
-| `--color-teal-100` | `#D6ECE9` | Selected backgrounds, subtle highlights | — |
+| `--color-teal-700` | `#1F666B` | Primary actions, links, selected state (brand hue, darkened for AA) | 5.87 |
+| `--color-teal-600` | `#24767B` | Hover for primary | 4.71 |
+| `--color-teal-500` | `#2E989E` | Non-text only (map field outline, focus halo) | 3.05 |
+| `--color-teal-100` | `#DCEFF0` | Selected backgrounds, subtle highlights | — |
 | `--color-accent` | `#A84B14` | **The one accent** (terracotta): top-ranked badge, key callout. Max one use per view region. | 5.06 |
 | `--color-danger` | `#A63D32` | Errors | 5.59 |
 | `--color-warning` | `#8A5A00` | Caveats, demo-data badge | 5.26 |
-| `--color-navy-900` | `#0F1B2D` | Dark surfaces (header on landing, tooltips) | — |
+| `--color-navy-900` | `#061832` | Dark surfaces (header on landing, tooltips) | — |
+| `--color-brand-teal` | `#5CB0B5` | **The logo mark only.** 2.36:1 — never text, never a UI control. | 2.36 |
+| `--color-brand-paper` | `#FAF7F2` | Background behind the logo in raster assets | — |
 
-Text on `teal-700` and on `accent` is `#FFFFFF` (7.23 and 5.70). Dark-surface text is `#EEE8DC` (14.17 on navy).
+Text on `teal-700` and on `accent` is `#FFFFFF` (6.62 and 5.70). `check-palette.mjs` reads these values from `globals.css` and runs in CI. Brand assets and rules: `docs/brand/README.md`. Dark-surface text is `#EEE8DC` (14.17 on navy).
 
 Chart colours are defined in the `data-viz` skill, not here.
 
@@ -77,9 +79,9 @@ Shadows are warm (navy at low alpha), never pure black.
 
 | Token | Value | Use |
 |---|---|---|
-| `--shadow-1` | `0 1px 2px rgb(15 27 45 / 0.06), 0 1px 1px rgb(15 27 45 / 0.04)` | Cards at rest |
-| `--shadow-2` | `0 4px 12px rgb(15 27 45 / 0.08), 0 1px 3px rgb(15 27 45 / 0.06)` | Hover, popovers |
-| `--shadow-3` | `0 12px 32px rgb(15 27 45 / 0.14)` | Panels floating over the map, dialogs |
+| `--shadow-1` | `0 1px 2px rgb(6 24 50 / 0.06), 0 1px 1px rgb(6 24 50 / 0.04)` | Cards at rest |
+| `--shadow-2` | `0 4px 12px rgb(6 24 50 / 0.08), 0 1px 3px rgb(6 24 50 / 0.06)` | Hover, popovers |
+| `--shadow-3` | `0 12px 32px rgb(6 24 50 / 0.14)` | Panels floating over the map, dialogs |
 
 ## 6. Motion
 

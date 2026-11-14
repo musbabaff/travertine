@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "Mark a field, set your priorities and explore three- to five-year crop rotations scored with open satellite and climate records.",
 };
 
-export const viewport: Viewport = { themeColor: "#f5f1e8" };
+export const viewport: Viewport = { themeColor: "#faf7f2" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

@@ -56,3 +56,6 @@ Thumbs.db
 
 # generated at dev/build time
 apps/web/public/maplibre-gl-worker.mjs
+
+# Brand originals drop folder (originals are kept in docs/brand/original)
+brand-source/
