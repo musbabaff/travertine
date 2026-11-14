@@ -5,12 +5,12 @@
     "family": "Poaceae",
     "is_legume": false,
     "season": "winter",
-    "growing_days": 210,
+    "growing_days": 240,
     "kc_ini": 0.7,
     "kc_mid": 1.15,
     "kc_end": 0.25,
     "root_depth_m": 1.65,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Winter Wheat, November planting, Mediterranean (30/140/40/30 days). Kc: FAO-56 Table 12, Winter Wheat with non-frozen soils (Kc ini 0.7, Kc mid 1.15, Kc end 0.25–0.4; lower bound used for a crop harvested dry). Rooting depth: FAO-56 Table 22, Winter Wheat (1.5–1.8 m). Depletion fraction p: FAO-56 Table 22, Winter Wheat (0.55). Yield response Ky: FAO-56 Table 24 (from FAO-33), Winter wheat (1.05)."
   },
   {
     "id": "barley",
@@ -18,25 +18,12 @@
     "family": "Poaceae",
     "is_legume": false,
     "season": "winter",
-    "growing_days": 180,
+    "growing_days": 165,
     "kc_ini": 0.3,
     "kc_mid": 1.15,
     "kc_end": 0.25,
     "root_depth_m": 1.25,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
-  },
-  {
-    "id": "chickpea",
-    "name": "Chickpea",
-    "family": "Fabaceae",
-    "is_legume": true,
-    "season": "winter",
-    "growing_days": 140,
-    "kc_ini": 0.4,
-    "kc_mid": 1,
-    "kc_end": 0.35,
-    "root_depth_m": 0.8,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Grains (small), Oct/Nov planting, Pakistan; Arid Region (25/35/65/40 days). Kc: FAO-56 Table 12, Barley (Kc ini 0.3 from the cereals group, Kc mid 1.15, Kc end 0.25). Rooting depth: FAO-56 Table 22, Barley (1.0–1.5 m). Depletion fraction p: FAO-56 Table 22, Barley (0.55). Yield response Ky: Not listed in FAO-56 Table 24 / FAO-33; yield response not computed."
   },
   {
     "id": "lentil",
@@ -44,12 +31,12 @@
     "family": "Fabaceae",
     "is_legume": true,
     "season": "winter",
-    "growing_days": 150,
+    "growing_days": 170,
     "kc_ini": 0.4,
     "kc_mid": 1.1,
     "kc_end": 0.3,
     "root_depth_m": 0.7,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Lentil, Oct/Nov planting, Arid Region (25/35/70/40 days). Kc: FAO-56 Table 12, Lentil (Kc ini 0.4 from the legumes group, Kc mid 1.10, Kc end 0.30). Rooting depth: FAO-56 Table 22, Lentil (0.6–0.8 m). Depletion fraction p: FAO-56 Table 22, Lentil (0.50). Yield response Ky: Not listed in FAO-56 Table 24 / FAO-33; yield response not computed."
   },
   {
     "id": "faba_bean",
@@ -57,12 +44,12 @@
     "family": "Fabaceae",
     "is_legume": true,
     "season": "winter",
-    "growing_days": 160,
+    "growing_days": 235,
     "kc_ini": 0.5,
     "kc_mid": 1.15,
     "kc_end": 0.3,
     "root_depth_m": 0.6,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Faba bean, dry, November planting, Europe (90/45/40/60 days). Kc: FAO-56 Table 12, Fababean (broad bean), Dry/Seed (0.5, 1.15, 0.30). Rooting depth: FAO-56 Table 22, Fababean, Dry/Seed (0.5–0.7 m). Depletion fraction p: FAO-56 Table 22, Fababean, Dry/Seed (0.45). Yield response Ky: Not listed in FAO-56 Table 24 / FAO-33 (the 'Beans' value refers to Phaseolus); yield response not computed."
   },
   {
     "id": "maize",
@@ -75,7 +62,20 @@
     "kc_mid": 1.2,
     "kc_end": 0.35,
     "root_depth_m": 1.35,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Maize (grain), April planting, Spain (spr, sum.); Calif. (30/40/50/30 days). Kc: FAO-56 Table 12, Maize, Field (grain) (Kc ini 0.3 from the cereals group, Kc mid 1.20, Kc end 0.60–0.35; 0.35 used for grain harvested dry). Rooting depth: FAO-56 Table 22, Maize, Field (grain) (1.0–1.7 m). Depletion fraction p: FAO-56 Table 22, Maize, Field (grain) (0.55). Yield response Ky: FAO-56 Table 24 (from FAO-33), Maize (1.25)."
+  },
+  {
+    "id": "sorghum",
+    "name": "Sorghum (grain)",
+    "family": "Poaceae",
+    "is_legume": false,
+    "season": "summer",
+    "growing_days": 125,
+    "kc_ini": 0.3,
+    "kc_mid": 1.05,
+    "kc_end": 0.55,
+    "root_depth_m": 1.5,
+    "source": "Stage lengths: FAO-56 Table 11, Sorghum, May/June planting, USA, Pakis., Med. (20/35/40/30 days; the table lists a total of 130 days, the stage sum of 125 days is used). Kc: FAO-56 Table 12, Sorghum, grain (Kc ini 0.3 from the cereals group, Kc mid 1.00–1.10, Kc end 0.55). Rooting depth: FAO-56 Table 22, Sorghum, grain (1.0–2.0 m). Depletion fraction p: FAO-56 Table 22, Sorghum, grain (0.55). Yield response Ky: FAO-56 Table 24 (from FAO-33), Sorghum (0.9)."
   },
   {
     "id": "cotton",
@@ -85,10 +85,10 @@
     "season": "summer",
     "growing_days": 195,
     "kc_ini": 0.35,
-    "kc_mid": 1.18,
+    "kc_mid": 1.175,
     "kc_end": 0.6,
     "root_depth_m": 1.35,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Cotton, Mar–May planting, Egypt; Pakistan; Calif. (30/50/60/55 days). Kc: FAO-56 Table 12, Cotton (Kc ini 0.35 from the fibre crops group, Kc mid 1.15–1.20, Kc end 0.70–0.50). Rooting depth: FAO-56 Table 22, Cotton (1.0–1.7 m). Depletion fraction p: FAO-56 Table 22, Cotton (0.65). Yield response Ky: FAO-56 Table 24 (from FAO-33), Cotton (0.85)."
   },
   {
     "id": "sunflower",
@@ -98,10 +98,10 @@
     "season": "summer",
     "growing_days": 130,
     "kc_ini": 0.35,
-    "kc_mid": 1.08,
+    "kc_mid": 1.075,
     "kc_end": 0.35,
     "root_depth_m": 1.15,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Sunflower, April/May planting, Medit.; California (25/35/45/25 days). Kc: FAO-56 Table 12, Sunflower (Kc ini 0.35 from the oil crops group, Kc mid 1.0–1.15, Kc end 0.35). Rooting depth: FAO-56 Table 22, Sunflower (0.8–1.5 m). Depletion fraction p: FAO-56 Table 22, Sunflower (0.45). Yield response Ky: FAO-56 Table 24 (from FAO-33), Sunflower (0.95)."
   },
   {
     "id": "sugar_beet",
@@ -109,12 +109,12 @@
     "family": "Amaranthaceae",
     "is_legume": false,
     "season": "summer",
-    "growing_days": 190,
+    "growing_days": 160,
     "kc_ini": 0.35,
     "kc_mid": 1.2,
     "kc_end": 0.7,
     "root_depth_m": 0.95,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Sugarbeet, May planting, Mediterranean (25/35/50/50 days). Kc: FAO-56 Table 12, Sugar Beet (0.35, 1.20, 0.70; Kc end for no irrigation in the last month). Rooting depth: FAO-56 Table 22, Sugar Beet (0.7–1.2 m). Depletion fraction p: FAO-56 Table 22, Sugar Beet (0.55). Yield response Ky: FAO-56 Table 24 (from FAO-33), Sugarbeet (1.0)."
   },
   {
     "id": "tomato",
@@ -127,19 +127,32 @@
     "kc_mid": 1.15,
     "kc_end": 0.8,
     "root_depth_m": 1.1,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Tomato, April/May planting, Mediterranean (30/40/45/30 days). Kc: FAO-56 Table 12, Tomato (Kc ini 0.6 from the Solanaceae group, Kc mid 1.15, Kc end 0.70–0.90). Rooting depth: FAO-56 Table 22, Tomato (0.7–1.5 m). Depletion fraction p: FAO-56 Table 22, Tomato (0.40). Yield response Ky: FAO-56 Table 24 (from FAO-33), Tomato (1.05)."
+  },
+  {
+    "id": "soybean",
+    "name": "Soybean",
+    "family": "Fabaceae",
+    "is_legume": true,
+    "season": "summer",
+    "growing_days": 140,
+    "kc_ini": 0.4,
+    "kc_mid": 1.15,
+    "kc_end": 0.5,
+    "root_depth_m": 0.95,
+    "source": "Stage lengths: FAO-56 Table 11, Soybeans, May planting, Central USA (20/30–35/60/25 days, total 140; 35 days development used to match the listed total). Kc: FAO-56 Table 12, Soybeans (Kc ini 0.4 from the legumes group, Kc mid 1.15, Kc end 0.50). Rooting depth: FAO-56 Table 22, Soybeans (0.6–1.3 m). Depletion fraction p: FAO-56 Table 22, Soybeans (0.50). Yield response Ky: FAO-56 Table 24 (from FAO-33), Soybean (0.85)."
   },
   {
     "id": "alfalfa",
-    "name": "Alfalfa",
+    "name": "Alfalfa (hay)",
     "family": "Fabaceae",
     "is_legume": true,
     "season": "perennial",
-    "growing_days": 365,
+    "growing_days": 210,
     "kc_ini": 0.4,
     "kc_mid": 0.95,
     "kc_end": 0.9,
     "root_depth_m": 1.5,
-    "source": "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11"
+    "source": "Stage lengths: FAO-56 Table 11, Alfalfa, Idaho, USA: 1st cutting cycle 10/30/25/10 days and other cutting cycles 5/20/10/10 days; four cycles (75 + 3 × 45 = 210 days) as in the FAO-56 Figure 35 example, expressed as one averaged curve (10/30/160/10). Kc: FAO-56 Table 12, Alfalfa Hay, averaged cutting effects (0.40, 0.95, 0.90). Rooting depth: FAO-56 Table 22, Alfalfa for hay (1.0–2.0 m). Depletion fraction p: FAO-56 Table 22, Alfalfa for hay (0.55). Yield response Ky: FAO-56 Table 24 (from FAO-33), Alfalfa (1.1)."
   }
 ]
