@@ -102,5 +102,6 @@ a dryness signal at this site; it does not validate crop-specific deficits, yiel
 
 ## 4. Not yet done
 
-- Field-scale (30 m) history from Harmonized Landsat Sentinel-2.
+- Field-scale (30 m) back-test: the anonymous HLS record starts in 2020, six seasons, too few for a correlation; the
+  full HLS archive from 2013 needs a NASA Earthdata login.
 - Several sites in contrasting climates; they will be listed in a new protocol section before any is computed.

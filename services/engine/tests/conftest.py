@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterator
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -97,6 +97,36 @@ def synthetic_modis(params: dict[str, Any], cloudy_year: int | None = None) -> d
     return {"band": params["band"], "subset": subset}
 
 
+def synthetic_hls(url: str, params: Any) -> dict[str, Any]:
+    """STAC search and point-value payloads: two overlapping tiles per date, every 10th date too cloudy to read,
+    every 3rd date with a cloudy pixel."""
+    if url.endswith("/search"):
+        p = dict(params)
+        year = int(str(p["datetime"])[:4])
+        sensor = "L30" if p["collections"].endswith("l30") else "S30"
+        features = []
+        for k in range(36):
+            day = date(year, 1, 5) + timedelta(days=10 * k + (0 if sensor == "L30" else 5))
+            for tile in ("T35SPB", "T35SPC"):
+                features.append(
+                    {
+                        "id": f"HLS.{sensor}.{tile}.{day:%Y%j}T084025.v2.0",
+                        "properties": {
+                            "datetime": f"{day.isoformat()}T08:40:25Z",
+                            "eo:cloud_cover": 90.0 if k % 10 == 9 else 20.0,
+                        },
+                    }
+                )
+        return {"features": features, "links": []}
+    item = dict(params)["item"]
+    day = datetime.strptime(item.split(".")[3][:7], "%Y%j").date()
+    greenness = 0.2 + 0.5 * max(0.0, math.sin(2 * math.pi * (day.timetuple().tm_yday - 60) / 365.0))
+    red = 800.0
+    nir = red * (1 + greenness) / (1 - greenness)
+    fmask = 2 if day.toordinal() % 3 == 0 else 64
+    return {"values": [red, nir, fmask], "band_names": ["B04_b1", "B05_b1", "Fmask_b1"]}
+
+
 class FakeUpstream(Upstream):
     def __init__(
         self,
@@ -130,6 +160,8 @@ class FakeUpstream(Upstream):
             if self.modis_fails:
                 raise UpstreamUnavailable("MODIS did not return data.", details={"source": source})
             return synthetic_modis(dict(params), self.cloudy_year)
+        if source == "HLS (Planetary Computer)":
+            return synthetic_hls(url, params)
         raise AssertionError(f"unexpected upstream {source}")
 
 
