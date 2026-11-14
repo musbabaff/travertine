@@ -47,4 +47,60 @@ interval contains zero the result is reported as "no detectable difference".
 
 ## 3. Results — demo field
 
-Not yet computed.
+Computed on 14 November 2026 with the engine at the commit that added this section, NASA POWER API v2.10.3 and
+MOD13Q1 v061. Reproduce with `GET /v1/validation?lat=37.89&lon=28.98`.
+
+| Series | Pearson r with NDVI anomaly | 95 % bootstrap interval |
+|---|---|---|
+| Model: winter-wheat water balance, 1 − ETa/ETc, 1 April – harvest | −0.66 | −0.85 to −0.43 |
+| Baseline: 1 − P/ET0, April – September | −0.53 | −0.74 to −0.26 |
+| Difference, model − baseline | −0.14 | −0.34 to +0.03 |
+
+n = 24 years (2002–2025). All 25 MODIS seasons 2001–2025 passed the quality screen; 2001 is outside the model record
+because of the spin-up.
+
+**Verdict under the pre-registered rule: no detectable difference.** Both series correlate with greenness in the
+expected direction and neither interval includes zero. The model's correlation is stronger in this sample, but the
+interval of the difference includes zero, so the data do not show that the water balance beats the plain dryness
+index at this pixel.
+
+**Check against the fixture.** Recomputing the baseline over the fixture's years (2001–2024) with the engine's
+daily ET0 gives r = −0.49 (n = 24), against −0.48 in the contract fixture, which used a cruder monthly ET0.
+
+Per-year values (stress rounded to 3 decimals, anomaly to 2):
+
+| Year | Model stress | Baseline index | NDVI anomaly (σ) |
+|---|---|---|---|
+| 2002 | 0.319 | 0.739 | −0.42 |
+| 2003 | 0.223 | 0.806 | −0.18 |
+| 2004 | 0.437 | 0.870 | −1.54 |
+| 2005 | 0.349 | 0.814 | −1.38 |
+| 2006 | 0.408 | 0.859 | 0.56 |
+| 2007 | 0.541 | 0.934 | −1.69 |
+| 2008 | 0.508 | 0.900 | −1.25 |
+| 2009 | 0.328 | 0.842 | 0.44 |
+| 2010 | 0.316 | 0.799 | 0.58 |
+| 2011 | 0.172 | 0.796 | 2.31 |
+| 2012 | 0.274 | 0.833 | −0.11 |
+| 2013 | 0.351 | 0.870 | 0.05 |
+| 2014 | 0.300 | 0.741 | −0.06 |
+| 2015 | 0.158 | 0.747 | 2.11 |
+| 2016 | 0.450 | 0.833 | −0.89 |
+| 2017 | 0.351 | 0.844 | 0.38 |
+| 2018 | 0.286 | 0.766 | 0.79 |
+| 2019 | 0.442 | 0.850 | 0.39 |
+| 2020 | 0.356 | 0.845 | −0.02 |
+| 2021 | 0.535 | 0.946 | −1.00 |
+| 2022 | 0.419 | 0.868 | 0.08 |
+| 2023 | 0.000 | 0.636 | 0.75 |
+| 2024 | 0.552 | 0.887 | −0.23 |
+| 2025 | 0.385 | 0.784 | 0.31 |
+
+**What this does and does not show.** The pixel's growing-season NDVI is low (0.23–0.35), consistent with sparse or
+mixed cover rather than a dense crop, and its land use is not known. The result supports using the water balance as
+a dryness signal at this site; it does not validate crop-specific deficits, yields or the rotation ranking.
+
+## 4. Not yet done
+
+- Field-scale (30 m) history from Harmonized Landsat Sentinel-2.
+- Several sites in contrasting climates; they will be listed in a new protocol section before any is computed.

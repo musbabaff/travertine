@@ -8,8 +8,9 @@ import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from typing import Annotated
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -29,10 +30,12 @@ from travertine_engine.models import (
     Health,
     RotationExploreRequest,
     RotationExploreResponse,
+    Validation,
 )
 from travertine_engine.ratelimit import RateLimiter
 from travertine_engine.science.crops import load_crops
 from travertine_engine.upstream import Upstream
+from travertine_engine.validation import ValidationService
 
 log = logging.getLogger("travertine_engine")
 
@@ -53,6 +56,7 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
         )
         app.state.fields = FieldService(settings, client, DiskCache(settings.cache_dir))
         app.state.explore = ExploreService(app.state.fields)
+        app.state.validation = ValidationService(app.state.explore)
         load_crops()
         log.info("engine started", extra={"version": __version__, "cache_dir": str(settings.cache_dir)})
         yield
@@ -177,6 +181,15 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
     async def explore(body: RotationExploreRequest, request: Request) -> RotationExploreResponse:
         service: ExploreService = request.app.state.explore
         return await service.explore(body)
+
+    @app.get("/v1/validation", response_model=Validation, tags=["validation"], responses=ERROR_RESPONSES)
+    async def validation(
+        request: Request,
+        lat: Annotated[float, Query(ge=-90, le=90)],
+        lon: Annotated[float, Query(ge=-180, le=180)],
+    ) -> Validation:
+        service: ValidationService = request.app.state.validation
+        return await service.validate(lat, lon)
 
     return app
 

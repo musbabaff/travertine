@@ -107,7 +107,7 @@ class ExploreService:
         ] = OrderedDict()
         self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
 
-    async def _inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
+    async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
         (daily, api_version), soil = await asyncio.gather(
             self.fields.daily_climate(lat, lon),
             resolve_soil(self.fields.upstream, self.fields.cache, lat, lon),
@@ -141,7 +141,7 @@ class ExploreService:
         self, lat: float, lon: float, irrigated: bool, crops: tuple[CropParams, ...]
     ) -> tuple[RotationTables, FieldInputs, list[Provenance]]:
         key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops))
-        inputs, provenance, _ = await self._inputs(lat, lon)
+        inputs, provenance, _ = await self.inputs(lat, lon)
         cached = self._tables.get(key)
         if cached is not None:
             self._tables.move_to_end(key)

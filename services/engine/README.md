@@ -16,9 +16,9 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 |---|---|
 | `GET /v1/health` | implemented |
 | `GET /v1/crops` | implemented — 12 crops from `data/crops.yaml`, every value cited to an FAO table |
-| `POST /v1/field/analyze` | implemented — NASA POWER daily climate (2001 to the last full year), FAO-56 Penman-Monteith ET0, SoilGrids soil and available water capacity |
-| `POST /v1/rotations/explore` | not yet |
-| `GET /v1/validation` | not yet |
+| `POST /v1/field/analyze` | implemented — NASA POWER daily climate (2001 to the last full year), FAO-56 Penman-Monteith ET0, SoilGrids soil and available water capacity, MODIS growing-season NDVI history |
+| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window |
+| `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md` |
 
 Interactive docs are served at `/docs` when the engine runs.
 

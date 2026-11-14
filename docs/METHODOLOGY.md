@@ -167,10 +167,31 @@ independent samples. POWER rain is a 0.5° grid-cell average, which smooths loca
 informative under irrigation, where every crop meets its demand. Fallow and cover-crop options are not yet in the crop
 table.
 
-## 8. Not yet implemented
+## 8. Vegetation record and validation
+
+**NDVI history.** `/v1/field/analyze` returns `ndvi_history`: for each year, the mean MODIS/Terra MOD13Q1 v061 NDVI
+of the 250 m pixel containing the field centre over the ten 16-day composites starting on day of year 97 to 241
+(early April to late September). Composites with pixel reliability 2 (snow), 3 (cloud) or −1 (fill) are dropped, and
+a year needs at least six usable composites; years that fail are listed in the provenance note. Data come from the
+ORNL DAAC MODIS web service, one request per band per season. If the service is down, the analysis is returned
+without `ndvi_history` rather than failing.
+
+**Back-test (`/v1/validation`).** The protocol is fixed in `docs/VALIDATION.md` before results were computed. In short:
+modelled stress for year Y is 1 − ΣETa/ΣETc of rain-fed winter wheat from 1 April to harvest, from the section 5 water
+balance started on 1 October of Y−1; the observed series is the z-score of the growing-season NDVI; the statistic is
+Pearson r with a paired percentile bootstrap (10,000 resamples of years, seed 2026). The same statistic is computed for
+a baseline dryness index, 1 − ΣP/ΣET0 over April–September, so the response shows whether the water balance adds
+anything over climate alone. Both numbers, their intervals, the interval of their difference and a plain verdict are
+the first caveat in the response; results are in `docs/VALIDATION.md`.
+
+**Limitations.** The land use of the pixel is unknown, so the model crop is an assumption. A 250 m pixel can mix
+fields, roads and buildings. Irrigation is not represented in the back-test. Two dozen years give wide intervals.
+Field-scale (30 m) NDVI from Harmonized Landsat Sentinel-2 is not yet included.
+
+## 9. Not yet implemented
 
 Yield response with Ky (FAO-33 / FAO-66), trend tests (Mann-Kendall, Sen's slope), P10/P50/P90 outcomes and the
-Pareto set in the explore response, validation against MODIS and HLS NDVI, and the GPM IMERG precipitation
+Pareto set in the explore response, HLS 30 m NDVI, multi-site validation, and the GPM IMERG precipitation
 cross-check. Each will be documented here when it lands.
 
 ## References
@@ -184,4 +205,9 @@ cross-check. Each will be documented here when it lands.
   with quantified spatial uncertainty. *SOIL* 7, 217–240. https://doi.org/10.5194/soil-7-217-2021
 - Bundy, L. G., Kelling, K. A., Ward Good, L. (1997). *Using Legumes as a Nitrogen Source.* University of
   Wisconsin-Extension A3517.
+- Didan, K. (2021). *MODIS/Terra Vegetation Indices 16-Day L3 Global 250m SIN Grid V061.* NASA EOSDIS Land Processes
+  DAAC. https://doi.org/10.5067/MODIS/MOD13Q1.061
+- ORNL DAAC (2018). *Terrestrial Ecology Subsetting & Visualization Services (TESViS) Global Subsets Tool* (Version
+  1.1). ORNL Distributed Active Archive Center. https://doi.org/10.3334/ORNLDAAC/1379
+- Efron, B., Tibshirani, R. J. (1993). *An Introduction to the Bootstrap.* Chapman & Hall.
 - Soil Science Division Staff (2017). *Soil Survey Manual.* USDA Handbook 18.

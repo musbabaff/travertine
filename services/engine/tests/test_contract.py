@@ -57,7 +57,7 @@ def test_field_analyze_with_contract_request_fixture(client: TestClient) -> None
     body = r.json()
     assert errors("FieldAnalysis", body) == []
     assert [y["year"] for y in body["climate"]] == [2001, 2002, 2003, 2004]
-    assert len(body["provenance"]) == 2
+    assert len(body["provenance"]) == 3  # POWER, SoilGrids, MODIS
     assert "model-based" in body["provenance"][0]["note"]
 
 
@@ -107,3 +107,17 @@ def test_rotations_explore_errors(settings: Settings) -> None:
     for r in (missing, unknown, no_legume, bad_id):
         assert r.status_code == 422, r.text
         assert errors("Error", r.json()) == []
+
+
+def test_validation(settings: Settings) -> None:
+    long = Settings(cache_dir=settings.cache_dir, first_year=2001, last_year=2012, rate_limit_per_minute=1000)
+    with make_client(long, FakeUpstream(varying_rain=True)) as c:
+        r = c.get("/v1/validation", params={"lat": 37.89, "lon": 28.98})
+    assert r.status_code == 200, r.text
+    assert errors("Validation", r.json()) == []
+
+
+def test_field_analyze_with_ndvi(client: TestClient) -> None:
+    body = client.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False}).json()
+    assert body["ndvi_history"]
+    assert errors("FieldAnalysis", body) == []
