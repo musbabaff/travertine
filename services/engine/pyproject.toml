@@ -1,0 +1,59 @@
+[project]
+name = "travertine-engine"
+version = "0.1.0"
+description = "Science engine for Travertine: field climate, soil water balance and rotation scoring from open Earth observation data."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "httpx>=0.28",
+    "pydantic>=2.9",
+    "numpy>=2.1",
+    "pandas>=2.2",
+    "scipy>=1.14",
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "hypothesis>=6.115",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "jsonschema>=4.23",
+    "referencing>=0.35",
+    "types-pyyaml>=6.0",
+    "pandas-stubs>=2.2",
+    "scipy-stubs>=1.14",
+]
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/travertine_engine"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+pythonpath = ["."]
+markers = ["live: hits real upstream services (skipped unless ENGINE_LIVE_TESTS=1)"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF", "PL", "PT"]
+ignore = ["E501", "N818", "PLR0911", "PLR0913", "PLR0917", "PLR2004", "RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+packages = ["travertine_engine"]
+plugins = ["pydantic.mypy"]

@@ -29,3 +29,4 @@ the same pull request that introduces it.
 | Date | Change |
 |---|---|
 | 2026-11-14 | Repository scaffold, contract, fixtures-from-public-data script, CI and project skills generated with Claude Code under human review. |
+| 2026-11-14 | Engine (services/engine) foundation written with Claude Code (engine agent): FastAPI service, FAO-56 ET0, SoilGrids soil processing, cited crop table, tests and docs. FAO table values were extracted from the FAO-56 online edition by script and checked against the tables by the agent; humans review every PR. |
