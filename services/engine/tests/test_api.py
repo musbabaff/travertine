@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from tests.conftest import FakeUpstream, make_client
+from travertine_engine import explore
 from travertine_engine.config import Settings
 from travertine_engine.errors import InvalidRequest
 from travertine_engine.field import make_field_id, parse_field_id
@@ -98,3 +99,24 @@ def test_cors_allows_listed_and_preview_origins(settings: Settings, fake: FakeUp
         assert preflight(preview) == preview
         assert preflight("https://travertine-evil.vercel.app") is None
         assert preflight("https://travertine-x-musbabaffs-projects.vercel.app.evil.com") is None
+
+
+def test_explore_ranking_does_not_depend_on_chunk_size(
+    settings: Settings, fake: FakeUpstream, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    long = replace(settings, last_year=2008)
+    body = {
+        "lat": 37.89,
+        "lon": 28.98,
+        "horizon_years": 3,
+        "priorities": {"water": 0.8, "income": 0.4, "soil": 0.6, "risk": 0.5},
+        "irrigated": False,
+    }
+    results = []
+    for chunk in (10_000, 7):
+        monkeypatch.setattr(explore, "CHUNK", chunk)
+        with make_client(long, fake) as c:
+            r = c.post("/v1/rotations/explore", json=body)
+        assert r.status_code == 200, r.text
+        results.append(r.json()["rotations"])
+    assert results[0] == results[1]

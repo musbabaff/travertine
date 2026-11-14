@@ -276,10 +276,11 @@ class Backcast:
     irrigation: FloatArray
     window_valid: BoolArray
     window_years: tuple[int, ...]  # first agricultural year of each window
+    irrigated: bool = False
 
     @property
     def deficit(self) -> FloatArray:
-        return self.irrigation if self.irrigation.any() else np.maximum(self.etc - self.eta, 0.0)
+        return self.irrigation if self.irrigated else np.maximum(self.etc - self.eta, 0.0)
 
 
 def _interp(table: FloatArray, idx: tuple[IntArray, IntArray, IntArray], f: FloatArray) -> FloatArray:
@@ -318,7 +319,12 @@ def backcast(tables: RotationTables, rotations: IntArray) -> Backcast:
         irr[:, :, k] = _interp(tables.pair.irrigation, idx, f)
         f = _interp(tables.pair.f_end, idx, f)
     return Backcast(
-        etc=etc, eta=eta, irrigation=irr, window_valid=ok, window_years=tuple(tables.years[i] for i in y0)
+        etc=etc,
+        eta=eta,
+        irrigation=irr,
+        window_valid=ok,
+        window_years=tuple(tables.years[i] for i in y0),
+        irrigated=tables.irrigated,
     )
 
 
