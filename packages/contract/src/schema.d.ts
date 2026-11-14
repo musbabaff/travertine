@@ -38,6 +38,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/field/ndvi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Field-scale (30 m) NDVI history from Harmonized Landsat Sentinel-2
+         * @description Separate from /v1/field/analyze because a cold request reads hundreds of scenes (about 2 minutes); warm requests come from the engine's cache. Load it after the field summary with its own loading state.
+         */
+        get: operations["getFieldNdvi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/field/analyze": {
         parameters: {
             query?: never;
@@ -272,6 +292,35 @@ export interface components {
                 value: number;
             }[];
         };
+        NdviObservation: {
+            /** Format: date */
+            date: string;
+            /** @description NDVI of one clear-sky observation (unitless). */
+            ndvi: number;
+            /**
+             * @description L30 = Landsat 8/9, S30 = Sentinel-2 (HLS v2.0 products).
+             * @enum {string}
+             */
+            sensor: "L30" | "S30";
+        };
+        NdviSeason: {
+            year: number;
+            /** @description Mean of clear April–September observations (unitless). Omitted when n_clear < 5. */
+            mean_ndvi?: number;
+            /** @description Clear observations used. */
+            n_clear: number;
+            /** @description Scenes looked at that year. */
+            n_scenes: number;
+        };
+        FieldNdvi: {
+            /** @description Every clear-sky observation of the 30 m pixel at the field centre, ascending by date. */
+            observations: components["schemas"]["NdviObservation"][];
+            /** @description Growing-season (April–September) summary per year, ascending by year. */
+            seasons: components["schemas"]["NdviSeason"][];
+            /** @description Limitations. The UI renders these verbatim. */
+            caveats: string[];
+            provenance: components["schemas"]["Provenance"][];
+        };
         Validation: {
             years: components["schemas"]["ValidationYear"][];
             /** @description Correlation between modelled_stress and observed_ndvi_anomaly. Negative means more stress, less greenness. */
@@ -352,6 +401,32 @@ export interface operations {
                     "application/json": components["schemas"]["Crop"][];
                 };
             };
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldNdvi: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Clear-sky observations and growing-season summaries for the 30 m pixel at the field centre. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldNdvi"];
+                };
+            };
+            422: components["responses"]["Error"];
+            502: components["responses"]["Error"];
             default: components["responses"]["Error"];
         };
     };
