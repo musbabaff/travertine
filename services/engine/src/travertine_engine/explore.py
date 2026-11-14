@@ -228,31 +228,53 @@ def _scale(values: np.ndarray) -> np.ndarray:
 class Ranked:
     order: np.ndarray
     scored: Scored
-    cast: Backcast
+    top: np.ndarray  # rotation indices of the returned rotations, best first
+    cast: Backcast  # back-cast of the `top` rotations only, in the same order
+    window_years: tuple[int, ...]  # first year of every window that is valid for at least one candidate
 
 
-def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
-    rot, indicators = candidates(tables.crops, horizon, texture)
-    if rot.shape[0] == 0:
-        raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
-    cast = backcast(tables, rot)
+CHUNK = 2048  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
+
+
+def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     ok = cast.window_valid
-    if not ok.any():
-        raise InvalidRequest("The climate record is too short for this horizon.")
-
+    n = ok.shape[0]
     demand = cast.etc.sum(axis=2)
     deficit = cast.deficit.sum(axis=2)
     met = np.where(ok, 1.0 - deficit / np.maximum(demand, 1e-9), np.nan)
     water = np.clip(row_percentile(met, 50), 0.0, 1.0)
 
     unmet = cast.deficit / np.maximum(cast.etc, 1e-9)
-    unmet = np.where(ok[:, :, None], unmet, np.nan).reshape(rot.shape[0], -1)
+    unmet = np.where(ok[:, :, None], unmet, np.nan).reshape(n, -1)
     p10 = row_percentile(unmet, 10)
     p90 = row_percentile(unmet, 90)
     risk = np.clip(1.0 - (0.5 * p90 + 0.5 * (p90 - p10)), 0.0, 1.0)
 
-    rel_et = np.where(ok[:, :, None], cast.eta / np.maximum(cast.etc, 1e-9), np.nan)
-    income = np.clip(np.nanmean(rel_et.reshape(rot.shape[0], -1), axis=1), 0.0, 1.0)
+    rel_et = np.where(ok[:, :, None], cast.eta / np.maximum(cast.etc, 1e-9), np.nan).reshape(n, -1)
+    with np.errstate(invalid="ignore"):
+        income = np.clip(np.nanmean(rel_et, axis=1), 0.0, 1.0)
+    return water, income, risk
+
+
+def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
+    rot, indicators = candidates(tables.crops, horizon, texture)
+    if rot.shape[0] == 0:
+        raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
+    n = rot.shape[0]
+    water, income, risk = np.zeros(n), np.zeros(n), np.zeros(n)
+    any_valid = np.zeros(n, dtype=bool)
+    windows_used: np.ndarray | None = None
+    window_years: tuple[int, ...] = ()
+    for lo in range(0, n, CHUNK):
+        part = backcast(tables, rot[lo : lo + CHUNK])
+        hi = lo + part.etc.shape[0]
+        water[lo:hi], income[lo:hi], risk[lo:hi] = _chunk_scores(part)
+        any_valid[lo:hi] = part.window_valid.any(axis=1)
+        used = part.window_valid.any(axis=0)
+        windows_used = used if windows_used is None else windows_used | used
+        window_years = part.window_years
+    if not any_valid.any() or windows_used is None:
+        raise InvalidRequest("The climate record is too short for this horizon.")
 
     n_credit = _scale(np.array([i.n_credit_kg_ha for i in indicators]))
     families = _scale(np.array([float(i.families) for i in indicators]))
@@ -266,6 +288,7 @@ def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorit
     stacked = np.vstack([water, income, soil, risk])
     total = (weights[:, None] * stacked).sum(axis=0) / weights.sum()
     order = np.lexsort((-water, -total))  # ties broken by water score
+    top = order[:TOP_N]
     return Ranked(
         order=order,
         scored=Scored(
@@ -277,7 +300,9 @@ def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorit
             total=total,
             indicators=indicators,
         ),
-        cast=cast,
+        top=top,
+        cast=backcast(tables, rot[top]),
+        window_years=tuple(y for y, keep in zip(window_years, windows_used, strict=True) if keep),
     )
 
 
@@ -290,13 +315,13 @@ def describe(
 ) -> list[Rotation]:
     s, cast = ranked.scored, ranked.cast
     out: list[Rotation] = []
-    first_years = [y for y, ok in zip(cast.window_years, cast.window_valid.any(axis=0), strict=True) if ok]
-    for r in ranked.order[:TOP_N]:
+    first_years = list(ranked.window_years)
+    for k, r in enumerate(ranked.top):
         seq = [tables.crops[i] for i in s.rotations[r]]
-        ok = cast.window_valid[r]
-        etc = cast.etc[r][ok]
-        eta = cast.eta[r][ok]
-        deficit = cast.deficit[r][ok]
+        ok = cast.window_valid[k]
+        etc = cast.etc[k][ok]
+        eta = cast.eta[k][ok]
+        deficit = cast.deficit[k][ok]
         stress = 1.0 - eta / np.maximum(etc, 1e-9)
         yearly = [
             RotationYear(

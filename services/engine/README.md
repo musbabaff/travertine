@@ -95,6 +95,38 @@ the only directory the server writes is `ENGINE_CACHE_DIR` (`/app/data/cache`), 
 the snapshot offline and then tries a live refresh capped at 30 seconds that cannot fail the build.
 `ENGINE_LAST_YEAR` is fixed at 2025 in the image so the record matches the snapshot.
 
+## Deployment (Render)
+
+Live at `https://travertine-engine.onrender.com` (`https://api.travertinefields.com` once DNS is in place, #20).
+
+| Setting | Value |
+|---|---|
+| Service | Render web service, Free instance (512 MB RAM, shared CPU) |
+| Source | `main`, root directory `services/engine`, Docker |
+| Health check path | `/v1/health` |
+| `ENGINE_CORS_ORIGINS` | `https://travertinefields.com,https://www.travertinefields.com,https://travertine-bice.vercel.app,http://localhost:3000` |
+| `ENGINE_CORS_ORIGIN_REGEX` | `^https://travertine-[a-z0-9-]+-musbabaffs-projects\.vercel\.app$` |
+| Deploys | GitHub Actions calls the Render deploy hook after CI passes on `main` (secret `RENDER_DEPLOY_HOOK_URL`) |
+
+The disk is not persistent. The demo field is served from the snapshot inside the image, so a restart loses
+nothing for it; other locations are fetched again after a restart.
+
+**Sleep and warm-up.** A free instance spins down after 15 minutes without requests; the first request afterwards
+waits for the container to start. A scheduled workflow pings `/v1/health` every 10 minutes. Before a demo, wake it
+and fill the in-memory rotation tables by hand:
+
+```bash
+curl -fsS -m 180 https://travertine-engine.onrender.com/v1/health
+curl -fsS -m 180 -H 'content-type: application/json' -d '{"lat":37.89,"lon":28.98,"horizon_years":4,"priorities":{"water":0.8,"income":0.4,"soil":0.6,"risk":0.5},"irrigated":false}' https://travertine-engine.onrender.com/v1/rotations/explore -o /dev/null
+```
+
+**Memory.** Peak RSS on the demo field, measured on Linux: 115 MB after start-up and analysis, 124 MB for a 3-year
+explore, 125 MB for 4 years, 146 MB for 5 years.
+
+**Rollback.** In the Render dashboard: travertine-engine → Events → pick an earlier successful deploy → Rollback
+(the free plan keeps the two most recent previous deploys). To roll back in git instead, revert the merge commit on
+`main` through a pull request; the deploy hook redeploys once CI passes.
+
 Errors follow the contract `Error` schema: `invalid_request` (422), `out_of_coverage` (422), `not_found` (404),
 `rate_limited` (429, with `Retry-After`), `upstream_unavailable` (502), `internal_error` (500). Every response carries an
 `X-Request-ID` header; send your own to correlate logs.
