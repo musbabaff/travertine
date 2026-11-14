@@ -1,133 +1,273 @@
 {
   "years": [
     {
-      "year": 2001,
-      "modelled_stress": 0.81,
-      "observed_ndvi_anomaly": -1.45
-    },
-    {
       "year": 2002,
-      "modelled_stress": 0.725,
-      "observed_ndvi_anomaly": -0.33
+      "modelled_stress": 0.319,
+      "observed_ndvi_anomaly": -0.42,
+      "baseline_index": 0.739
     },
     {
       "year": 2003,
-      "modelled_stress": 0.796,
-      "observed_ndvi_anomaly": -0.09
+      "modelled_stress": 0.223,
+      "observed_ndvi_anomaly": -0.18,
+      "baseline_index": 0.806
     },
     {
       "year": 2004,
-      "modelled_stress": 0.864,
-      "observed_ndvi_anomaly": -1.39
+      "modelled_stress": 0.437,
+      "observed_ndvi_anomaly": -1.54,
+      "baseline_index": 0.87
     },
     {
       "year": 2005,
-      "modelled_stress": 0.808,
-      "observed_ndvi_anomaly": -1.25
+      "modelled_stress": 0.349,
+      "observed_ndvi_anomaly": -1.38,
+      "baseline_index": 0.814
     },
     {
       "year": 2006,
-      "modelled_stress": 0.852,
-      "observed_ndvi_anomaly": 0.62
+      "modelled_stress": 0.408,
+      "observed_ndvi_anomaly": 0.56,
+      "baseline_index": 0.859
     },
     {
       "year": 2007,
-      "modelled_stress": 0.931,
-      "observed_ndvi_anomaly": -1.52
+      "modelled_stress": 0.541,
+      "observed_ndvi_anomaly": -1.69,
+      "baseline_index": 0.934
     },
     {
       "year": 2008,
-      "modelled_stress": 0.897,
-      "observed_ndvi_anomaly": -1.11
+      "modelled_stress": 0.508,
+      "observed_ndvi_anomaly": -1.25,
+      "baseline_index": 0.9
     },
     {
       "year": 2009,
-      "modelled_stress": 0.834,
-      "observed_ndvi_anomaly": 0.52
+      "modelled_stress": 0.328,
+      "observed_ndvi_anomaly": 0.44,
+      "baseline_index": 0.842
     },
     {
       "year": 2010,
-      "modelled_stress": 0.789,
-      "observed_ndvi_anomaly": 0.62
+      "modelled_stress": 0.316,
+      "observed_ndvi_anomaly": 0.58,
+      "baseline_index": 0.799
     },
     {
       "year": 2011,
-      "modelled_stress": 0.791,
-      "observed_ndvi_anomaly": 2.28
+      "modelled_stress": 0.172,
+      "observed_ndvi_anomaly": 2.31,
+      "baseline_index": 0.796
     },
     {
       "year": 2012,
-      "modelled_stress": 0.824,
-      "observed_ndvi_anomaly": -0.03
+      "modelled_stress": 0.274,
+      "observed_ndvi_anomaly": -0.11,
+      "baseline_index": 0.833
     },
     {
       "year": 2013,
-      "modelled_stress": 0.864,
-      "observed_ndvi_anomaly": 0.14
+      "modelled_stress": 0.351,
+      "observed_ndvi_anomaly": 0.05,
+      "baseline_index": 0.87
     },
     {
       "year": 2014,
-      "modelled_stress": 0.732,
-      "observed_ndvi_anomaly": 0.01
+      "modelled_stress": 0.3,
+      "observed_ndvi_anomaly": -0.06,
+      "baseline_index": 0.741
     },
     {
       "year": 2015,
-      "modelled_stress": 0.737,
-      "observed_ndvi_anomaly": 2.08
+      "modelled_stress": 0.158,
+      "observed_ndvi_anomaly": 2.11,
+      "baseline_index": 0.747
     },
     {
       "year": 2016,
-      "modelled_stress": 0.828,
-      "observed_ndvi_anomaly": -0.77
+      "modelled_stress": 0.45,
+      "observed_ndvi_anomaly": -0.89,
+      "baseline_index": 0.833
     },
     {
       "year": 2017,
-      "modelled_stress": 0.839,
-      "observed_ndvi_anomaly": 0.45
+      "modelled_stress": 0.351,
+      "observed_ndvi_anomaly": 0.38,
+      "baseline_index": 0.844
     },
     {
       "year": 2018,
-      "modelled_stress": 0.757,
-      "observed_ndvi_anomaly": 0.82
+      "modelled_stress": 0.286,
+      "observed_ndvi_anomaly": 0.79,
+      "baseline_index": 0.766
     },
     {
       "year": 2019,
-      "modelled_stress": 0.846,
-      "observed_ndvi_anomaly": 0.45
+      "modelled_stress": 0.442,
+      "observed_ndvi_anomaly": 0.39,
+      "baseline_index": 0.85
     },
     {
       "year": 2020,
-      "modelled_stress": 0.84,
-      "observed_ndvi_anomaly": 0.08
+      "modelled_stress": 0.356,
+      "observed_ndvi_anomaly": -0.02,
+      "baseline_index": 0.845
     },
     {
       "year": 2021,
-      "modelled_stress": 0.945,
-      "observed_ndvi_anomaly": -0.88
+      "modelled_stress": 0.535,
+      "observed_ndvi_anomaly": -1.0,
+      "baseline_index": 0.946
     },
     {
       "year": 2022,
-      "modelled_stress": 0.862,
-      "observed_ndvi_anomaly": 0.14
+      "modelled_stress": 0.419,
+      "observed_ndvi_anomaly": 0.08,
+      "baseline_index": 0.868
     },
     {
       "year": 2023,
-      "modelled_stress": 0.627,
-      "observed_ndvi_anomaly": 0.79
+      "modelled_stress": 0.0,
+      "observed_ndvi_anomaly": 0.75,
+      "baseline_index": 0.636
     },
     {
       "year": 2024,
-      "modelled_stress": 0.882,
-      "observed_ndvi_anomaly": -0.16
+      "modelled_stress": 0.552,
+      "observed_ndvi_anomaly": -0.23,
+      "baseline_index": 0.887
+    },
+    {
+      "year": 2025,
+      "modelled_stress": 0.385,
+      "observed_ndvi_anomaly": 0.31,
+      "baseline_index": 0.784
     }
   ],
-  "correlation": -0.48,
+  "correlation": -0.66,
+  "correlation_ci95": [
+    -0.85,
+    -0.43
+  ],
+  "baseline": {
+    "name": "Dryness index 1 − P/ET0, April–September",
+    "correlation": -0.53,
+    "correlation_ci95": [
+      -0.74,
+      -0.26
+    ],
+    "values": [
+      {
+        "year": 2002,
+        "value": 0.739
+      },
+      {
+        "year": 2003,
+        "value": 0.806
+      },
+      {
+        "year": 2004,
+        "value": 0.87
+      },
+      {
+        "year": 2005,
+        "value": 0.814
+      },
+      {
+        "year": 2006,
+        "value": 0.859
+      },
+      {
+        "year": 2007,
+        "value": 0.934
+      },
+      {
+        "year": 2008,
+        "value": 0.9
+      },
+      {
+        "year": 2009,
+        "value": 0.842
+      },
+      {
+        "year": 2010,
+        "value": 0.799
+      },
+      {
+        "year": 2011,
+        "value": 0.796
+      },
+      {
+        "year": 2012,
+        "value": 0.833
+      },
+      {
+        "year": 2013,
+        "value": 0.87
+      },
+      {
+        "year": 2014,
+        "value": 0.741
+      },
+      {
+        "year": 2015,
+        "value": 0.747
+      },
+      {
+        "year": 2016,
+        "value": 0.833
+      },
+      {
+        "year": 2017,
+        "value": 0.844
+      },
+      {
+        "year": 2018,
+        "value": 0.766
+      },
+      {
+        "year": 2019,
+        "value": 0.85
+      },
+      {
+        "year": 2020,
+        "value": 0.845
+      },
+      {
+        "year": 2021,
+        "value": 0.946
+      },
+      {
+        "year": 2022,
+        "value": 0.868
+      },
+      {
+        "year": 2023,
+        "value": 0.636
+      },
+      {
+        "year": 2024,
+        "value": 0.887
+      },
+      {
+        "year": 2025,
+        "value": 0.784
+      }
+    ]
+  },
+  "difference_ci95": [
+    -0.34,
+    0.03
+  ],
+  "verdict": "no_detectable_difference",
   "n": 24,
-  "method": "Pearson correlation between a growing-season (April–September) climatic water-deficit proxy, 1 − P/ET0 (NASA POWER precipitation; ET0 from the engine's annual FAO-56 Penman-Monteith, distributed over months by a Hargreaves shape), and the standardised anomaly of growing-season mean MODIS NDVI at the field centre pixel, one value per year.",
+  "method": "Pearson correlation, one value per year, between modelled water stress and the standardised anomaly (z-score, sample standard deviation) of growing-season MODIS NDVI at the field-centre pixel. Modelled stress is 1 − ΣETa/ΣETc of rain-fed winter wheat (sown 15 November, harvested 12 July) from 1 April to harvest, from the engine's daily FAO-56 chapter 8 root-zone water balance on NASA POWER precipitation and Penman-Monteith ET0 with the field's SoilGrids available water capacity. The same comparison is made for a baseline climatic dryness index, 1 − ΣP/ΣET0 over April–September. 95 % intervals are paired percentile bootstraps over years (10,000 resamples, seed 2026). Protocol fixed in advance in docs/VALIDATION.md.",
   "caveats": [
-    "Fixture only: the stress series is a simple climatic proxy, not the Travertine engine's crop water-balance model.",
-    "NDVI comes from a single 250 m pixel without cloud or quality filtering; it may mix several fields and land uses.",
+    "Model (winter-wheat water balance): r = -0.66, 95 % interval -0.85 to -0.43. Baseline (April–September 1 − P/ET0): r = -0.53, 95 % interval -0.74 to -0.26. Difference model − baseline: -0.13, 95 % interval -0.34 to +0.03. No detectable difference between the model and the baseline: the interval of the difference includes 0.",
+    "The land use of the pixel is not known. The model assumes rain-fed winter wheat; if the pixel holds an irrigated or summer crop, orchard, pasture or a mix, its greenness follows other drivers.",
     "Irrigation is not represented: irrigated fields can stay green in dry years, which weakens the relationship.",
+    "NDVI is a single 250 m pixel; it may mix several fields and land uses.",
     "24 years is a small sample; the correlation is uncertain and shows association, not causation."
   ],
   "provenance": [
@@ -140,12 +280,28 @@
       "note": "Gridded, model-based reanalysis values for the grid cell containing the field, not field measurements: MERRA-2 meteorology (0.5° × 0.625°) and CERES SYN1deg solar radiation (1° × 1°). Parameters T2M, T2M_MAX, T2M_MIN, T2MDEW, WS2M, PS, ALLSKY_SFC_SW_DWN, PRECTOTCORR, GWETROOT. Daily reference evapotranspiration is FAO-56 Penman-Monteith (eq. 6) with actual vapour pressure from the dew point (eq. 14) and net radiation from eqs. 37–40 using the POWER grid-cell elevation (676 m); annual ET0 is the sum of daily values. Hargreaves (eq. 52) was used on 0 day(s) where Penman-Monteith inputs were missing. Root-zone wetness is the GWETROOT fraction of saturation from the MERRA-2 land model, not a measured soil moisture."
     },
     {
-      "dataset": "MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061)",
-      "provider": "NASA LP DAAC, accessed via ORNL DAAC MODIS Web Service",
+      "dataset": "SoilGrids 2.0 (clay, sand, silt, soc, phh2o; mean and 5th/95th percentiles)",
+      "provider": "ISRIC — World Soil Information",
       "spatial_resolution": "250 m",
-      "temporal_coverage": "2001–2024, 16-day composites, April–September",
+      "temporal_coverage": "Static; predictions from soil profiles collected over several decades",
+      "access_url": "https://rest.isric.org/soilgrids/v2.0/docs",
+      "note": "Texture class (USDA), organic carbon and pH are depth-weighted means of 0–30 cm. Available water capacity is the 0–100 cm sum of field capacity (−33 kPa) minus wilting point (−1500 kPa) from the Saxton & Rawls (2006) pedotransfer functions (Soil Sci. Soc. Am. J. 70:1569–1578), with organic matter = 1.724 × organic carbon; gravel and salinity are not accounted for. SoilGrids 90 % prediction interval for 0–30 cm at this point: clay 3–92 %, organic carbon 2.9–44.2 g/kg; values derived from the mean prediction carry that uncertainty."
+    },
+    {
+      "dataset": "MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061), NDVI and pixel reliability",
+      "provider": "NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by the ORNL DAAC MODIS web service",
+      "spatial_resolution": "250 m",
+      "temporal_coverage": "2001–2025, 16-day composites, April–September",
       "access_url": "https://modis.ornl.gov/data/modis_webservice.html",
-      "note": "Single pixel at the field centre. Growing-season mean of the ten composites starting day-of-year 97 to 241. Quality flags not yet applied."
+      "note": "Single 250 m pixel containing the field centre; it may include neighbouring fields, roads or buildings. Growing-season value = mean NDVI of the 10 composites starting day-of-year 97 to 241 (early April to late September) whose pixel reliability is 0 (good) or 1 (marginal); snow, cloud and fill are dropped and a year needs at least 6 usable composites. Fixture provenance: per-year values and intervals copied from docs/VALIDATION.md §3 (engine run of 14 November 2026); method, caveats and verdict wording generated by the engine's own code, because the ORNL MODIS service returned HTTP 503 when this fixture was built."
+    },
+    {
+      "dataset": "FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
+      "provider": "Food and Agriculture Organization of the United Nations",
+      "spatial_resolution": "Not spatial (method and crop coefficients)",
+      "temporal_coverage": "Published 1998",
+      "access_url": "https://www.fao.org/4/x0490e/x0490e00.htm",
+      "note": "Crop coefficients (Table 12, adjusted for local wind and humidity with eqs. 62 and 65), stage lengths (Table 11), rooting depth and depletion fraction (Table 22), daily root-zone water balance and water-stress coefficient Ks (chapter 8, eqs. 84–85) and bare-soil evaporation between crops (chapter 7, eqs. 73–74, Table 19). Runoff and capillary rise are not modelled."
     }
   ]
 }

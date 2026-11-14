@@ -327,6 +327,34 @@ components:
         observed_ndvi_anomaly:
           type: number
           description: Standardised anomaly of growing-season mean NDVI (σ, z-score) relative to the record.
+        baseline_index:
+          type: number
+          description: "Optional. Baseline dryness index for this year (1 − ΣP/ΣET0, April–September), unitless. Same value as in baseline.values."
+
+    CorrelationInterval:
+      type: array
+      description: 95 % paired percentile bootstrap interval (lower, upper) of a Pearson correlation.
+      minItems: 2
+      maxItems: 2
+      items: { type: number, minimum: -1, maximum: 1 }
+
+    ValidationBaseline:
+      type: object
+      description: The same back-test for a climate-only dryness index, so the model can be judged against a simple baseline.
+      required: [name, correlation, correlation_ci95, values]
+      properties:
+        name: { type: string, description: "Human-readable label, English." }
+        correlation: { type: number, minimum: -1, maximum: 1, description: Pearson r between the baseline index and the NDVI anomaly. }
+        correlation_ci95: { $ref: "#/components/schemas/CorrelationInterval" }
+        values:
+          type: array
+          description: Baseline index per year, same years as Validation.years.
+          items:
+            type: object
+            required: [year, value]
+            properties:
+              year: { type: integer }
+              value: { type: number, description: "1 − ΣP/ΣET0 over April–September, unitless." }
 
     Validation:
       type: object
@@ -341,6 +369,22 @@ components:
           maximum: 1
           description: Correlation between modelled_stress and observed_ndvi_anomaly. Negative means more stress, less greenness.
         n: { type: integer, minimum: 0, description: Number of years used. }
+        correlation_ci95:
+          $ref: "#/components/schemas/CorrelationInterval"
+          description: Optional. 95 % paired percentile bootstrap interval for correlation.
+        baseline:
+          $ref: "#/components/schemas/ValidationBaseline"
+          description: Optional. The same statistic for a baseline dryness index.
+        difference_ci95:
+          type: array
+          description: "Optional. 95 % interval of correlation − baseline.correlation (lower, upper)."
+          minItems: 2
+          maxItems: 2
+          items: { type: number, minimum: -2, maximum: 2 }
+        verdict:
+          type: string
+          enum: [model_better, baseline_better, no_detectable_difference]
+          description: "Optional. Pre-registered rule (docs/VALIDATION.md): model_better only if difference_ci95 lies entirely below 0; baseline_better only if entirely above 0; otherwise no_detectable_difference."
         method: { type: string, description: "How the back-test was computed, including the correlation type." }
         caveats:
           type: array
