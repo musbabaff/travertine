@@ -41,6 +41,7 @@ log = logging.getLogger(__name__)
 
 TOP_N = 10
 TABLE_CACHE_SIZE = 16
+SCORE_CACHE_SIZE = 48
 
 FAO56_PROVENANCE = Provenance(
     dataset="FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
@@ -106,6 +107,8 @@ class ExploreService:
             tuple[float, float, bool, tuple[str, ...]], tuple[RotationTables, FieldInputs]
         ] = OrderedDict()
         self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
+        self._scores: OrderedDict[tuple[object, ...], CandidateScores] = OrderedDict()
+        self._score_locks: dict[tuple[object, ...], asyncio.Lock] = {}
 
     async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
         (daily, api_version), soil = await asyncio.gather(
@@ -162,6 +165,40 @@ class ExploreService:
                 cached = self._tables[key]
         return cached[0], cached[1], provenance
 
+    async def scores(
+        self, lat: float, lon: float, irrigated: bool, crops: tuple[CropParams, ...], horizon: int
+    ) -> tuple[RotationTables, FieldInputs, list[Provenance], CandidateScores]:
+        """Candidate scores are independent of the priorities, so they are computed once per field, mode, crop set
+        and horizon; a request then only weighs them and describes the top ten."""
+        tables, inputs, provenance = await self.tables(lat, lon, irrigated, crops)
+        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops), horizon)
+        cached = self._scores.get(key)
+        if cached is None:
+            async with self._score_locks.setdefault(key, asyncio.Lock()):
+                cached = self._scores.get(key)
+                if cached is None:
+                    started = time.perf_counter()
+                    cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
+                    log.info(
+                        "candidate scores built",
+                        extra={
+                            "horizon": horizon,
+                            "elapsed_ms": round((time.perf_counter() - started) * 1000),
+                        },
+                    )
+                    self._scores[key] = cached
+                    while len(self._scores) > SCORE_CACHE_SIZE:
+                        self._scores.popitem(last=False)
+        self._scores.move_to_end(key)
+        return tables, inputs, provenance, cached
+
+    async def warm(self, lat: float, lon: float, horizons: tuple[int, ...] = (3, 4, 5)) -> None:
+        """Fill the table and score caches for one field, rain-fed then irrigated, all crops."""
+        crops = select_crops(None)
+        for irrigated in (False, True):
+            for horizon in horizons:
+                await self.scores(lat, lon, irrigated, crops, horizon)
+
     async def explore(self, req: RotationExploreRequest) -> RotationExploreResponse:
         if req.field_id is not None:
             lat, lon = parse_field_id(req.field_id)
@@ -170,8 +207,10 @@ class ExploreService:
         else:
             raise InvalidRequest("Provide field_id or both lat and lon.")
         crops = select_crops(req.crop_ids)
-        tables, inputs, provenance = await self.tables(lat, lon, req.irrigated, crops)
-        result = await asyncio.to_thread(rank, tables, inputs.texture, req.horizon_years, req.priorities)
+        tables, inputs, provenance, scores = await self.scores(
+            lat, lon, req.irrigated, crops, req.horizon_years
+        )
+        result = await asyncio.to_thread(rank_scores, tables, scores, req.priorities)
         rotations = describe(tables, result, inputs.texture, req)
         n_windows = len(tables.years) - req.horizon_years + 1
         provenance = [
@@ -256,7 +295,20 @@ def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return water, income, risk
 
 
-def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
+@dataclass(frozen=True, slots=True)
+class CandidateScores:
+    """Everything about the candidates that does not depend on the user's priorities."""
+
+    rotations: np.ndarray
+    indicators: list[SoilIndicators]
+    water: np.ndarray
+    income: np.ndarray
+    risk: np.ndarray
+    soil: np.ndarray
+    window_years: tuple[int, ...]  # first year of every window valid for at least one candidate
+
+
+def score_candidates(tables: RotationTables, texture: str, horizon: int) -> CandidateScores:
     rot, indicators = candidates(tables.crops, horizon, texture)
     if rot.shape[0] == 0:
         raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
@@ -280,30 +332,44 @@ def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorit
     families = _scale(np.array([float(i.families) for i in indicators]))
     roots = _scale(np.array([i.root_range_m for i in indicators]))
     cover = _scale(np.array([i.cover_fraction for i in indicators]))
-    soil = (n_credit + families + roots + cover) / 4.0
+    return CandidateScores(
+        rotations=rot,
+        indicators=indicators,
+        water=water,
+        income=income,
+        risk=risk,
+        soil=(n_credit + families + roots + cover) / 4.0,
+        window_years=tuple(y for y, keep in zip(window_years, windows_used, strict=True) if keep),
+    )
 
+
+def rank_scores(tables: RotationTables, c: CandidateScores, priorities: Priorities) -> Ranked:
     weights = np.array([priorities.water, priorities.income, priorities.soil, priorities.risk])
     if weights.sum() == 0:
         weights = np.ones(4)
-    stacked = np.vstack([water, income, soil, risk])
+    stacked = np.vstack([c.water, c.income, c.soil, c.risk])
     total = (weights[:, None] * stacked).sum(axis=0) / weights.sum()
-    order = np.lexsort((-water, -total))  # ties broken by water score
+    order = np.lexsort((-c.water, -total))  # ties broken by water score
     top = order[:TOP_N]
     return Ranked(
         order=order,
         scored=Scored(
-            rotations=rot,
-            water=water,
-            income=income,
-            soil=soil,
-            risk=risk,
+            rotations=c.rotations,
+            water=c.water,
+            income=c.income,
+            soil=c.soil,
+            risk=c.risk,
             total=total,
-            indicators=indicators,
+            indicators=c.indicators,
         ),
         top=top,
-        cast=backcast(tables, rot[top]),
-        window_years=tuple(y for y, keep in zip(window_years, windows_used, strict=True) if keep),
+        cast=backcast(tables, c.rotations[top]),
+        window_years=c.window_years,
     )
+
+
+def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
+    return rank_scores(tables, score_candidates(tables, texture, horizon), priorities)
 
 
 def _pct(x: float) -> str:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 import time
@@ -45,6 +46,24 @@ ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
 }
 
 
+async def warm_fields(explore: ExploreService, fields: list[tuple[float, float]]) -> None:
+    """Fill the rotation caches for configured fields in the background, so the first explore of the demo field does
+    not pay for the back-cast. Failures are logged and ignored; the service answers either way."""
+    for lat, lon in fields:
+        started = time.perf_counter()
+        try:
+            await explore.warm(lat, lon)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            log.exception("explore warm-up failed", extra={"lat": lat, "lon": lon})
+            continue
+        log.info(
+            "explore caches warm",
+            extra={"lat": lat, "lon": lon, "elapsed_ms": round((time.perf_counter() - started) * 1000)},
+        )
+
+
 def attach_services(app: FastAPI, settings: Settings, client: Upstream) -> int:
     """Build the services on app.state; returns how many snapshot entries were copied into the cache."""
     cache = DiskCache(settings.cache_dir)
@@ -74,7 +93,9 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
                 "snapshot_entries_loaded": loaded,
             },
         )
+        warming = asyncio.create_task(warm_fields(app.state.explore, settings.warm_fields))
         yield
+        warming.cancel()
         await client.aclose()
 
     app = FastAPI(

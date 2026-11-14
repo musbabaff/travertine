@@ -120,3 +120,35 @@ def test_explore_ranking_does_not_depend_on_chunk_size(
         assert r.status_code == 200, r.text
         results.append(r.json()["rotations"])
     assert results[0] == results[1]
+
+
+def test_candidate_scores_are_reused_across_priorities(
+    settings: Settings, fake: FakeUpstream, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls = []
+    original = explore.score_candidates
+
+    def counting(*args: object) -> explore.CandidateScores:
+        calls.append(args[2])
+        return original(*args)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(explore, "score_candidates", counting)
+    long = replace(settings, last_year=2008)
+    base = {"lat": 37.89, "lon": 28.98, "horizon_years": 3, "irrigated": False}
+    with make_client(long, fake) as c:
+        a = c.post(
+            "/v1/rotations/explore",
+            json={**base, "priorities": {"water": 1, "income": 0, "soil": 0, "risk": 0}},
+        )
+        b = c.post(
+            "/v1/rotations/explore",
+            json={**base, "priorities": {"water": 0, "income": 0, "soil": 1, "risk": 0}},
+        )
+    assert a.status_code == b.status_code == 200
+    assert calls == [3]
+    assert a.json()["rotations"] != b.json()["rotations"]
+
+
+def test_warm_fields_setting_parses_points(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENGINE_WARM_FIELDS", "37.89,28.98; 40.1,-88.2")
+    assert Settings.from_env().warm_fields == [(37.89, 28.98), (40.1, -88.2)]
