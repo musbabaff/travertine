@@ -74,6 +74,7 @@ All optional. See the root `.env.example`.
 | `ENGINE_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed origins |
 | `ENGINE_CORS_ORIGIN_REGEX` | unset | Extra origins matched by a full-match regex, for preview deployments |
 | `ENGINE_CACHE_DIR` | `services/engine/data/cache` | Disk cache location |
+| `ENGINE_WARM_FIELDS` | unset (image: `37.89,28.98`) | `lat,lon;lat,lon` fields whose rotation scores are computed in the background after start-up |
 | `ENGINE_SNAPSHOT_DIR` | `services/engine/data/snapshot` | Bundled upstream responses loaded into the cache at start-up |
 | `ENGINE_FIRST_YEAR` / `ENGINE_LAST_YEAR` | 2001 / last full calendar year | Climate record period |
 | `ENGINE_UPSTREAM_TIMEOUT_S` | 90 | Per-request timeout for upstream calls |
@@ -119,6 +120,10 @@ and fill the in-memory rotation tables by hand:
 curl -fsS -m 180 https://travertine-engine.onrender.com/v1/health
 curl -fsS -m 180 -H 'content-type: application/json' -d '{"lat":37.89,"lon":28.98,"horizon_years":4,"priorities":{"water":0.8,"income":0.4,"soil":0.6,"risk":0.5},"irrigated":false}' https://travertine-engine.onrender.com/v1/rotations/explore -o /dev/null
 ```
+
+**Warm-up inside the engine.** After start-up the engine computes the demo field's candidate scores for 3, 4 and
+5 years, rain-fed and irrigated, in the background. These do not depend on the user's priorities, so later explore
+requests only weigh them and describe the top ten.
 
 **Memory.** Peak RSS on the demo field, measured on Linux: 115 MB after start-up and analysis, 124 MB for a 3-year
 explore, 125 MB for 4 years, 146 MB for 5 years.
