@@ -1,0 +1,273 @@
+# Crop table for the Travertine engine.
+#
+# Every value is copied from a published table; `sources` names the document and table for each group of values.
+# Abbreviations used in the sources:
+#   FAO-56  Allen, R. G., Pereira, L. S., Raes, D., Smith, M. (1998). Crop evapotranspiration — Guidelines for
+#           computing crop water requirements. FAO Irrigation and Drainage Paper 56. https://www.fao.org/4/x0490e/x0490e00.htm
+#           Table 11 (stage lengths), Table 12 (Kc, crop height), Table 22 (rooting depth, p), Table 24 (Ky, reproduced
+#           from FAO-33).
+#   FAO-33  Doorenbos, J., Kassam, A. H. (1979). Yield response to water. FAO Irrigation and Drainage Paper 33.
+#
+# Conventions
+#   * Where FAO-56 gives a range (e.g. rooting depth 1.0–1.7 m, Kc mid 1.15–1.20) the midpoint is used and the range
+#     is kept in `*_range` so the uncertainty stays visible.
+#   * Kc values are the Table 12 values for a sub-humid climate (RHmin ≈ 45 %, u2 ≈ 2 m/s). The engine adjusts Kc mid
+#     and Kc end for local wind and humidity with FAO-56 eq. 62 at run time; the table values are not altered here.
+#   * `stages` are one Table 11 row (initial / development / mid-season / late-season days). The row chosen is named
+#     in `sources.stages`; Mediterranean or arid-region rows are preferred because the demo field is in inland Aegean
+#     Turkey. Stage lengths are regional and should be replaced with local observations where they exist.
+#   * `sowing_month` is the planting month listed in that same Table 11 row.
+#   * `ky` is null where FAO-56 Table 24 (FAO-33) gives no value for the crop. The engine reports yield response only
+#     for crops with a sourced Ky.
+#
+# Crops considered and left out (no published value for a required field):
+#   * Chickpea — FAO-56 Table 12 and Table 22 list it, but Table 11 gives no stage lengths, so the season cannot be
+#     placed without an unsourced assumption.
+
+crops:
+  - id: winter_wheat
+    name: Winter wheat
+    family: Poaceae
+    is_legume: false
+    season: winter
+    sowing_month: 11
+    stages: { ini: 30, dev: 140, mid: 40, late: 30 }
+    kc: { ini: 0.70, mid: 1.15, end: 0.25 }
+    kc_end_range: [0.25, 0.40]
+    height_m: 1.0
+    root_depth_m: 1.65
+    root_depth_range_m: [1.5, 1.8]
+    p: 0.55
+    ky: 1.05
+    sources:
+      stages: "FAO-56 Table 11, Winter Wheat, November planting, Mediterranean (30/140/40/30 days)"
+      kc: "FAO-56 Table 12, Winter Wheat with non-frozen soils (Kc ini 0.7, Kc mid 1.15, Kc end 0.25–0.4; lower bound used for a crop harvested dry)"
+      root_depth: "FAO-56 Table 22, Winter Wheat (1.5–1.8 m)"
+      p: "FAO-56 Table 22, Winter Wheat (0.55)"
+      ky: "FAO-56 Table 24 (from FAO-33), Winter wheat (1.05)"
+
+  - id: barley
+    name: Barley
+    family: Poaceae
+    is_legume: false
+    season: winter
+    sowing_month: 10
+    stages: { ini: 25, dev: 35, mid: 65, late: 40 }
+    kc: { ini: 0.30, mid: 1.15, end: 0.25 }
+    height_m: 1.0
+    root_depth_m: 1.25
+    root_depth_range_m: [1.0, 1.5]
+    p: 0.55
+    ky: null
+    sources:
+      stages: "FAO-56 Table 11, Grains (small), Oct/Nov planting, Pakistan; Arid Region (25/35/65/40 days)"
+      kc: "FAO-56 Table 12, Barley (Kc ini 0.3 from the cereals group, Kc mid 1.15, Kc end 0.25)"
+      root_depth: "FAO-56 Table 22, Barley (1.0–1.5 m)"
+      p: "FAO-56 Table 22, Barley (0.55)"
+      ky: "Not listed in FAO-56 Table 24 / FAO-33; yield response not computed"
+
+  - id: lentil
+    name: Lentil
+    family: Fabaceae
+    is_legume: true
+    season: winter
+    sowing_month: 10
+    stages: { ini: 25, dev: 35, mid: 70, late: 40 }
+    kc: { ini: 0.40, mid: 1.10, end: 0.30 }
+    height_m: 0.5
+    root_depth_m: 0.70
+    root_depth_range_m: [0.6, 0.8]
+    p: 0.50
+    ky: null
+    sources:
+      stages: "FAO-56 Table 11, Lentil, Oct/Nov planting, Arid Region (25/35/70/40 days)"
+      kc: "FAO-56 Table 12, Lentil (Kc ini 0.4 from the legumes group, Kc mid 1.10, Kc end 0.30)"
+      root_depth: "FAO-56 Table 22, Lentil (0.6–0.8 m)"
+      p: "FAO-56 Table 22, Lentil (0.50)"
+      ky: "Not listed in FAO-56 Table 24 / FAO-33; yield response not computed"
+
+  - id: faba_bean
+    name: Faba bean (dry)
+    family: Fabaceae
+    is_legume: true
+    season: winter
+    sowing_month: 11
+    stages: { ini: 90, dev: 45, mid: 40, late: 60 }
+    kc: { ini: 0.50, mid: 1.15, end: 0.30 }
+    height_m: 0.8
+    root_depth_m: 0.60
+    root_depth_range_m: [0.5, 0.7]
+    p: 0.45
+    ky: null
+    sources:
+      stages: "FAO-56 Table 11, Faba bean, dry, November planting, Europe (90/45/40/60 days)"
+      kc: "FAO-56 Table 12, Fababean (broad bean), Dry/Seed (0.5, 1.15, 0.30)"
+      root_depth: "FAO-56 Table 22, Fababean, Dry/Seed (0.5–0.7 m)"
+      p: "FAO-56 Table 22, Fababean, Dry/Seed (0.45)"
+      ky: "Not listed in FAO-56 Table 24 / FAO-33 (the 'Beans' value refers to Phaseolus); yield response not computed"
+
+  - id: maize
+    name: Maize (grain)
+    family: Poaceae
+    is_legume: false
+    season: summer
+    sowing_month: 4
+    stages: { ini: 30, dev: 40, mid: 50, late: 30 }
+    kc: { ini: 0.30, mid: 1.20, end: 0.35 }
+    kc_end_range: [0.35, 0.60]
+    height_m: 2.0
+    root_depth_m: 1.35
+    root_depth_range_m: [1.0, 1.7]
+    p: 0.55
+    ky: 1.25
+    sources:
+      stages: "FAO-56 Table 11, Maize (grain), April planting, Spain (spr, sum.); Calif. (30/40/50/30 days)"
+      kc: "FAO-56 Table 12, Maize, Field (grain) (Kc ini 0.3 from the cereals group, Kc mid 1.20, Kc end 0.60–0.35; 0.35 used for grain harvested dry)"
+      root_depth: "FAO-56 Table 22, Maize, Field (grain) (1.0–1.7 m)"
+      p: "FAO-56 Table 22, Maize, Field (grain) (0.55)"
+      ky: "FAO-56 Table 24 (from FAO-33), Maize (1.25)"
+
+  - id: sorghum
+    name: Sorghum (grain)
+    family: Poaceae
+    is_legume: false
+    season: summer
+    sowing_month: 5
+    stages: { ini: 20, dev: 35, mid: 40, late: 30 }
+    kc: { ini: 0.30, mid: 1.05, end: 0.55 }
+    kc_mid_range: [1.00, 1.10]
+    height_m: 1.5
+    root_depth_m: 1.50
+    root_depth_range_m: [1.0, 2.0]
+    p: 0.55
+    ky: 0.90
+    sources:
+      stages: "FAO-56 Table 11, Sorghum, May/June planting, USA, Pakis., Med. (20/35/40/30 days; the table lists a total of 130 days, the stage sum of 125 days is used)"
+      kc: "FAO-56 Table 12, Sorghum, grain (Kc ini 0.3 from the cereals group, Kc mid 1.00–1.10, Kc end 0.55)"
+      root_depth: "FAO-56 Table 22, Sorghum, grain (1.0–2.0 m)"
+      p: "FAO-56 Table 22, Sorghum, grain (0.55)"
+      ky: "FAO-56 Table 24 (from FAO-33), Sorghum (0.9)"
+
+  - id: cotton
+    name: Cotton
+    family: Malvaceae
+    is_legume: false
+    season: summer
+    sowing_month: 4
+    stages: { ini: 30, dev: 50, mid: 60, late: 55 }
+    kc: { ini: 0.35, mid: 1.175, end: 0.60 }
+    kc_mid_range: [1.15, 1.20]
+    kc_end_range: [0.50, 0.70]
+    height_m: 1.35
+    root_depth_m: 1.35
+    root_depth_range_m: [1.0, 1.7]
+    p: 0.65
+    ky: 0.85
+    sources:
+      stages: "FAO-56 Table 11, Cotton, Mar–May planting, Egypt; Pakistan; Calif. (30/50/60/55 days)"
+      kc: "FAO-56 Table 12, Cotton (Kc ini 0.35 from the fibre crops group, Kc mid 1.15–1.20, Kc end 0.70–0.50)"
+      root_depth: "FAO-56 Table 22, Cotton (1.0–1.7 m)"
+      p: "FAO-56 Table 22, Cotton (0.65)"
+      ky: "FAO-56 Table 24 (from FAO-33), Cotton (0.85)"
+
+  - id: sunflower
+    name: Sunflower
+    family: Asteraceae
+    is_legume: false
+    season: summer
+    sowing_month: 4
+    stages: { ini: 25, dev: 35, mid: 45, late: 25 }
+    kc: { ini: 0.35, mid: 1.075, end: 0.35 }
+    kc_mid_range: [1.00, 1.15]
+    height_m: 2.0
+    root_depth_m: 1.15
+    root_depth_range_m: [0.8, 1.5]
+    p: 0.45
+    ky: 0.95
+    sources:
+      stages: "FAO-56 Table 11, Sunflower, April/May planting, Medit.; California (25/35/45/25 days)"
+      kc: "FAO-56 Table 12, Sunflower (Kc ini 0.35 from the oil crops group, Kc mid 1.0–1.15, Kc end 0.35)"
+      root_depth: "FAO-56 Table 22, Sunflower (0.8–1.5 m)"
+      p: "FAO-56 Table 22, Sunflower (0.45)"
+      ky: "FAO-56 Table 24 (from FAO-33), Sunflower (0.95)"
+
+  - id: sugar_beet
+    name: Sugar beet
+    family: Amaranthaceae
+    is_legume: false
+    season: summer
+    sowing_month: 5
+    stages: { ini: 25, dev: 35, mid: 50, late: 50 }
+    kc: { ini: 0.35, mid: 1.20, end: 0.70 }
+    height_m: 0.5
+    root_depth_m: 0.95
+    root_depth_range_m: [0.7, 1.2]
+    p: 0.55
+    ky: 1.0
+    sources:
+      stages: "FAO-56 Table 11, Sugarbeet, May planting, Mediterranean (25/35/50/50 days)"
+      kc: "FAO-56 Table 12, Sugar Beet (0.35, 1.20, 0.70; Kc end for no irrigation in the last month)"
+      root_depth: "FAO-56 Table 22, Sugar Beet (0.7–1.2 m)"
+      p: "FAO-56 Table 22, Sugar Beet (0.55)"
+      ky: "FAO-56 Table 24 (from FAO-33), Sugarbeet (1.0)"
+
+  - id: tomato
+    name: Tomato
+    family: Solanaceae
+    is_legume: false
+    season: summer
+    sowing_month: 4
+    stages: { ini: 30, dev: 40, mid: 45, late: 30 }
+    kc: { ini: 0.60, mid: 1.15, end: 0.80 }
+    kc_end_range: [0.70, 0.90]
+    height_m: 0.6
+    root_depth_m: 1.10
+    root_depth_range_m: [0.7, 1.5]
+    p: 0.40
+    ky: 1.05
+    sources:
+      stages: "FAO-56 Table 11, Tomato, April/May planting, Mediterranean (30/40/45/30 days)"
+      kc: "FAO-56 Table 12, Tomato (Kc ini 0.6 from the Solanaceae group, Kc mid 1.15, Kc end 0.70–0.90)"
+      root_depth: "FAO-56 Table 22, Tomato (0.7–1.5 m)"
+      p: "FAO-56 Table 22, Tomato (0.40)"
+      ky: "FAO-56 Table 24 (from FAO-33), Tomato (1.05)"
+
+  - id: soybean
+    name: Soybean
+    family: Fabaceae
+    is_legume: true
+    season: summer
+    sowing_month: 5
+    stages: { ini: 20, dev: 35, mid: 60, late: 25 }
+    kc: { ini: 0.40, mid: 1.15, end: 0.50 }
+    height_m: 0.75
+    root_depth_m: 0.95
+    root_depth_range_m: [0.6, 1.3]
+    p: 0.50
+    ky: 0.85
+    sources:
+      stages: "FAO-56 Table 11, Soybeans, May planting, Central USA (20/30–35/60/25 days, total 140; 35 days development used to match the listed total)"
+      kc: "FAO-56 Table 12, Soybeans (Kc ini 0.4 from the legumes group, Kc mid 1.15, Kc end 0.50)"
+      root_depth: "FAO-56 Table 22, Soybeans (0.6–1.3 m)"
+      p: "FAO-56 Table 22, Soybeans (0.50)"
+      ky: "FAO-56 Table 24 (from FAO-33), Soybean (0.85)"
+
+  - id: alfalfa
+    name: Alfalfa (hay)
+    family: Fabaceae
+    is_legume: true
+    season: perennial
+    sowing_month: 4
+    stages: { ini: 10, dev: 30, mid: 160, late: 10 }
+    kc: { ini: 0.40, mid: 0.95, end: 0.90 }
+    height_m: 0.7
+    root_depth_m: 1.50
+    root_depth_range_m: [1.0, 2.0]
+    p: 0.55
+    ky: 1.1
+    sources:
+      stages: "FAO-56 Table 11, Alfalfa, Idaho, USA: 1st cutting cycle 10/30/25/10 days and other cutting cycles 5/20/10/10 days; four cycles (75 + 3 × 45 = 210 days) as in the FAO-56 Figure 35 example, expressed as one averaged curve (10/30/160/10)"
+      kc: "FAO-56 Table 12, Alfalfa Hay, averaged cutting effects (0.40, 0.95, 0.90)"
+      root_depth: "FAO-56 Table 22, Alfalfa for hay (1.0–2.0 m)"
+      p: "FAO-56 Table 22, Alfalfa for hay (0.55)"
+      ky: "FAO-56 Table 24 (from FAO-33), Alfalfa (1.1)"
