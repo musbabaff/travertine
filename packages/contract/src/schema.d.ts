@@ -253,6 +253,24 @@ export interface components {
             modelled_stress: components["schemas"]["Unit01"];
             /** @description Standardised anomaly of growing-season mean NDVI (σ, z-score) relative to the record. */
             observed_ndvi_anomaly: number;
+            /** @description Optional. Baseline dryness index for this year (1 − ΣP/ΣET0, April–September), unitless. Same value as in baseline.values. */
+            baseline_index?: number;
+        };
+        /** @description 95 % paired percentile bootstrap interval (lower, upper) of a Pearson correlation. */
+        CorrelationInterval: number[];
+        /** @description The same back-test for a climate-only dryness index, so the model can be judged against a simple baseline. */
+        ValidationBaseline: {
+            /** @description Human-readable label, English. */
+            name: string;
+            /** @description Pearson r between the baseline index and the NDVI anomaly. */
+            correlation: number;
+            correlation_ci95: components["schemas"]["CorrelationInterval"];
+            /** @description Baseline index per year, same years as Validation.years. */
+            values: {
+                year: number;
+                /** @description 1 − ΣP/ΣET0 over April–September, unitless. */
+                value: number;
+            }[];
         };
         Validation: {
             years: components["schemas"]["ValidationYear"][];
@@ -260,6 +278,17 @@ export interface components {
             correlation: number;
             /** @description Number of years used. */
             n: number;
+            /** @description Optional. 95 % paired percentile bootstrap interval for correlation. */
+            correlation_ci95?: components["schemas"]["CorrelationInterval"];
+            /** @description Optional. The same statistic for a baseline dryness index. */
+            baseline?: components["schemas"]["ValidationBaseline"];
+            /** @description Optional. 95 % interval of correlation − baseline.correlation (lower, upper). */
+            difference_ci95?: number[];
+            /**
+             * @description Optional. Pre-registered rule (docs/VALIDATION.md): model_better only if difference_ci95 lies entirely below 0; baseline_better only if entirely above 0; otherwise no_detectable_difference.
+             * @enum {string}
+             */
+            verdict?: "model_better" | "baseline_better" | "no_detectable_difference";
             /** @description How the back-test was computed, including the correlation type. */
             method: string;
             /** @description Limitations. The UI renders these verbatim. */

@@ -13,7 +13,7 @@ test.describe("Evidence screen", () => {
   test("shows correlation, n, method and every caveat exactly as returned", async ({ page }) => {
     await fakeEngine(page);
     await page.goto(`/app/evidence?${DEMO_QUERY}`);
-    await expect(page.getByTestId("correlation")).toHaveText("r = -0.48");
+    await expect(page.getByTestId("correlation")).toHaveText(`r = ${validation.correlation.toFixed(2)}`);
     await expect(page.getByText(`n = ${validation.n}`, { exact: true })).toBeVisible();
     await expect(page.getByTestId("method")).toHaveText(validation.method);
     const items = page.getByTestId("caveats").locator("li");
