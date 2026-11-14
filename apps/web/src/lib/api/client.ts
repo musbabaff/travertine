@@ -6,6 +6,8 @@ import type { paths } from "./types";
 
 const TIMEOUT_MS = 25_000;
 const FALLBACK_STATUS = new Set([502, 503, 504]);
+/** The contract defines no 404/501, so these mean the engine does not serve this route yet. */
+const NOT_SERVED_STATUS = new Set([404, 501]);
 
 export class ApiRequestError extends Error {
   constructor(
@@ -21,6 +23,8 @@ export class ApiRequestError extends Error {
  * fetch implementation used by the typed client.
  * - No engine configured → serve fixtures.
  * - Engine configured but unreachable (network error, timeout, 502/503/504) → serve fixtures and flag "fallback".
+ * - Engine answers 404/501 (route not built yet) → serve that route's fixture, marked as fixtures in the
+ *   response header only; the app-wide badge keeps reporting the live engine.
  * - Otherwise → the engine's response, including its 4xx errors.
  */
 export function createEngineFetch(base: string | null, report: (s: DataSource) => void = setDataSource) {
@@ -36,6 +40,10 @@ export function createEngineFetch(base: string | null, report: (s: DataSource) =
     try {
       const res = await fetch(input, { signal: AbortSignal.any([input.signal, AbortSignal.timeout(TIMEOUT_MS)]) });
       if (FALLBACK_STATUS.has(res.status)) return fromFixtures("fallback");
+      if (NOT_SERVED_STATUS.has(res.status)) {
+        const mock = mockResponse(input.method, input.url, body);
+        if (mock) return mock;
+      }
       report(res.headers.get(SOURCE_HEADER) === "fixtures" ? "fixtures" : "engine");
       return res;
     } catch (err) {
@@ -54,3 +62,6 @@ export function unwrap<T>(result: { data?: T; error?: unknown; response: Respons
   const e = result.error as { message?: string; code?: string } | undefined;
   throw new ApiRequestError(e?.message ?? `HTTP ${result.response.status}`, result.response.status, e?.code);
 }
+
+/** True when this response came from the contract fixtures rather than the engine. */
+export const isFixtureResponse = (res: Response) => res.headers.get(SOURCE_HEADER) === "fixtures";

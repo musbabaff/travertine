@@ -50,7 +50,7 @@ export function Segmented<T extends string>({
               aria-checked={active}
               tabIndex={active ? 0 : -1}
               onClick={() => onChange(o.value)}
-              className={`min-h-9 flex-1 rounded-[5px] px-3 text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
+              className={`min-h-9 flex-1 whitespace-nowrap rounded-[5px] px-3 text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
                 active ? "bg-surface text-ink shadow-1" : "text-ink-2 hover:text-ink"
               }`}
             >
