@@ -10,6 +10,7 @@ export function shortName(p: Provenance): string {
   const known: [RegExp, string][] = [
     [/POWER/i, "NASA POWER"],
     [/SoilGrids/i, "SoilGrids"],
+    [/HLS|Harmonized Landsat/i, "HLS NDVI"],
     [/MOD13|MODIS/i, "MODIS NDVI"],
     [/VIIRS/i, "VIIRS"],
     [/SMAP/i, "SMAP"],
