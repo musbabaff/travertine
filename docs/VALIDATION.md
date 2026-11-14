@@ -39,9 +39,10 @@ terms.)
 
 **Statistics.** Pearson r between each stress series and the observed anomaly, over the same years. The expected
 sign is negative: more stress, less greenness. 95 % confidence intervals from a paired percentile bootstrap that
-resamples years with replacement, 10,000 resamples, seed 2026. The model "beats" the baseline only if its r is
-more negative and the 95 % interval of the difference r_model − r_baseline lies entirely below zero. If the
-interval contains zero the result is reported as "no detectable difference".
+resamples years with replacement, 10,000 resamples, seed 2026. A difference between the model and the baseline
+counts as established only if the 95 % interval of r_model − r_baseline lies entirely on one side of zero. If the
+interval contains zero the result is reported as "difference not established". (Wording edited on 14 November 2026;
+the rule itself is unchanged.)
 
 **Not done here.** No parameter is tuned to improve agreement. No years are dropped after seeing results.
 
@@ -59,10 +60,10 @@ MOD13Q1 v061. Reproduce with `GET /v1/validation?lat=37.89&lon=28.98`.
 n = 24 years (2002–2025). All 25 MODIS seasons 2001–2025 passed the quality screen; 2001 is outside the model record
 because of the spin-up.
 
-**Verdict under the pre-registered rule: no detectable difference.** Both series correlate with greenness in the
-expected direction and neither interval includes zero. The model's correlation is stronger in this sample, but the
-interval of the difference includes zero, so the data do not show that the water balance beats the plain dryness
-index at this pixel.
+**Verdict under the pre-registered rule: difference not established.** The model's correlation is r = −0.66 and its
+95 % interval excludes zero; so does the baseline's. The model's correlation is the stronger of the two in this
+sample, but the interval of the difference includes zero, so at n = 24 the data cannot separate the water balance
+from the plain dryness index at this pixel.
 
 **Check against the fixture.** Recomputing the baseline over the fixture's years (2001–2024) with the engine's
 daily ET0 gives r = −0.49 (n = 24), against −0.48 in the contract fixture, which used a cruder monthly ET0.
@@ -100,7 +101,45 @@ Per-year values (stress rounded to 3 decimals, anomaly to 2):
 mixed cover rather than a dense crop, and its land use is not known. The result supports using the water balance as
 a dryness signal at this site; it does not validate crop-specific deficits, yields or the rotation ranking.
 
-## 4. Not yet done
+## 4. Protocol — multi-site (fixed before results)
 
-- Field-scale (30 m) history from Harmonized Landsat Sentinel-2.
-- Several sites in contrasting climates; they will be listed in a new protocol section before any is computed.
+Written and committed on 14 November 2026, before any multi-site number was computed. One site with 24 years cannot
+separate the model from the baseline; several sites in contrasting climates can narrow the interval.
+
+**Sites.** Northern-hemisphere areas where rain-fed winter cereals are the main field crop, chosen to span humid to
+semi-arid climates. The coordinates were chosen from general knowledge of these regions, not checked against a land
+cover map, so a pixel may hold other land uses; every site is reported whatever its result.
+
+| Id | Area | Lat | Lon | Climate (Köppen, approximate) |
+|---|---|---|---|---|
+| tr-saraykoy | Sarayköy, Denizli, Türkiye (demo field) | 37.89 | 28.98 | Csa, Mediterranean |
+| tr-cihanbeyli | Cihanbeyli, Konya, Türkiye | 38.65 | 32.93 | BSk, cold semi-arid |
+| tr-polatli | Polatlı, Ankara, Türkiye | 39.58 | 32.15 | BSk, cold semi-arid |
+| ma-settat | Settat, Chaouia, Morocco | 33.00 | −7.62 | Csa/BSh, semi-arid Mediterranean |
+| es-tierra-de-campos | Tierra de Campos, Valladolid, Spain | 41.95 | −4.95 | Csb/BSk, Mediterranean continental |
+| ro-baragan | Bărăgan plain, Călărași, Romania | 44.35 | 27.20 | Dfa/Cfa, humid continental |
+| us-kansas | Great Bend, Kansas, USA | 38.36 | −98.76 | Cfa/BSk, continental |
+| fr-beauce | Beauce, Eure-et-Loir, France | 48.25 | 1.75 | Cfb, oceanic (little water stress expected) |
+
+Southern-hemisphere wheat areas are left out because the crop table's calendar (sowing 15 November) is a
+northern-hemisphere calendar.
+
+**Per site.** Exactly the demo-field protocol of section 2: same years rule, NDVI screen, model (rain-fed winter
+wheat, same parameters and sowing date everywhere, nothing adjusted per site), baseline, Pearson r, paired bootstrap
+with 10,000 resamples and seed 2026. A site with fewer than 8 usable years is reported as "too few years" and left
+out of the pooled statistic.
+
+**Pooled comparison.** The mean over sites of r_model − r_baseline, with a 95 % interval from a stratified paired
+bootstrap: in each of 10,000 resamples (seed 2026) years are drawn with replacement within every site, the same draw
+is used for model and baseline, and the mean difference across sites is recomputed. The mean r of the model and of
+the baseline get intervals the same way. The difference counts as established only if its pooled interval lies
+entirely on one side of zero.
+
+**Fixed in advance.** No site is added, removed or moved after results are seen; no parameter is changed; sites
+where the model or the baseline does poorly are reported like the others. The run is `scripts/validate_sites.py`,
+which writes `docs/validation/multisite.json`.
+
+## 5. Not yet done
+
+- Field-scale (30 m) back-test: the anonymous HLS record starts in 2020, six seasons, too few for a correlation; the
+  full HLS archive from 2013 needs a NASA Earthdata login.
