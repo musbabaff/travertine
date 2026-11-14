@@ -1,5 +1,6 @@
 "use client";
 
+import { SlowHint } from "@/components/ui/slow-hint";
 import { Info } from "lucide-react";
 import type { ReactNode } from "react";
 import { WaterBalanceChart } from "@/components/charts/water-balance-chart";
@@ -44,6 +45,7 @@ export function FieldSummarySkeleton() {
   return (
     <div aria-busy="true" aria-live="polite" className="space-y-5">
       <span className="sr-only">{t("state.loading")}</span>
+      <SlowHint />
       <Skeleton className="h-6 w-40" />
       <div className="grid grid-cols-2 gap-4">
         {Array.from({ length: 4 }, (_, i) => (

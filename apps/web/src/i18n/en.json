@@ -189,8 +189,8 @@
   "evidence.error.title": "Could not load the back-test",
   "evidence.empty.title": "No years to compare",
   "evidence.empty.body": "The back-test returned no years with both a stress value and a vegetation value for this location.",
-  "evidence.baseline.title": "Baseline dryness index, not the Travertine model",
-  "evidence.baseline.body": "The engine does not serve the back-test yet, so this page shows the contract fixture: a simple growing-season dryness index (1 − precipitation ÷ reference evapotranspiration) compared with MODIS NDVI for the demo field. It is a baseline to beat, not the engine's crop water-balance model. This page switches to the engine's own back-test as soon as it serves one.",
+  "evidence.baseline.title": "Demo data: the published back-test for the Denizli demo field",
+  "evidence.baseline.body": "The engine did not provide a back-test for this request, so this page shows the contract fixture: the engine's back-test for the demo field (37.89° N, 28.98° E) as published in docs/VALIDATION.md. It is not computed for the field you selected.",
   "evidence.r.title": "Correlation",
   "evidence.r.value": "r = {r}",
   "evidence.r.none": "0 (none)",
@@ -226,5 +226,6 @@
   "notFound.cta": "Go to the home page",
   "error.title": "Something went wrong",
   "error.body": "The page failed to load. Your field and priorities are still in the address bar.",
-  "error.retry": "Try again"
+  "error.retry": "Try again",
+  "state.slow": "Still working. The engine may need up to a minute to wake up when it has been idle."
 }

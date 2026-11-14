@@ -4,7 +4,8 @@ import { mockResponse, SOURCE_HEADER } from "./mock";
 import { setDataSource, type DataSource } from "./source";
 import type { paths } from "./types";
 
-const TIMEOUT_MS = 25_000;
+/** The engine can need about 90 s to wake from idle and about 40 s for a 5-year search; give it room before falling back. */
+const TIMEOUT_MS = 150_000;
 const FALLBACK_STATUS = new Set([502, 503, 504]);
 /** The contract defines no 404/501, so these mean the engine does not serve this route yet. */
 const NOT_SERVED_STATUS = new Set([404, 501]);
