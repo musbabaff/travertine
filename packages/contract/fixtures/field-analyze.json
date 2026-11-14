@@ -1,0 +1,303 @@
+{
+  "field_id": "fld_denizli_demo",
+  "climate": [
+    {
+      "year": 2001,
+      "precipitation_mm": 753.3,
+      "et0_mm": 1806,
+      "mean_temp_c": 15.32,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2002,
+      "precipitation_mm": 731.3,
+      "et0_mm": 1662.5,
+      "mean_temp_c": 14.09,
+      "root_zone_wetness": 0.57
+    },
+    {
+      "year": 2003,
+      "precipitation_mm": 750.7,
+      "et0_mm": 1702.9,
+      "mean_temp_c": 14.06,
+      "root_zone_wetness": 0.55
+    },
+    {
+      "year": 2004,
+      "precipitation_mm": 516.8,
+      "et0_mm": 1724.2,
+      "mean_temp_c": 14.33,
+      "root_zone_wetness": 0.5
+    },
+    {
+      "year": 2005,
+      "precipitation_mm": 693.2,
+      "et0_mm": 1696.4,
+      "mean_temp_c": 13.97,
+      "root_zone_wetness": 0.49
+    },
+    {
+      "year": 2006,
+      "precipitation_mm": 564,
+      "et0_mm": 1691.4,
+      "mean_temp_c": 14.22,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2007,
+      "precipitation_mm": 565.2,
+      "et0_mm": 1824.2,
+      "mean_temp_c": 15.25,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2008,
+      "precipitation_mm": 376,
+      "et0_mm": 1783.9,
+      "mean_temp_c": 14.89,
+      "root_zone_wetness": 0.47
+    },
+    {
+      "year": 2009,
+      "precipitation_mm": 885.3,
+      "et0_mm": 1663.6,
+      "mean_temp_c": 14.47,
+      "root_zone_wetness": 0.55
+    },
+    {
+      "year": 2010,
+      "precipitation_mm": 733.5,
+      "et0_mm": 1746,
+      "mean_temp_c": 15.66,
+      "root_zone_wetness": 0.53
+    },
+    {
+      "year": 2011,
+      "precipitation_mm": 614.9,
+      "et0_mm": 1679.6,
+      "mean_temp_c": 13.74,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2012,
+      "precipitation_mm": 814.9,
+      "et0_mm": 1732.4,
+      "mean_temp_c": 14.59,
+      "root_zone_wetness": 0.54
+    },
+    {
+      "year": 2013,
+      "precipitation_mm": 574,
+      "et0_mm": 1701.4,
+      "mean_temp_c": 14.46,
+      "root_zone_wetness": 0.53
+    },
+    {
+      "year": 2014,
+      "precipitation_mm": 686.9,
+      "et0_mm": 1739.1,
+      "mean_temp_c": 15.26,
+      "root_zone_wetness": 0.44
+    },
+    {
+      "year": 2015,
+      "precipitation_mm": 725.1,
+      "et0_mm": 1650.7,
+      "mean_temp_c": 14.1,
+      "root_zone_wetness": 0.57
+    },
+    {
+      "year": 2016,
+      "precipitation_mm": 538.5,
+      "et0_mm": 1803.2,
+      "mean_temp_c": 15.08,
+      "root_zone_wetness": 0.45
+    },
+    {
+      "year": 2017,
+      "precipitation_mm": 597,
+      "et0_mm": 1770.6,
+      "mean_temp_c": 14.68,
+      "root_zone_wetness": 0.48
+    },
+    {
+      "year": 2018,
+      "precipitation_mm": 693.6,
+      "et0_mm": 1726.2,
+      "mean_temp_c": 15.8,
+      "root_zone_wetness": 0.48
+    },
+    {
+      "year": 2019,
+      "precipitation_mm": 606.6,
+      "et0_mm": 1748.7,
+      "mean_temp_c": 15.33,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2020,
+      "precipitation_mm": 487.3,
+      "et0_mm": 1783.3,
+      "mean_temp_c": 15.43,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2021,
+      "precipitation_mm": 545,
+      "et0_mm": 1808.8,
+      "mean_temp_c": 15.15,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2022,
+      "precipitation_mm": 561.7,
+      "et0_mm": 1735.3,
+      "mean_temp_c": 14.68,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2023,
+      "precipitation_mm": 725.2,
+      "et0_mm": 1711,
+      "mean_temp_c": 15.57,
+      "root_zone_wetness": 0.48
+    },
+    {
+      "year": 2024,
+      "precipitation_mm": 533.9,
+      "et0_mm": 1837.1,
+      "mean_temp_c": 16.65,
+      "root_zone_wetness": 0.46
+    }
+  ],
+  "soil": {
+    "texture": "clay loam",
+    "organic_carbon": 16,
+    "ph": 6.7,
+    "awc_mm": 139
+  },
+  "ndvi_history": [
+    {
+      "year": 2001,
+      "mean_ndvi": 0.236
+    },
+    {
+      "year": 2002,
+      "mean_ndvi": 0.269
+    },
+    {
+      "year": 2003,
+      "mean_ndvi": 0.276
+    },
+    {
+      "year": 2004,
+      "mean_ndvi": 0.238
+    },
+    {
+      "year": 2005,
+      "mean_ndvi": 0.242
+    },
+    {
+      "year": 2006,
+      "mean_ndvi": 0.297
+    },
+    {
+      "year": 2007,
+      "mean_ndvi": 0.234
+    },
+    {
+      "year": 2008,
+      "mean_ndvi": 0.246
+    },
+    {
+      "year": 2009,
+      "mean_ndvi": 0.294
+    },
+    {
+      "year": 2010,
+      "mean_ndvi": 0.297
+    },
+    {
+      "year": 2011,
+      "mean_ndvi": 0.346
+    },
+    {
+      "year": 2012,
+      "mean_ndvi": 0.278
+    },
+    {
+      "year": 2013,
+      "mean_ndvi": 0.283
+    },
+    {
+      "year": 2014,
+      "mean_ndvi": 0.279
+    },
+    {
+      "year": 2015,
+      "mean_ndvi": 0.34
+    },
+    {
+      "year": 2016,
+      "mean_ndvi": 0.256
+    },
+    {
+      "year": 2017,
+      "mean_ndvi": 0.292
+    },
+    {
+      "year": 2018,
+      "mean_ndvi": 0.303
+    },
+    {
+      "year": 2019,
+      "mean_ndvi": 0.292
+    },
+    {
+      "year": 2020,
+      "mean_ndvi": 0.281
+    },
+    {
+      "year": 2021,
+      "mean_ndvi": 0.253
+    },
+    {
+      "year": 2022,
+      "mean_ndvi": 0.283
+    },
+    {
+      "year": 2023,
+      "mean_ndvi": 0.302
+    },
+    {
+      "year": 2024,
+      "mean_ndvi": 0.274
+    }
+  ],
+  "provenance": [
+    {
+      "dataset": "NASA POWER monthly point data (MERRA-2 and GEWEX SRB derived), AG community",
+      "provider": "NASA Langley Research Center, POWER Project",
+      "spatial_resolution": "0.5° × 0.625°",
+      "temporal_coverage": "2001–2024, monthly",
+      "access_url": "https://power.larc.nasa.gov/docs/services/api/temporal/monthly/",
+      "note": "Parameters PRECTOTCORR_SUM, T2M, T2M_MAX, T2M_MIN, GWETROOT. Annual ET0 is computed by summing monthly Hargreaves–Samani estimates (FAO-56 eq. 52) from POWER temperatures and FAO-56 extraterrestrial radiation; Hargreaves can overestimate ET0 in humid or windy conditions."
+    },
+    {
+      "dataset": "SoilGrids 2.0 (clay, sand, silt, soc, phh2o)",
+      "provider": "ISRIC — World Soil Information",
+      "spatial_resolution": "250 m",
+      "temporal_coverage": "Static, predictions from soil profiles collected over several decades",
+      "access_url": "https://rest.isric.org/soilgrids/v2.0/docs",
+      "note": "Texture, organic carbon and pH are depth-weighted means of 0–30 cm. Available water capacity is the 0–100 cm sum of field capacity minus wilting point from the Saxton & Rawls (2006) pedotransfer functions. SoilGrids 90 % prediction intervals at this point are wide (clay 3–92 %), so soil values are uncertain."
+    },
+    {
+      "dataset": "MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061)",
+      "provider": "NASA LP DAAC, accessed via ORNL DAAC MODIS Web Service",
+      "spatial_resolution": "250 m",
+      "temporal_coverage": "2001–2024, 16-day composites, April–September",
+      "access_url": "https://modis.ornl.gov/data/modis_webservice.html",
+      "note": "Single pixel at the field centre. Growing-season mean of the ten composites starting day-of-year 97 to 241. Quality flags not yet applied."
+    }
+  ]
+}

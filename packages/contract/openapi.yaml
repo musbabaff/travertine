@@ -1,0 +1,351 @@
+openapi: 3.1.0
+info:
+  title: Travertine Engine API
+  version: 1.0.0
+  summary: Crop-rotation decision support scored with Earth observation data.
+  description: |
+    Contract between `apps/web` and `services/engine`. Single source of truth for every field, type and unit.
+    Every response that carries data includes a `provenance` array describing the datasets behind it.
+    Units: millimetres (mm) for water depths, degrees Celsius for temperature, unitless 0–1 for scores and indices.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: http://localhost:8000
+    description: Local engine (default port)
+tags:
+  - name: crops
+    description: Crop catalogue and coefficients.
+  - name: field
+    description: Field-level climate, soil and vegetation history.
+  - name: rotations
+    description: Rotation exploration and scoring.
+  - name: validation
+    description: Back-test of the model against observed vegetation.
+  - name: system
+    description: Service status.
+
+paths:
+  /v1/health:
+    get:
+      tags: [system]
+      operationId: getHealth
+      summary: Service health and version
+      responses:
+        "200":
+          description: Engine is up.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+
+  /v1/crops:
+    get:
+      tags: [crops]
+      operationId: listCrops
+      summary: Crop catalogue with FAO-56 coefficients
+      responses:
+        "200":
+          description: All crops the engine can schedule.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Crop" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/field/analyze:
+    post:
+      tags: [field]
+      operationId: analyzeField
+      summary: Climate, soil and vegetation history for a field
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FieldAnalyzeRequest" }
+      responses:
+        "200":
+          description: Field analysis.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldAnalysis" }
+        "422": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/rotations/explore:
+    post:
+      tags: [rotations]
+      operationId: exploreRotations
+      summary: Ranked rotation strategies under the given priorities
+      description: Provide either `field_id` (from /v1/field/analyze) or `lat` and `lon`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RotationExploreRequest" }
+      responses:
+        "200":
+          description: Rotations sorted by `scores.total`, highest first.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RotationExploreResponse" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/validation:
+    get:
+      tags: [validation]
+      operationId: getValidation
+      summary: Back-test of modelled stress against observed NDVI anomalies
+      parameters:
+        - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
+        - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+      responses:
+        "200":
+          description: Year-by-year back-test.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Validation" }
+        "422": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+components:
+  responses:
+    Error:
+      description: Error.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Latitude: { type: number, minimum: -90, maximum: 90, description: WGS84 latitude in decimal degrees. }
+    Longitude: { type: number, minimum: -180, maximum: 180, description: WGS84 longitude in decimal degrees. }
+    Unit01: { type: number, minimum: 0, maximum: 1 }
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, examples: [invalid_geometry, out_of_coverage, upstream_unavailable] }
+        message: { type: string, description: "Human-readable, English." }
+        details: { type: object, additionalProperties: true }
+
+    Health:
+      type: object
+      required: [status, version]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        version: { type: string, description: Engine semantic version. }
+
+    Provenance:
+      type: object
+      required: [dataset, provider, spatial_resolution, temporal_coverage, access_url, note]
+      properties:
+        dataset: { type: string, description: Dataset name and version. }
+        provider: { type: string }
+        spatial_resolution: { type: string, description: "Human-readable, e.g. 0.5° × 0.625°, 250 m." }
+        temporal_coverage: { type: string, description: "Human-readable, e.g. 2001–2024, monthly." }
+        access_url: { type: string, format: uri }
+        note: { type: string, description: "How it was used, derivations, limitations. Empty string if none." }
+
+    Crop:
+      type: object
+      required: [id, name, family, is_legume, season, growing_days, kc_ini, kc_mid, kc_end, root_depth_m, source]
+      properties:
+        id: { type: string, pattern: "^[a-z0-9_]+$" }
+        name: { type: string, description: English display name. }
+        family: { type: string, description: "Botanical family, e.g. Poaceae." }
+        is_legume: { type: boolean }
+        season: { type: string, enum: [winter, summer, perennial] }
+        growing_days: { type: integer, minimum: 1, description: Total length of the growing period in days. }
+        kc_ini: { type: number, minimum: 0 }
+        kc_mid: { type: number, minimum: 0 }
+        kc_end: { type: number, minimum: 0 }
+        root_depth_m: { type: number, minimum: 0, description: Maximum effective rooting depth (m). }
+        source: { type: string, description: Citation for the coefficients. }
+
+    PolygonGeometry:
+      type: object
+      description: GeoJSON Polygon (RFC 7946), WGS84, counter-clockwise outer ring.
+      required: [type, coordinates]
+      properties:
+        type: { type: string, const: Polygon }
+        coordinates:
+          type: array
+          minItems: 1
+          items:
+            type: array
+            minItems: 4
+            items:
+              type: array
+              minItems: 2
+              maxItems: 3
+              items: { type: number }
+
+    FieldAnalyzeRequest:
+      type: object
+      required: [lat, lon, irrigated]
+      properties:
+        lat: { $ref: "#/components/schemas/Latitude" }
+        lon: { $ref: "#/components/schemas/Longitude" }
+        geometry: { $ref: "#/components/schemas/PolygonGeometry" }
+        irrigated: { type: boolean }
+
+    ClimateYear:
+      type: object
+      required: [year, precipitation_mm, et0_mm, mean_temp_c, root_zone_wetness]
+      properties:
+        year: { type: integer }
+        precipitation_mm: { type: number, minimum: 0, description: Annual total precipitation (mm). }
+        et0_mm: { type: number, minimum: 0, description: Annual reference evapotranspiration (mm). }
+        mean_temp_c: { type: number, description: Annual mean 2 m air temperature (°C). }
+        root_zone_wetness:
+          allOf: [{ $ref: "#/components/schemas/Unit01" }]
+          description: Annual mean root-zone soil wetness, 0 (dry) to 1 (saturated).
+
+    Soil:
+      type: object
+      required: [texture, organic_carbon, ph, awc_mm]
+      properties:
+        texture: { type: string, description: "USDA texture class, e.g. clay loam." }
+        organic_carbon: { type: number, minimum: 0, description: Soil organic carbon in the 0–30 cm layer (g/kg). }
+        ph: { type: number, minimum: 0, maximum: 14, description: "pH in water, 0–30 cm." }
+        awc_mm: { type: number, minimum: 0, description: Plant-available water capacity of the 0–100 cm profile (mm). }
+
+    NdviYear:
+      type: object
+      required: [year, mean_ndvi]
+      properties:
+        year: { type: integer }
+        mean_ndvi: { type: number, minimum: -1, maximum: 1, description: Growing-season (Apr–Sep) mean NDVI. }
+
+    FieldAnalysis:
+      type: object
+      required: [field_id, climate, soil, provenance]
+      properties:
+        field_id: { type: string, description: Opaque id usable in /v1/rotations/explore. }
+        climate:
+          type: array
+          description: One item per year, ascending.
+          items: { $ref: "#/components/schemas/ClimateYear" }
+        soil: { $ref: "#/components/schemas/Soil" }
+        ndvi_history:
+          type: array
+          description: One item per year, ascending. Omitted when no vegetation record is available.
+          items: { $ref: "#/components/schemas/NdviYear" }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
+    Priorities:
+      type: object
+      required: [water, income, soil, risk]
+      description: Relative importance of each objective, 0–1. They need not sum to 1.
+      properties:
+        water: { $ref: "#/components/schemas/Unit01" }
+        income: { $ref: "#/components/schemas/Unit01" }
+        soil: { $ref: "#/components/schemas/Unit01" }
+        risk: { $ref: "#/components/schemas/Unit01" }
+
+    RotationExploreRequest:
+      type: object
+      required: [horizon_years, priorities, irrigated]
+      properties:
+        field_id: { type: string }
+        lat: { $ref: "#/components/schemas/Latitude" }
+        lon: { $ref: "#/components/schemas/Longitude" }
+        horizon_years: { type: integer, enum: [3, 4, 5] }
+        priorities: { $ref: "#/components/schemas/Priorities" }
+        irrigated: { type: boolean }
+        crop_ids:
+          type: array
+          description: Restrict candidates to these crops. Omit for all crops.
+          items: { type: string }
+      anyOf:
+        - required: [field_id]
+        - required: [lat, lon]
+
+    RotationScores:
+      type: object
+      required: [water, income, soil, risk, total]
+      description: All scores 0–1, higher is better. `risk` is high when risk is LOW.
+      properties:
+        water: { $ref: "#/components/schemas/Unit01" }
+        income: { $ref: "#/components/schemas/Unit01" }
+        soil: { $ref: "#/components/schemas/Unit01" }
+        risk: { $ref: "#/components/schemas/Unit01" }
+        total: { $ref: "#/components/schemas/Unit01" }
+
+    RotationYear:
+      type: object
+      required: [year_index, crop_id, water_demand_mm, water_deficit_mm, stress_index]
+      properties:
+        year_index: { type: integer, minimum: 1, description: 1-based year in the rotation. }
+        crop_id: { type: string }
+        water_demand_mm: { type: number, minimum: 0, description: Crop evapotranspiration ETc for the season (mm). }
+        water_deficit_mm:
+          type: number
+          minimum: 0
+          description: Demand not met by effective rainfall and stored soil water (mm); for irrigated fields, the irrigation requirement.
+        stress_index: { $ref: "#/components/schemas/Unit01" }
+
+    Rotation:
+      type: object
+      required: [sequence, scores, yearly, explanation]
+      properties:
+        sequence:
+          type: array
+          description: crop_id per year, length equals horizon_years.
+          items: { type: string }
+        scores: { $ref: "#/components/schemas/RotationScores" }
+        yearly:
+          type: array
+          items: { $ref: "#/components/schemas/RotationYear" }
+        explanation:
+          type: array
+          description: Plain-language English sentences explaining the score.
+          items: { type: string }
+
+    RotationExploreResponse:
+      type: object
+      required: [rotations, provenance]
+      properties:
+        rotations:
+          type: array
+          items: { $ref: "#/components/schemas/Rotation" }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
+    ValidationYear:
+      type: object
+      required: [year, modelled_stress, observed_ndvi_anomaly]
+      properties:
+        year: { type: integer }
+        modelled_stress: { $ref: "#/components/schemas/Unit01" }
+        observed_ndvi_anomaly:
+          type: number
+          description: Standardised anomaly of growing-season mean NDVI (σ, z-score) relative to the record.
+
+    Validation:
+      type: object
+      required: [years, correlation, n, method, caveats, provenance]
+      properties:
+        years:
+          type: array
+          items: { $ref: "#/components/schemas/ValidationYear" }
+        correlation:
+          type: number
+          minimum: -1
+          maximum: 1
+          description: Correlation between modelled_stress and observed_ndvi_anomaly. Negative means more stress, less greenness.
+        n: { type: integer, minimum: 0, description: Number of years used. }
+        method: { type: string, description: "How the back-test was computed, including the correlation type." }
+        caveats:
+          type: array
+          description: Limitations. The UI renders these verbatim.
+          items: { type: string }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }

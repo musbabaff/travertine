@@ -1,0 +1,288 @@
+{
+  "rotations": [
+    {
+      "sequence": [
+        "winter_wheat",
+        "lentil",
+        "sunflower",
+        "barley"
+      ],
+      "scores": {
+        "water": 0.86,
+        "income": 0.38,
+        "soil": 0.75,
+        "risk": 0.86,
+        "total": 0.73
+      },
+      "yearly": [
+        {
+          "year_index": 1,
+          "crop_id": "winter_wheat",
+          "water_demand_mm": 493,
+          "water_deficit_mm": 6,
+          "stress_index": 0.01
+        },
+        {
+          "year_index": 2,
+          "crop_id": "lentil",
+          "water_demand_mm": 253,
+          "water_deficit_mm": 0,
+          "stress_index": 0
+        },
+        {
+          "year_index": 3,
+          "crop_id": "sunflower",
+          "water_demand_mm": 619,
+          "water_deficit_mm": 439,
+          "stress_index": 0.71
+        },
+        {
+          "year_index": 4,
+          "crop_id": "barley",
+          "water_demand_mm": 323,
+          "water_deficit_mm": 0,
+          "stress_index": 0
+        }
+      ],
+      "explanation": [
+        "Estimated water deficit over 4 years: 445 mm under rain-fed conditions, using the 2001–2024 climate at this location.",
+        "Includes 1 legume year (lentil), which fix nitrogen for the following crop.",
+        "No crop is grown in consecutive years, which breaks pest and disease cycles."
+      ]
+    },
+    {
+      "sequence": [
+        "barley",
+        "faba_bean",
+        "winter_wheat",
+        "sunflower"
+      ],
+      "scores": {
+        "water": 0.86,
+        "income": 0.38,
+        "soil": 0.75,
+        "risk": 0.86,
+        "total": 0.73
+      },
+      "yearly": [
+        {
+          "year_index": 1,
+          "crop_id": "barley",
+          "water_demand_mm": 323,
+          "water_deficit_mm": 0,
+          "stress_index": 0
+        },
+        {
+          "year_index": 2,
+          "crop_id": "faba_bean",
+          "water_demand_mm": 270,
+          "water_deficit_mm": 0,
+          "stress_index": 0
+        },
+        {
+          "year_index": 3,
+          "crop_id": "winter_wheat",
+          "water_demand_mm": 493,
+          "water_deficit_mm": 6,
+          "stress_index": 0.01
+        },
+        {
+          "year_index": 4,
+          "crop_id": "sunflower",
+          "water_demand_mm": 619,
+          "water_deficit_mm": 439,
+          "stress_index": 0.71
+        }
+      ],
+      "explanation": [
+        "Estimated water deficit over 4 years: 445 mm under rain-fed conditions, using the 2001–2024 climate at this location.",
+        "Includes 1 legume year (faba bean (dry)), which fix nitrogen for the following crop.",
+        "No crop is grown in consecutive years, which breaks pest and disease cycles."
+      ]
+    },
+    {
+      "sequence": [
+        "winter_wheat",
+        "chickpea",
+        "cotton",
+        "winter_wheat"
+      ],
+      "scores": {
+        "water": 0.73,
+        "income": 0.5,
+        "soil": 0.75,
+        "risk": 0.83,
+        "total": 0.7
+      },
+      "yearly": [
+        {
+          "year_index": 1,
+          "crop_id": "winter_wheat",
+          "water_demand_mm": 493,
+          "water_deficit_mm": 6,
+          "stress_index": 0.01
+        },
+        {
+          "year_index": 2,
+          "crop_id": "chickpea",
+          "water_demand_mm": 240,
+          "water_deficit_mm": 0,
+          "stress_index": 0
+        },
+        {
+          "year_index": 3,
+          "crop_id": "cotton",
+          "water_demand_mm": 1063,
+          "water_deficit_mm": 863,
+          "stress_index": 0.81
+        },
+        {
+          "year_index": 4,
+          "crop_id": "winter_wheat",
+          "water_demand_mm": 493,
+          "water_deficit_mm": 6,
+          "stress_index": 0.01
+        }
+      ],
+      "explanation": [
+        "Estimated water deficit over 4 years: 875 mm under rain-fed conditions, using the 2001–2024 climate at this location.",
+        "Includes 1 legume year (chickpea), which fix nitrogen for the following crop.",
+        "No crop is grown in consecutive years, which breaks pest and disease cycles."
+      ]
+    },
+    {
+      "sequence": [
+        "cotton",
+        "winter_wheat",
+        "chickpea",
+        "maize"
+      ],
+      "scores": {
+        "water": 0.52,
+        "income": 0.62,
+        "soil": 0.75,
+        "risk": 0.68,
+        "total": 0.63
+      },
+      "yearly": [
+        {
+          "year_index": 1,
+          "crop_id": "cotton",
+          "water_demand_mm": 1063,
+          "water_deficit_mm": 863,
+          "stress_index": 0.81
+        },
+        {
+          "year_index": 2,
+          "crop_id": "winter_wheat",
+          "water_demand_mm": 493,
+          "water_deficit_mm": 6,
+          "stress_index": 0.01
+        },
+        {
+          "year_index": 3,
+          "crop_id": "chickpea",
+          "water_demand_mm": 240,
+          "water_deficit_mm": 0,
+          "stress_index": 0
+        },
+        {
+          "year_index": 4,
+          "crop_id": "maize",
+          "water_demand_mm": 842,
+          "water_deficit_mm": 656,
+          "stress_index": 0.78
+        }
+      ],
+      "explanation": [
+        "Estimated water deficit over 4 years: 1525 mm under rain-fed conditions, using the 2001–2024 climate at this location.",
+        "Includes 1 legume year (chickpea), which fix nitrogen for the following crop.",
+        "No crop is grown in consecutive years, which breaks pest and disease cycles."
+      ]
+    },
+    {
+      "sequence": [
+        "maize",
+        "cotton",
+        "maize",
+        "cotton"
+      ],
+      "scores": {
+        "water": 0.05,
+        "income": 0.82,
+        "soil": 0.45,
+        "risk": 0.36,
+        "total": 0.38
+      },
+      "yearly": [
+        {
+          "year_index": 1,
+          "crop_id": "maize",
+          "water_demand_mm": 842,
+          "water_deficit_mm": 656,
+          "stress_index": 0.78
+        },
+        {
+          "year_index": 2,
+          "crop_id": "cotton",
+          "water_demand_mm": 1063,
+          "water_deficit_mm": 863,
+          "stress_index": 0.81
+        },
+        {
+          "year_index": 3,
+          "crop_id": "maize",
+          "water_demand_mm": 842,
+          "water_deficit_mm": 656,
+          "stress_index": 0.78
+        },
+        {
+          "year_index": 4,
+          "crop_id": "cotton",
+          "water_demand_mm": 1063,
+          "water_deficit_mm": 863,
+          "stress_index": 0.81
+        }
+      ],
+      "explanation": [
+        "Estimated water deficit over 4 years: 3038 mm under rain-fed conditions, using the 2001–2024 climate at this location.",
+        "Includes no legume, so nitrogen must come from fertiliser in every year.",
+        "No crop is grown in consecutive years, which breaks pest and disease cycles."
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "dataset": "NASA POWER monthly point data (MERRA-2 and GEWEX SRB derived), AG community",
+      "provider": "NASA Langley Research Center, POWER Project",
+      "spatial_resolution": "0.5° × 0.625°",
+      "temporal_coverage": "2001–2024, monthly",
+      "access_url": "https://power.larc.nasa.gov/docs/services/api/temporal/monthly/",
+      "note": "Parameters PRECTOTCORR_SUM, T2M, T2M_MAX, T2M_MIN, GWETROOT. Annual ET0 is computed by summing monthly Hargreaves–Samani estimates (FAO-56 eq. 52) from POWER temperatures and FAO-56 extraterrestrial radiation; Hargreaves can overestimate ET0 in humid or windy conditions."
+    },
+    {
+      "dataset": "SoilGrids 2.0 (clay, sand, silt, soc, phh2o)",
+      "provider": "ISRIC — World Soil Information",
+      "spatial_resolution": "250 m",
+      "temporal_coverage": "Static, predictions from soil profiles collected over several decades",
+      "access_url": "https://rest.isric.org/soilgrids/v2.0/docs",
+      "note": "Texture, organic carbon and pH are depth-weighted means of 0–30 cm. Available water capacity is the 0–100 cm sum of field capacity minus wilting point from the Saxton & Rawls (2006) pedotransfer functions. SoilGrids 90 % prediction intervals at this point are wide (clay 3–92 %), so soil values are uncertain."
+    },
+    {
+      "dataset": "FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
+      "provider": "Food and Agriculture Organization of the United Nations",
+      "spatial_resolution": "Not spatial (crop coefficients)",
+      "temporal_coverage": "Published 1998",
+      "access_url": "https://www.fao.org/4/x0490e/x0490e00.htm",
+      "note": "Crop coefficients (Table 12) and rooting depths (Table 22)."
+    },
+    {
+      "dataset": "Travertine fixture rotation scoring (illustrative)",
+      "provider": "Travertine project",
+      "spatial_resolution": "Field",
+      "temporal_coverage": "2001–2024 climatology",
+      "access_url": "https://github.com/musbabaff/travertine/blob/main/packages/contract/scripts/build-fixtures.mjs",
+      "note": "Fixture only: rotation scores and yearly water figures were produced by a simplified script (mean-climate Kc-weighted demand, 80 % effective rainfall, half of root-zone AWC available, heuristic soil/income/risk scores), not by the Travertine engine. Replace with engine output."
+    }
+  ]
+}

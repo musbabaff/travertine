@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* Travertine design tokens — see .claude/skills/design-system/SKILL.md. Do not edit values without re-measuring contrast. */
+:root {
+  --color-canvas: #f5f1e8;
+  --color-surface: #fbf9f5;
+  --color-sunken: #ede7db;
+  --color-border: #d8cebb;
+  --color-border-strong: #8c7f68;
+  --color-ink: #0f1b2d;
+  --color-ink-2: #5c5446;
+  --color-ink-muted: #6b6252;
+  --color-teal-700: #13615f;
+  --color-teal-600: #1b7774;
+  --color-teal-500: #2a9490;
+  --color-teal-100: #d6ece9;
+  --color-accent: #a84b14;
+  --color-danger: #a63d32;
+  --color-warning: #8a5a00;
+  --color-warning-bg: #f6ebd3;
+  --color-navy-900: #0f1b2d;
+
+  --viz-water: #0072b2;
+  --viz-income: #b87800;
+  --viz-soil: #007a5a;
+  --viz-risk: #c1480a;
+  --viz-model: #13615f;
+  --viz-observed: #0f1b2d;
+  --viz-neutral: #8c7f68;
+  --viz-grid: #e2dacb;
+
+  --shadow-1: 0 1px 2px rgb(15 27 45 / 0.06), 0 1px 1px rgb(15 27 45 / 0.04);
+  --shadow-2: 0 4px 12px rgb(15 27 45 / 0.08), 0 1px 3px rgb(15 27 45 / 0.06);
+  --shadow-3: 0 12px 32px rgb(15 27 45 / 0.14);
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+}
+
+@theme inline {
+  --color-canvas: var(--color-canvas);
+  --color-surface: var(--color-surface);
+  --color-sunken: var(--color-sunken);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-ink: var(--color-ink);
+  --color-ink-2: var(--color-ink-2);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-teal-700: var(--color-teal-700);
+  --color-teal-600: var(--color-teal-600);
+  --color-teal-500: var(--color-teal-500);
+  --color-teal-100: var(--color-teal-100);
+  --color-accent: var(--color-accent);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+  --color-warning-bg: var(--color-warning-bg);
+
+  --font-sans: var(--font-plex);
+
+  --text-display: 3rem;
+  --text-display--line-height: 3.25rem;
+  --text-h1: 2rem;
+  --text-h1--line-height: 2.375rem;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.875rem;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.5rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-1: var(--shadow-1);
+  --shadow-2: var(--shadow-2);
+  --shadow-3: var(--shadow-3);
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-plex), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-teal-700);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

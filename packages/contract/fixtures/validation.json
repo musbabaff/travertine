@@ -1,0 +1,151 @@
+{
+  "years": [
+    {
+      "year": 2001,
+      "modelled_stress": 0.863,
+      "observed_ndvi_anomaly": -1.45
+    },
+    {
+      "year": 2002,
+      "modelled_stress": 0.808,
+      "observed_ndvi_anomaly": -0.33
+    },
+    {
+      "year": 2003,
+      "modelled_stress": 0.854,
+      "observed_ndvi_anomaly": -0.09
+    },
+    {
+      "year": 2004,
+      "modelled_stress": 0.899,
+      "observed_ndvi_anomaly": -1.39
+    },
+    {
+      "year": 2005,
+      "modelled_stress": 0.861,
+      "observed_ndvi_anomaly": -1.25
+    },
+    {
+      "year": 2006,
+      "modelled_stress": 0.893,
+      "observed_ndvi_anomaly": 0.62
+    },
+    {
+      "year": 2007,
+      "modelled_stress": 0.949,
+      "observed_ndvi_anomaly": -1.52
+    },
+    {
+      "year": 2008,
+      "modelled_stress": 0.925,
+      "observed_ndvi_anomaly": -1.11
+    },
+    {
+      "year": 2009,
+      "modelled_stress": 0.88,
+      "observed_ndvi_anomaly": 0.52
+    },
+    {
+      "year": 2010,
+      "modelled_stress": 0.854,
+      "observed_ndvi_anomaly": 0.62
+    },
+    {
+      "year": 2011,
+      "modelled_stress": 0.851,
+      "observed_ndvi_anomaly": 2.28
+    },
+    {
+      "year": 2012,
+      "modelled_stress": 0.874,
+      "observed_ndvi_anomaly": -0.03
+    },
+    {
+      "year": 2013,
+      "modelled_stress": 0.9,
+      "observed_ndvi_anomaly": 0.14
+    },
+    {
+      "year": 2014,
+      "modelled_stress": 0.81,
+      "observed_ndvi_anomaly": 0.01
+    },
+    {
+      "year": 2015,
+      "modelled_stress": 0.817,
+      "observed_ndvi_anomaly": 2.08
+    },
+    {
+      "year": 2016,
+      "modelled_stress": 0.876,
+      "observed_ndvi_anomaly": -0.77
+    },
+    {
+      "year": 2017,
+      "modelled_stress": 0.888,
+      "observed_ndvi_anomaly": 0.45
+    },
+    {
+      "year": 2018,
+      "modelled_stress": 0.826,
+      "observed_ndvi_anomaly": 0.82
+    },
+    {
+      "year": 2019,
+      "modelled_stress": 0.89,
+      "observed_ndvi_anomaly": 0.45
+    },
+    {
+      "year": 2020,
+      "modelled_stress": 0.884,
+      "observed_ndvi_anomaly": 0.08
+    },
+    {
+      "year": 2021,
+      "modelled_stress": 0.959,
+      "observed_ndvi_anomaly": -0.88
+    },
+    {
+      "year": 2022,
+      "modelled_stress": 0.9,
+      "observed_ndvi_anomaly": 0.14
+    },
+    {
+      "year": 2023,
+      "modelled_stress": 0.738,
+      "observed_ndvi_anomaly": 0.79
+    },
+    {
+      "year": 2024,
+      "modelled_stress": 0.913,
+      "observed_ndvi_anomaly": -0.16
+    }
+  ],
+  "correlation": -0.47,
+  "n": 24,
+  "method": "Pearson correlation between a growing-season (April–September) climatic water-deficit proxy, 1 − P/ET0 from NASA POWER, and the standardised anomaly of growing-season mean MODIS NDVI at the field centre pixel, one value per year.",
+  "caveats": [
+    "Fixture only: the stress series is a simple climatic proxy, not the Travertine engine's crop water-balance model.",
+    "NDVI comes from a single 250 m pixel without cloud or quality filtering; it may mix several fields and land uses.",
+    "Irrigation is not represented: irrigated fields can stay green in dry years, which weakens the relationship.",
+    "24 years is a small sample; the correlation is uncertain and shows association, not causation."
+  ],
+  "provenance": [
+    {
+      "dataset": "NASA POWER monthly point data (MERRA-2 and GEWEX SRB derived), AG community",
+      "provider": "NASA Langley Research Center, POWER Project",
+      "spatial_resolution": "0.5° × 0.625°",
+      "temporal_coverage": "2001–2024, monthly",
+      "access_url": "https://power.larc.nasa.gov/docs/services/api/temporal/monthly/",
+      "note": "Parameters PRECTOTCORR_SUM, T2M, T2M_MAX, T2M_MIN, GWETROOT. Annual ET0 is computed by summing monthly Hargreaves–Samani estimates (FAO-56 eq. 52) from POWER temperatures and FAO-56 extraterrestrial radiation; Hargreaves can overestimate ET0 in humid or windy conditions."
+    },
+    {
+      "dataset": "MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061)",
+      "provider": "NASA LP DAAC, accessed via ORNL DAAC MODIS Web Service",
+      "spatial_resolution": "250 m",
+      "temporal_coverage": "2001–2024, 16-day composites, April–September",
+      "access_url": "https://modis.ornl.gov/data/modis_webservice.html",
+      "note": "Single pixel at the field centre. Growing-season mean of the ten composites starting day-of-year 97 to 241. Quality flags not yet applied."
+    }
+  ]
+}

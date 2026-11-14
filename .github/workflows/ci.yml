@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web and contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Contract lint
+        run: pnpm contract:lint
+      - name: Generated types are up to date
+        run: |
+          pnpm contract:gen
+          git diff --exit-code packages/contract/src/schema.d.ts
+      - name: Palette contrast
+        run: node .claude/skills/data-viz/check-palette.mjs
+      - name: Lint
+        run: pnpm lint
+      - name: Type-check
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Build web
+        run: pnpm build
+
+  engine:
+    name: Engine tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: detect
+        name: Detect engine project
+        run: |
+          if [ -f services/engine/pyproject.toml ]; then echo "kind=python" >> "$GITHUB_OUTPUT";
+          elif [ -f services/engine/package.json ]; then echo "kind=node" >> "$GITHUB_OUTPUT";
+          else echo "kind=none" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.detect.outputs.kind == 'none'
+        run: echo "No engine project yet; skipping."
+      - if: steps.detect.outputs.kind == 'python'
+        uses: astral-sh/setup-uv@v6
+      - if: steps.detect.outputs.kind == 'python'
+        working-directory: services/engine
+        run: |
+          uv sync --all-extras --dev
+          uv run pytest
+      - if: steps.detect.outputs.kind == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - if: steps.detect.outputs.kind == 'node'
+        working-directory: services/engine
+        run: |
+          npm ci
+          npm test

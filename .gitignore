@@ -1,0 +1,55 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+apps/web/screenshots/
+
+# env and secrets — only .env.example is committed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# python (services/engine)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# data caches (never commit raw downloads)
+data/cache/
+*.nc
+*.tif
+*.h5
+
+# os / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# deployment
+.vercel
+
+# local Claude Code state
+.claude/settings.local.json

@@ -1,0 +1,29 @@
+{
+  "name": "@travertine/contract",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Travertine API contract: OpenAPI spec, fixtures and generated TypeScript types.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./schema": "./src/schema.d.ts",
+    "./fixtures/*": "./fixtures/*",
+    "./openapi.yaml": "./openapi.yaml"
+  },
+  "scripts": {
+    "lint": "redocly lint openapi.yaml --config redocly.yaml",
+    "gen": "openapi-typescript openapi.yaml -o src/schema.d.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@redocly/cli": "2.78.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "openapi-typescript": "7.13.0",
+    "vitest": "5.1.0",
+    "@types/node": "^24",
+    "typescript": "^5",
+    "yaml": "^2.8.1"
+  }
+}
