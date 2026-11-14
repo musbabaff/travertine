@@ -11,6 +11,7 @@ import { FIXTURE_LOCATION } from "@/lib/api/mock";
 import { useDataSource } from "@/lib/api/source";
 import type { FieldAnalysis } from "@/lib/api/types";
 import { distanceKm } from "@/lib/geo";
+import { NdviCompare } from "./ndvi-compare";
 import type { FieldState } from "@/lib/url-state";
 
 const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -122,8 +123,8 @@ export function FieldSummary({ data, field }: { data: FieldAnalysis; field: Fiel
         </dl>
       </Section>
 
-      {ndvi.length > 0 && ndviMin && ndviMax && (
-        <Section title={t("summary.ndvi")} sources={<ProvenanceChips items={ndviSrc} />}>
+      <Section title={t("summary.ndvi")} sources={ndvi.length > 0 ? <ProvenanceChips items={ndviSrc} /> : undefined}>
+        {ndvi.length > 0 && ndviMin && ndviMax ? (
           <dl>
             <Stat
               label={t("summary.ndvi.mean")}
@@ -131,8 +132,11 @@ export function FieldSummary({ data, field }: { data: FieldAnalysis; field: Fiel
               hint={t("summary.ndvi.range", { minYear: ndviMin.year, min: n(ndviMin.mean_ndvi, 2), maxYear: ndviMax.year, max: n(ndviMax.mean_ndvi, 2) })}
             />
           </dl>
-        </Section>
-      )}
+        ) : (
+          <p className="text-sm text-ink-2">{t("summary.ndvi.missing")}</p>
+        )}
+        <NdviCompare field={field} modis={ndvi} />
+      </Section>
       {/* "Changing conditions" panel slots in here once the contract carries climate trend statistics. */}
     </div>
   );

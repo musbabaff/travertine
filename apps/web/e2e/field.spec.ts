@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import ndvi30 from "../../../packages/contract/fixtures/field-ndvi.json";
 import { DEMO_QUERY, fakeEngine } from "./engine";
 
 test.describe("Field screen", () => {
@@ -15,6 +16,15 @@ test.describe("Field screen", () => {
     await expect(page.getByText("Climate at a glance")).toBeVisible();
     await expect(page.getByText("Clay loam")).toBeVisible();
     await expect(page.getByText("Live engine")).toBeVisible();
+  });
+
+  test("shows 30 m NDVI beside the 250 m record", async ({ page }) => {
+    await fakeEngine(page);
+    await page.goto(`/app?${DEMO_QUERY}`);
+    const box = page.getByTestId("ndvi30");
+    await expect(box).toContainText("30 m HLS");
+    await expect(box.locator("tbody tr")).toHaveCount(ndvi30.seasons.length);
+    await expect(box).toContainText(ndvi30.caveats[0]);
   });
 
   test("restores the field from a shared URL and toggles irrigation", async ({ page }) => {

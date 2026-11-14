@@ -23,6 +23,16 @@ test.describe("Evidence screen", () => {
     await expect(page.getByTestId("baseline-note")).toHaveCount(0);
   });
 
+  test("compares the model with the baseline, both intervals and the verdict", async ({ page }) => {
+    await fakeEngine(page);
+    await page.goto(`/app/evidence?${DEMO_QUERY}`);
+    const box = page.getByTestId("model-vs-baseline");
+    await expect(box).toContainText(validation.baseline!.name);
+    await expect(box).toContainText(`95 % interval ${validation.correlation_ci95![0].toFixed(2)} to ${validation.correlation_ci95![1].toFixed(2)}`);
+    await expect(box).toContainText(`95 % interval ${validation.baseline!.correlation_ci95[0].toFixed(2)} to ${validation.baseline!.correlation_ci95[1].toFixed(2)}`);
+    await expect(page.getByTestId("verdict")).toContainText("No detectable difference between the model and the baseline: the interval of the difference includes 0.");
+  });
+
   test("labels the fixture as demo data when the engine does not serve validation", async ({ page }) => {
     await fakeEngine(page, "partial");
     await page.goto(`/app/evidence?${DEMO_QUERY}`);
