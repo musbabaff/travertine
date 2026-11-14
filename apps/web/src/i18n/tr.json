@@ -227,5 +227,5 @@
   "error.title": "Bir sorun oluştu",
   "error.body": "Sayfa yüklenemedi. Tarlanız ve öncelikleriniz adres çubuğunda duruyor.",
   "error.retry": "Yeniden dene",
-  "state.slow": "Hâlâ çalışıyor. Motor bir süre boşta kaldıysa uyanması bir dakikayı bulabilir."
+  "state.slow": "Hâlâ çalışıyor. Yeni bir konumun ilk analizi 25 yıllık günlük iklim verisini indirir ve birkaç dakika sürebilir; motorun uyanması da bir dakikayı bulabilir. Sonraki ziyaretler daha hızlıdır."
 }
