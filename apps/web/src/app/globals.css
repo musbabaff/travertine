@@ -3,35 +3,41 @@
 /* Travertine design tokens — see .claude/skills/design-system/SKILL.md. Do not edit values without re-measuring contrast. */
 :root {
   --color-canvas: #f5f1e8;
-  --color-surface: #fbf9f5;
+  --color-surface: #faf7f2; /* brand off-white, sampled from the logo */
   --color-sunken: #ede7db;
   --color-border: #d8cebb;
   --color-border-strong: #8c7f68;
-  --color-ink: #0f1b2d;
+  --color-ink: #061832; /* brand navy, sampled from the logo wordmark */
   --color-ink-2: #5c5446;
   --color-ink-muted: #6b6252;
-  --color-teal-700: #13615f;
-  --color-teal-600: #1b7774;
-  --color-teal-500: #2a9490;
-  --color-teal-100: #d6ece9;
+  --color-teal-700: #1f666b; /* brand hue 183°, darkened for text and buttons (AA) */
+  --color-teal-600: #24767b;
+  --color-teal-500: #2e989e;
+  --color-teal-100: #dceff0;
   --color-accent: #a84b14;
   --color-danger: #a63d32;
   --color-warning: #8a5a00;
   --color-warning-bg: #f6ebd3;
-  --color-navy-900: #0f1b2d;
+  --color-navy-900: #061832;
+
+  /* Brand colours sampled from docs/brand/original/travertine-logo-original.png. brand-teal is for the mark only:
+     it is 2.36:1 on the off-white and must never carry text. */
+  --color-brand-teal: #5cb0b5;
+  --color-brand-navy: #061832;
+  --color-brand-paper: #faf7f2;
 
   --viz-water: #0072b2;
   --viz-income: #b87800;
   --viz-soil: #007a5a;
   --viz-risk: #c1480a;
-  --viz-model: #13615f;
-  --viz-observed: #0f1b2d;
+  --viz-model: #1f666b;
+  --viz-observed: #061832;
   --viz-neutral: #8c7f68;
   --viz-grid: #e2dacb;
 
-  --shadow-1: 0 1px 2px rgb(15 27 45 / 0.06), 0 1px 1px rgb(15 27 45 / 0.04);
-  --shadow-2: 0 4px 12px rgb(15 27 45 / 0.08), 0 1px 3px rgb(15 27 45 / 0.06);
-  --shadow-3: 0 12px 32px rgb(15 27 45 / 0.14);
+  --shadow-1: 0 1px 2px rgb(6 24 50 / 0.06), 0 1px 1px rgb(6 24 50 / 0.04);
+  --shadow-2: 0 4px 12px rgb(6 24 50 / 0.08), 0 1px 3px rgb(6 24 50 / 0.06);
+  --shadow-3: 0 12px 32px rgb(6 24 50 / 0.14);
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -57,6 +63,8 @@
   --color-danger: var(--color-danger);
   --color-warning: var(--color-warning);
   --color-warning-bg: var(--color-warning-bg);
+  --color-brand-teal: var(--color-brand-teal);
+  --color-brand-paper: var(--color-brand-paper);
 
   --font-sans: var(--font-plex);
 

@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from travertine_engine import __version__
-from travertine_engine.cache import DiskCache
+from travertine_engine.cache import DiskCache, load_snapshot
 from travertine_engine.config import Settings
 from travertine_engine.errors import EngineError, RateLimited
 from travertine_engine.explore import ExploreService
@@ -47,6 +47,18 @@ ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
 }
 
 
+def attach_services(app: FastAPI, settings: Settings, client: Upstream) -> int:
+    """Build the services on app.state; returns how many snapshot entries were copied into the cache."""
+    cache = DiskCache(settings.cache_dir)
+    loaded = load_snapshot(cache, settings.snapshot_dir) if settings.snapshot_dir else 0
+    app.state.fields = FieldService(settings, client, cache)
+    app.state.explore = ExploreService(app.state.fields)
+    app.state.validation = ValidationService(app.state.explore)
+    app.state.field_ndvi = FieldNdviService(app.state.fields)
+    load_crops()
+    return loaded
+
+
 def create_app(settings: Settings | None = None, upstream: Upstream | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     configure_logging(settings.log_level)
@@ -56,12 +68,15 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
         client = upstream or Upstream(
             timeout_s=settings.upstream_timeout_s, retries=settings.upstream_retries
         )
-        app.state.fields = FieldService(settings, client, DiskCache(settings.cache_dir))
-        app.state.explore = ExploreService(app.state.fields)
-        app.state.validation = ValidationService(app.state.explore)
-        app.state.field_ndvi = FieldNdviService(app.state.fields)
-        load_crops()
-        log.info("engine started", extra={"version": __version__, "cache_dir": str(settings.cache_dir)})
+        loaded = attach_services(app, settings, client)
+        log.info(
+            "engine started",
+            extra={
+                "version": __version__,
+                "cache_dir": str(settings.cache_dir),
+                "snapshot_entries_loaded": loaded,
+            },
+        )
         yield
         await client.aclose()
 

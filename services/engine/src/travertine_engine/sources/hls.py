@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Any
 
-from travertine_engine.cache import DiskCache
+from travertine_engine.cache import DiskCache, request_url
 from travertine_engine.errors import UpstreamUnavailable
 from travertine_engine.upstream import Upstream
 
@@ -126,7 +126,17 @@ async def _year(
             rows.extend(r for r in await asyncio.gather(*(one(i, d) for i, d in scenes)) if r is not None)
         raw = sorted(rows)
         if year < datetime.now(UTC).year:  # the current year keeps growing
-            cache.put(key, raw)
+            cache.put(
+                key,
+                raw,
+                url=request_url(
+                    SEARCH_URL,
+                    {
+                        "bbox": f"{lon:.5f},{lat:.5f},{lon:.5f},{lat:.5f}",
+                        "datetime": f"{year}-01-01/{year}-12-31",
+                    },
+                ),
+            )
     return [
         Observation(day=date.fromisoformat(d), sensor=s, red=r, nir=n, fmask=int(m)) for d, s, r, n, m in raw
     ]

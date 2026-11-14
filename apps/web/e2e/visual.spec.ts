@@ -23,6 +23,19 @@ interface State {
 const alert = (p: Page) => expect(p.getByRole("main").getByRole("alert")).toBeVisible();
 
 const ROUTES: Record<string, { path: string; settle: number; states: State[] }> = {
+  home: {
+    path: "/",
+    settle: 300,
+    states: [
+      { name: "default", mode: "ok", query: "", ready: (p) => expect(p.getByRole("img", { name: "Travertine" }).first()).toBeVisible() },
+      { name: "tr", mode: "ok", query: "", locale: "tr", ready: (p) => expect(p.getByText("Kaynak kodu")).toBeVisible() },
+    ],
+  },
+  "not-found": {
+    path: "/no-such-page",
+    settle: 300,
+    states: [{ name: "default", mode: "ok", query: "", ready: (p) => expect(p.getByText("Page not found")).toBeVisible() }],
+  },
   field: {
     path: "/app",
     settle: 3000, // camera move + tiles

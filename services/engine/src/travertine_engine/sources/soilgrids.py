@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from travertine_engine.cache import DiskCache
+from travertine_engine.cache import DiskCache, request_url
 from travertine_engine.science.soil import SoilLayer
 from travertine_engine.upstream import Upstream
 
@@ -40,7 +40,7 @@ async def fetch_soilgrids(upstream: Upstream, cache: DiskCache, lat: float, lon:
     raw = cache.get(key)
     if raw is None:
         raw = await upstream.get_json("ISRIC SoilGrids", SOILGRIDS_URL, params)
-        cache.put(key, raw)
+        cache.put(key, raw, url=request_url(SOILGRIDS_URL, params))
     return parse_soilgrids(raw)
 
 

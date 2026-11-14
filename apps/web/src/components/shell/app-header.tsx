@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useI18n, type MessageKey } from "@/i18n";
 import { Segmented } from "@/components/ui/segmented";
-import { LogoMark } from "./logo";
+import { BrandLockup } from "@/components/brand/logo";
 import { SourceBadge } from "./source-badge";
 
 /** Tabs are added here as each screen ships. */
@@ -23,9 +23,8 @@ export function AppHeader() {
   return (
     <header className="relative z-20 border-b border-border bg-surface">
       <div className="flex flex-wrap items-center gap-x-3 px-4 sm:h-14 sm:flex-nowrap md:gap-x-6 md:px-6 xl:px-8">
-        <Link href="/" className="flex h-14 shrink-0 items-center gap-2 rounded-sm text-ink">
-          <LogoMark />
-          <span className="text-h3 font-semibold tracking-[-0.01em]">{t("app.name")}</span>
+        <Link href="/" aria-label={t("nav.home")} className="flex h-14 shrink-0 items-center rounded-sm">
+          <BrandLockup className="h-6 sm:h-7" />
         </Link>
         <nav aria-label={t("nav.label")} className="order-last -mx-4 flex h-11 w-[calc(100%+2rem)] border-t border-border px-2 sm:order-none sm:mx-0 sm:h-full sm:w-auto sm:border-t-0 sm:px-0">
           <ul className="flex h-full items-stretch gap-1 overflow-x-auto">

@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/brand/travertine-logo-stacked.svg" alt="Travertine" width="280"></p>
+
 # Travertine
 
 **Crop-rotation decision support built on Earth observation data.**

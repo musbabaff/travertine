@@ -27,12 +27,14 @@ const SATELLITE_STYLE: StyleSpecification = {
   layers: [{ id: "s2", type: "raster", source: "s2" }],
 };
 
-// MapLibre paint cannot read CSS variables; these mirror the design tokens.
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
-const TEAL_700 = "#13615f";
-const TEAL_500 = "#2a9490";
-const SURFACE = "#fbf9f5";
+// MapLibre paint cannot read CSS variables, so the resolved token values are read once on the client.
+const token = (name: string, fallback: string) =>
+  (typeof window !== "undefined" && getComputedStyle(document.documentElement).getPropertyValue(name).trim()) || fallback;
+const TEAL_700 = token("--color-teal-700", "#1f666b");
+const TEAL_500 = token("--color-teal-500", "#2e989e");
+const SURFACE = token("--color-surface", "#faf7f2");
 
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
