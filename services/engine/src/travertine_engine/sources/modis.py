@@ -7,7 +7,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Any
 
-from travertine_engine.cache import DiskCache
+from travertine_engine.cache import DiskCache, request_url
 from travertine_engine.errors import UpstreamUnavailable
 from travertine_engine.upstream import Upstream
 
@@ -31,8 +31,8 @@ class Composite:
     reliability: int  # 0 good, 1 marginal, 2 snow/ice, 3 cloudy, -1 fill
 
 
-async def _band(upstream: Upstream, lat: float, lon: float, year: int, band: str) -> dict[int, int]:
-    params = {
+def _params(lat: float, lon: float, year: int, band: str) -> dict[str, Any]:
+    return {
         "latitude": f"{lat:.4f}",
         "longitude": f"{lon:.4f}",
         "band": band,
@@ -41,7 +41,10 @@ async def _band(upstream: Upstream, lat: float, lon: float, year: int, band: str
         "kmAboveBelow": 0,
         "kmLeftRight": 0,
     }
-    raw = await upstream.get_json("MODIS (ORNL DAAC)", SUBSET_URL, params)
+
+
+async def _band(upstream: Upstream, lat: float, lon: float, year: int, band: str) -> dict[int, int]:
+    raw = await upstream.get_json("MODIS (ORNL DAAC)", SUBSET_URL, _params(lat, lon, year, band))
     if not isinstance(raw, dict) or not isinstance(raw.get("subset"), list):
         raise UpstreamUnavailable("MODIS web service returned an unexpected payload.", details={"year": year})
     out: dict[int, int] = {}
@@ -62,7 +65,8 @@ async def _season(upstream: Upstream, cache: DiskCache, lat: float, lon: float, 
         )
         raw = [[doy, ndvi[doy], rel.get(doy, -1)] for doy in sorted(ndvi)]
         if len(raw) == SEASON_COMPOSITES:  # a season still being processed is fetched again next time
-            cache.put(key, raw)
+            # The NDVI request stands for both: the reliability band is the same query with another band name.
+            cache.put(key, raw, url=request_url(SUBSET_URL, _params(lat, lon, year, NDVI_BAND)))
     return [
         Composite(doy=int(d), ndvi=None if v == NDVI_FILL else v * NDVI_SCALE, reliability=int(r))
         for d, v, r in raw
