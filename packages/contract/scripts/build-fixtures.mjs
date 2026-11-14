@@ -3,9 +3,12 @@
 //   power.json  NASA POWER monthly point API, AG community, PRECTOTCORR_SUM,T2M,T2M_MAX,T2M_MIN,GWETROOT
 //   soil.json   ISRIC SoilGrids v2.0 properties query: clay,sand,silt,soc,phh2o, 0–100 cm, mean
 //   ndvi.json   ORNL DAAC MODIS subset API, MOD13Q1 250m_16_days_NDVI, DOY 097–241 per year
+//   crops.engine.json  GET /v1/crops from services/engine (FAO-56 values with per-crop citations)
+//   field.engine.json  POST /v1/field/analyze from services/engine with fixtures/field-analyze.request.json
 // Usage: node packages/contract/scripts/build-fixtures.mjs <raw-dir>
 //
 // Derived quantities and how they are computed are recorded in each provenance `note`.
+// crops.json and the climate, soil, field_id and provenance of field-analyze.json are engine output verbatim.
 // Model outputs (rotation scores, modelled stress) are NOT produced by the engine yet; see the notes.
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -45,16 +48,21 @@ const monthly = (y) =>
     return { m: m + 1, p: power.PRECTOTCORR_SUM[k], et0, t: power.T2M[k], w: power.GWETROOT[k] };
   });
 
-const climate = YEARS.map((year) => {
-  const ms = monthly(year);
-  return {
-    year,
-    precipitation_mm: r(ms.reduce((a, x) => a + x.p, 0)),
-    et0_mm: r(ms.reduce((a, x) => a + x.et0, 0)),
-    mean_temp_c: r(power.T2M[`${year}13`], 2),
-    root_zone_wetness: r(power.GWETROOT[`${year}13`], 2),
-  };
-});
+// ---------- engine output ----------
+const engineField = load("field.engine.json");
+const engineCrops = load("crops.engine.json");
+const climate = engineField.climate;
+const pmByYear = Object.fromEntries(climate.map((c) => [c.year, c.et0_mm]));
+
+// Monthly ET0 for the illustrative proxies below: the Hargreaves seasonal shape from POWER monthly
+// temperatures, rescaled so each year's total equals the engine's FAO-56 Penman-Monteith annual ET0.
+// (POWER monthly T2M_MAX/T2M_MIN are monthly extremes, so unscaled Hargreaves overstates ET0.)
+const monthlyScaled = (y) => {
+  const ms = monthly(y);
+  const total = ms.reduce((a, x) => a + x.et0, 0);
+  const k = pmByYear[y] / total;
+  return ms.map((x) => ({ ...x, et0: x.et0 * k }));
+};
 
 // ---------- soil (SoilGrids + Saxton & Rawls 2006) ----------
 const layers = Object.fromEntries(
@@ -93,12 +101,9 @@ function awcLayerMm(sandPct, clayPct, socGkg, thicknessCm) {
 }
 const awc = layers.clay.reduce((a, d, i) => a + awcLayerMm(layers.sand[i].v, d.v, layers.soc[i].v, d.bot - d.top), 0);
 
-const soil = {
-  texture: usdaTexture(sand030, silt030, clay030),
-  organic_carbon: r(depthMean("soc", 30), 1),
-  ph: r(depthMean("phh2o", 30), 1),
-  awc_mm: Math.round(awc),
-};
+const soil = engineField.soil;
+const localSoil = { texture: usdaTexture(sand030, silt030, clay030), organic_carbon: r(depthMean("soc", 30), 1), ph: r(depthMean("phh2o", 30), 1), awc_mm: Math.round(awc) };
+if (JSON.stringify(localSoil) !== JSON.stringify(soil)) console.warn("engine soil differs from local derivation", { localSoil, soil });
 
 // ---------- NDVI (MODIS MOD13Q1) ----------
 const ndviRaw = load("ndvi.json");
@@ -111,7 +116,7 @@ const ndvi_history = YEARS.filter((y) => ndviRaw[y]?.length).map((year) => ({
 // Growing-season (Apr–Sep) climatic water deficit 1 − P/ET0, a transparent proxy computed from POWER.
 const seasonStress = Object.fromEntries(
   YEARS.map((y) => {
-    const ms = monthly(y).filter((x) => x.m >= 4 && x.m <= 9);
+    const ms = monthlyScaled(y).filter((x) => x.m >= 4 && x.m <= 9);
     const p = ms.reduce((a, x) => a + x.p, 0), e = ms.reduce((a, x) => a + x.et0, 0);
     return [y, Math.min(1, Math.max(0, 1 - p / e))];
   }),
@@ -165,29 +170,14 @@ const PROV = {
   },
 };
 
-// ---------- crops (FAO-56 Table 12 Kc, Table 22 root depth midpoint) ----------
-const SRC = "FAO-56 (Allen et al., 1998): Kc from Table 12, root depth = midpoint of Table 22 range, growing days typical Mediterranean stage totals from Table 11";
-const crop = (id, name, family, is_legume, season, growing_days, kc_ini, kc_mid, kc_end, root_depth_m) =>
-  ({ id, name, family, is_legume, season, growing_days, kc_ini, kc_mid, kc_end, root_depth_m, source: SRC });
-const crops = [
-  crop("winter_wheat", "Winter wheat", "Poaceae", false, "winter", 210, 0.7, 1.15, 0.25, 1.65),
-  crop("barley", "Barley", "Poaceae", false, "winter", 180, 0.3, 1.15, 0.25, 1.25),
-  crop("chickpea", "Chickpea", "Fabaceae", true, "winter", 140, 0.4, 1.0, 0.35, 0.8),
-  crop("lentil", "Lentil", "Fabaceae", true, "winter", 150, 0.4, 1.1, 0.3, 0.7),
-  crop("faba_bean", "Faba bean (dry)", "Fabaceae", true, "winter", 160, 0.5, 1.15, 0.3, 0.6),
-  crop("maize", "Maize (grain)", "Poaceae", false, "summer", 150, 0.3, 1.2, 0.35, 1.35),
-  crop("cotton", "Cotton", "Malvaceae", false, "summer", 195, 0.35, 1.18, 0.6, 1.35),
-  crop("sunflower", "Sunflower", "Asteraceae", false, "summer", 130, 0.35, 1.08, 0.35, 1.15),
-  crop("sugar_beet", "Sugar beet", "Amaranthaceae", false, "summer", 190, 0.35, 1.2, 0.7, 0.95),
-  crop("tomato", "Tomato", "Solanaceae", false, "summer", 145, 0.6, 1.15, 0.8, 1.1),
-  crop("alfalfa", "Alfalfa", "Fabaceae", true, "perennial", 365, 0.4, 0.95, 0.9, 1.5),
-];
+// ---------- crops (engine output, FAO-56 with per-crop citations) ----------
+const crops = engineCrops;
 const cropById = Object.fromEntries(crops.map((c) => [c.id, c]));
 
 // ---------- rotations (illustrative: simple Kc-weighted demand on the POWER climatology) ----------
 // Mean monthly ET0 and precipitation across the record.
 const clim = Array.from({ length: 12 }, (_, m) => {
-  const v = YEARS.map((y) => monthly(y)[m]);
+  const v = YEARS.map((y) => monthlyScaled(y)[m]);
   return { et0: v.reduce((a, x) => a + x.et0, 0) / v.length, p: v.reduce((a, x) => a + x.p, 0) / v.length };
 });
 const SEASON_MONTHS = { winter: [10, 11, 12, 1, 2, 3, 4, 5, 6], summer: [4, 5, 6, 7, 8, 9, 10], perennial: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] };
@@ -201,9 +191,9 @@ function seasonWater(c) {
   return { demand: Math.round(demand), deficit: Math.round(deficit), stress: r(Math.min(1, deficit / demand), 2) };
 }
 const sequences = [
-  ["winter_wheat", "chickpea", "cotton", "winter_wheat"],
+  ["winter_wheat", "lentil", "cotton", "winter_wheat"],
   ["winter_wheat", "lentil", "sunflower", "barley"],
-  ["cotton", "winter_wheat", "chickpea", "maize"],
+  ["cotton", "winter_wheat", "soybean", "maize"],
   ["barley", "faba_bean", "winter_wheat", "sunflower"],
   ["maize", "cotton", "maize", "cotton"],
 ];
@@ -238,34 +228,32 @@ for (const x of rotations) {
 rotations.sort((a, b) => b.scores.total - a.scores.total);
 
 const ILLUSTRATIVE =
-  "Fixture only: rotation scores and yearly water figures were produced by a simplified script (mean-climate Kc-weighted demand, 80 % effective rainfall, half of root-zone AWC available, heuristic soil/income/risk scores), not by the Travertine engine. Replace with engine output.";
+  "Fixture only: rotation scores and yearly water figures were produced by a simplified script (mean-climate Kc-weighted demand using engine Penman-Monteith ET0 distributed over months by a Hargreaves shape, 80 % effective rainfall, half of root-zone AWC available, heuristic soil/income/risk scores), not by the Travertine engine. Replace with engine output.";
 
 // ---------- write ----------
 out("health.json", { status: "ok", version: "1.0.0" });
 out("crops.json", crops);
 out("field-analyze.json", {
-  field_id: "fld_denizli_demo",
-  climate,
-  soil,
+  ...engineField,
   ndvi_history,
-  provenance: [PROV.power, PROV.soilgrids, PROV.modis],
+  provenance: [...engineField.provenance, PROV.modis],
 });
 out("rotations-explore.json", {
   rotations,
-  provenance: [PROV.power, PROV.soilgrids, PROV.fao56, { ...PROV.fao56, dataset: "Travertine fixture rotation scoring (illustrative)", provider: "Travertine project", spatial_resolution: "Field", temporal_coverage: "2001–2024 climatology", access_url: "https://github.com/musbabaff/travertine/blob/main/packages/contract/scripts/build-fixtures.mjs", note: ILLUSTRATIVE }],
+  provenance: [...engineField.provenance, PROV.fao56, { ...PROV.fao56, dataset: "Travertine fixture rotation scoring (illustrative)", provider: "Travertine project", spatial_resolution: "Field", temporal_coverage: "2001–2024 climatology", access_url: "https://github.com/musbabaff/travertine/blob/main/packages/contract/scripts/build-fixtures.mjs", note: ILLUSTRATIVE }],
 });
 out("validation.json", {
   years: vyears,
   correlation: r(corr, 2),
   n: vyears.length,
-  method: "Pearson correlation between a growing-season (April–September) climatic water-deficit proxy, 1 − P/ET0 from NASA POWER, and the standardised anomaly of growing-season mean MODIS NDVI at the field centre pixel, one value per year.",
+  method: "Pearson correlation between a growing-season (April–September) climatic water-deficit proxy, 1 − P/ET0 (NASA POWER precipitation; ET0 from the engine's annual FAO-56 Penman-Monteith, distributed over months by a Hargreaves shape), and the standardised anomaly of growing-season mean MODIS NDVI at the field centre pixel, one value per year.",
   caveats: [
     "Fixture only: the stress series is a simple climatic proxy, not the Travertine engine's crop water-balance model.",
     "NDVI comes from a single 250 m pixel without cloud or quality filtering; it may mix several fields and land uses.",
     "Irrigation is not represented: irrigated fields can stay green in dry years, which weakens the relationship.",
     `${vyears.length} years is a small sample; the correlation is uncertain and shows association, not causation.`,
   ],
-  provenance: [PROV.power, PROV.modis],
+  provenance: [engineField.provenance[0], PROV.modis],
 });
 console.log({ soil, corr: r(corr, 3), clay030, sand030, silt030, ndviYears: ndvi_history.length });
 console.table(rotations.map((x) => ({ seq: x.sequence.join(">"), ...x.scores })));

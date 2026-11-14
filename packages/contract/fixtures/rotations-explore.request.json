@@ -1,5 +1,5 @@
 {
-  "field_id": "fld_denizli_demo",
+  "field_id": "fld_37.8900_28.9800",
   "horizon_years": 4,
   "priorities": { "water": 0.8, "income": 0.5, "soil": 0.6, "risk": 0.4 },
   "irrigated": false
