@@ -30,6 +30,8 @@ jobs:
         run: |
           pnpm contract:gen
           git diff --exit-code packages/contract/src/schema.d.ts
+      - name: README parity (English and Turkish)
+        run: node scripts/check-readme-parity.mjs
       - name: Palette contrast
         run: node .claude/skills/data-viz/check-palette.mjs
       - name: Lint
