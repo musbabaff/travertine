@@ -1,7 +1,9 @@
 "use client";
 
 import type { Map as MLMap } from "maplibre-gl";
-import { Check, Crosshair, MapPinned, Trash2, Undo2, X } from "lucide-react";
+import { ArrowRight, Check, Crosshair, MapPinned, Trash2, Undo2, X } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/segmented";
@@ -21,6 +23,7 @@ export function FieldScreen() {
   const { t, n } = useI18n();
   const { field, setField } = useField();
   const analysis = useFieldAnalysis(field);
+  const qs = useSearchParams().toString();
   const [mode, setMode] = useState<MapMode>("draw");
   const [basemap, setBasemap] = useState<Basemap>("map");
   const [draft, setDraft] = useState<LngLat[]>([]);
@@ -93,7 +96,7 @@ export function FieldScreen() {
   const areaText = areaM2 === null ? null : areaM2 >= 10_000 ? `${n(areaM2 / 10_000, 2)} ${t("unit.ha")}` : `${n(areaM2)} ${t("unit.m2")}`;
 
   return (
-    <div className="flex flex-1 flex-col lg:relative lg:min-h-0">
+    <div className="flex flex-1 flex-col lg:relative lg:h-[calc(100svh-57px)] lg:flex-none lg:overflow-hidden">
       {/* Map */}
       <div className="relative h-[52svh] min-h-[320px] md:h-[56svh] lg:absolute lg:inset-0 lg:h-auto">
         <FieldMap
@@ -221,7 +224,16 @@ export function FieldScreen() {
               ) : analysis.isError ? (
                 <FieldSummaryError message={analysis.error.message} onRetry={() => analysis.refetch()} />
               ) : (
-                <FieldSummary data={analysis.data} field={field} />
+                <>
+                  <FieldSummary data={analysis.data} field={field} />
+                  <Link
+                    href={`/app/explore?${qs}`}
+                    className="mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-4 text-sm font-medium text-white hover:bg-teal-600"
+                  >
+                    {t("explore.cta")}
+                    <ArrowRight aria-hidden className="size-4" strokeWidth={1.5} />
+                  </Link>
+                </>
               )}
             </div>
           )}

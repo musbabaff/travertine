@@ -4,28 +4,58 @@ import health from "@travertine/contract/fixtures/health.json";
 import rotations from "@travertine/contract/fixtures/rotations-explore.json";
 import validation from "@travertine/contract/fixtures/validation.json";
 import fieldRequest from "@travertine/contract/fixtures/field-analyze.request.json";
+import exploreRequest from "@travertine/contract/fixtures/rotations-explore.request.json";
+import { weightedTotal } from "../priorities";
+import type { Priorities } from "./types";
 
 /** Location the fixtures describe. Used to warn when demo data is shown for a different place. */
 export const FIXTURE_LOCATION = { lat: fieldRequest.lat, lon: fieldRequest.lon } as const;
 export const DEMO_FIELD = fieldRequest;
-
-const routes: Record<string, unknown> = {
-  "GET /v1/health": health,
-  "GET /v1/crops": crops,
-  "POST /v1/field/analyze": fieldAnalyze,
-  "POST /v1/rotations/explore": rotations,
-  "GET /v1/validation": validation,
-};
+/** The only rotation horizon the fixtures contain. */
+export const FIXTURE_HORIZON = exploreRequest.horizon_years;
 
 export const SOURCE_HEADER = "x-travertine-source";
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", [SOURCE_HEADER]: "fixtures" } });
+
+/**
+ * Re-ranks the fixture rotations under the requested priorities. The per-objective scores are fixture
+ * values; only `total` is recomputed, with the same weighted mean the fixture builder used, so the demo
+ * responds to the sliders without inventing scores.
+ */
+function exploreFromFixture(body: string | null): Response {
+  let req: { horizon_years?: number; priorities?: Priorities } = {};
+  try {
+    req = body ? JSON.parse(body) : {};
+  } catch {
+    /* use defaults */
+  }
+  if (req.horizon_years !== undefined && req.horizon_years !== FIXTURE_HORIZON) {
+    return json({ code: "demo_horizon_unavailable", message: `Demo data only covers ${FIXTURE_HORIZON}-year rotations.` }, 422);
+  }
+  const p = req.priorities ?? exploreRequest.priorities;
+  const ranked = rotations.rotations
+    .map((r) => ({ ...r, scores: { ...r.scores, total: weightedTotal(r.scores, p) } }))
+    .sort((a, b) => b.scores.total - a.scores.total);
+  return json({ ...rotations, rotations: ranked });
+}
+
 /** Serves a contract fixture as if it were the engine. Returns null for unknown routes. */
-export function mockResponse(method: string, url: string): Response | null {
+export function mockResponse(method: string, url: string, body: string | null = null): Response | null {
   const path = new URL(url, "http://mock.local").pathname;
-  const body = routes[`${method.toUpperCase()} ${path}`];
-  if (body === undefined) return null;
-  return new Response(JSON.stringify(body), {
-    status: 200,
-    headers: { "content-type": "application/json", [SOURCE_HEADER]: "fixtures" },
-  });
+  switch (`${method.toUpperCase()} ${path}`) {
+    case "GET /v1/health":
+      return json(health);
+    case "GET /v1/crops":
+      return json(crops);
+    case "POST /v1/field/analyze":
+      return json(fieldAnalyze);
+    case "POST /v1/rotations/explore":
+      return exploreFromFixture(body);
+    case "GET /v1/validation":
+      return json(validation);
+    default:
+      return null;
+  }
 }

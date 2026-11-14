@@ -134,6 +134,8 @@ opacity fades, which drop to ≤ 100 ms. Map fly-to animations are replaced by j
 - [ ] `grep -rnE "#[0-9a-fA-F]{3,8}\b" apps/web/src --include=*.tsx` returns no hits outside token files and chart palettes.
 - [ ] No `font-family` other than the Plex variable; no font sizes outside the scale.
 - [ ] No gradients (`grep -rn "gradient" apps/web/src` has no hits outside documented exceptions).
+      Documented exception: `.tv-slider` track in `globals.css` uses a hard-stop `linear-gradient` to fill the
+      track up to the value (WebKit has no range-progress pseudo-element). It renders two flat colours, never a blend.
 - [ ] No emoji characters in `apps/web/src` or locale files.
 - [ ] Every interactive element uses one of the defined button/input patterns.
 - [ ] Accent appears at most once per view region.

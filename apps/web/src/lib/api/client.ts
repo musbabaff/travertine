@@ -25,8 +25,9 @@ export class ApiRequestError extends Error {
  */
 export function createEngineFetch(base: string | null, report: (s: DataSource) => void = setDataSource) {
   return async function engineFetch(input: Request): Promise<Response> {
+    const body = input.method === "GET" || input.method === "HEAD" ? null : await input.clone().text();
     const fromFixtures = (kind: DataSource) => {
-      const res = mockResponse(input.method, input.url);
+      const res = mockResponse(input.method, input.url, body);
       if (!res) throw new ApiRequestError(`No fixture for ${input.method} ${new URL(input.url).pathname}`);
       report(kind);
       return res;
