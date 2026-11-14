@@ -1,4 +1,4 @@
-"""Field analysis: climate history from NASA POWER, soil from SoilGrids."""
+"""Field analysis: climate history from NASA POWER, soil from SoilGrids, greenness from MODIS."""
 
 from __future__ import annotations
 
@@ -10,14 +10,16 @@ from dataclasses import asdict, dataclass
 from travertine_engine.cache import DiskCache
 from travertine_engine.config import Settings
 from travertine_engine.errors import InvalidRequest, UpstreamUnavailable
-from travertine_engine.models import ClimateYear, FieldAnalysis, Provenance, Soil
+from travertine_engine.models import ClimateYear, FieldAnalysis, NdviYear, Provenance, Soil
 from travertine_engine.science.climate import DailyClimate, annual_summary, compute_daily_et0
+from travertine_engine.science.ndvi import MIN_COMPOSITES, season_mean
 from travertine_engine.science.soil import (
     SoilLayer,
     available_water_mm,
     depth_weighted_mean,
     usda_texture_class,
 )
+from travertine_engine.sources.modis import SEASON_COMPOSITES, fetch_ndvi_seasons
 from travertine_engine.sources.power import fetch_power_daily
 from travertine_engine.sources.soilgrids import SoilGridsNoData, fetch_soilgrids
 from travertine_engine.upstream import Upstream
@@ -156,6 +158,32 @@ async def resolve_soil(upstream: Upstream, cache: DiskCache, lat: float, lon: fl
     )
 
 
+@dataclass(frozen=True, slots=True)
+class NdviRecord:
+    by_year: dict[int, float]
+    skipped: list[int]
+    provenance: Provenance
+
+
+def modis_provenance(first: int, last: int, skipped: list[int]) -> Provenance:
+    note = (
+        "Single 250 m pixel containing the field centre; it may include neighbouring fields, roads or buildings. "
+        f"Growing-season value = mean NDVI of the {SEASON_COMPOSITES} composites starting day-of-year 97 to 241 "
+        "(early April to late September) whose pixel reliability is 0 (good) or 1 (marginal); snow, cloud and fill "
+        f"are dropped and a year needs at least {MIN_COMPOSITES} usable composites."
+    )
+    if skipped:
+        note += f" Years without enough usable composites were left out: {', '.join(map(str, skipped))}."
+    return Provenance(
+        dataset="MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061), NDVI and pixel reliability",
+        provider="NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by the ORNL DAAC MODIS web service",
+        spatial_resolution="250 m",
+        temporal_coverage=f"{first}–{last}, 16-day composites, April–September",
+        access_url="https://modis.ornl.gov/data/modis_webservice.html",
+        note=note,
+    )
+
+
 class FieldService:
     def __init__(self, settings: Settings, upstream: Upstream, cache: DiskCache) -> None:
         self.settings = settings
@@ -168,9 +196,31 @@ class FieldService:
         )
         return compute_daily_et0(power), power.api_version
 
+    async def ndvi(self, lat: float, lon: float) -> NdviRecord:
+        years = range(self.settings.first_year, self.settings.last_year + 1)
+        seasons = await fetch_ndvi_seasons(self.upstream, self.cache, lat, lon, years)
+        by_year: dict[int, float] = {}
+        skipped: list[int] = []
+        for year in years:
+            value = season_mean(seasons[year])
+            if value is None:
+                skipped.append(year)
+            else:
+                by_year[year] = value
+        return NdviRecord(by_year, skipped, modis_provenance(years[0], years[-1], skipped))
+
+    async def _ndvi_or_none(self, lat: float, lon: float) -> NdviRecord | None:
+        try:
+            return await self.ndvi(lat, lon)
+        except UpstreamUnavailable as exc:
+            log.warning("modis unavailable, analysis returned without ndvi", extra={"reason": str(exc)})
+            return None
+
     async def analyze(self, lat: float, lon: float) -> FieldAnalysis:
-        (daily, api_version), soil = await asyncio.gather(
-            self.daily_climate(lat, lon), resolve_soil(self.upstream, self.cache, lat, lon)
+        (daily, api_version), soil, ndvi = await asyncio.gather(
+            self.daily_climate(lat, lon),
+            resolve_soil(self.upstream, self.cache, lat, lon),
+            self._ndvi_or_none(lat, lon),
         )
         years, dropped = annual_summary(daily)
         first = years[0].year if years else self.settings.first_year
@@ -179,5 +229,14 @@ class FieldService:
             field_id=make_field_id(lat, lon),
             climate=[ClimateYear(**asdict(y)) for y in years],
             soil=soil.soil,
-            provenance=[power_provenance(daily, first, last, api_version, dropped), soil.provenance],
+            ndvi_history=(
+                [NdviYear(year=y, mean_ndvi=round(v, 3)) for y, v in sorted(ndvi.by_year.items())]
+                if ndvi and ndvi.by_year
+                else None
+            ),
+            provenance=[
+                power_provenance(daily, first, last, api_version, dropped),
+                soil.provenance,
+                *([ndvi.provenance] if ndvi and ndvi.by_year else []),
+            ],
         )

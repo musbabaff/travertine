@@ -131,6 +131,21 @@ class RotationExploreResponse(_Model):
     provenance: list[Provenance]
 
 
+class ValidationYear(_Model):
+    year: int
+    modelled_stress: Unit01
+    observed_ndvi_anomaly: float
+
+
+class Validation(_Model):
+    years: list[ValidationYear]
+    correlation: float = Field(ge=-1, le=1)
+    n: int = Field(ge=0)
+    method: str
+    caveats: list[str]
+    provenance: list[Provenance]
+
+
 class ErrorBody(_Model):
     code: str
     message: str
