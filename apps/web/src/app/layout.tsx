@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Travertine — crop-rotation decisions from Earth observation data",
   alternates: { canonical: "/" },
+  // Lets CI confirm which commit production serves (see .github/workflows/deploy-check.yml).
+  other: { "travertine-commit": process.env.VERCEL_GIT_COMMIT_SHA ?? "local" },
   openGraph: pageMetadata("Travertine — crop-rotation decisions from Earth observation data", "/").openGraph,
   description:
     "Mark a field, set your priorities and explore three- to five-year crop rotations scored with open satellite and climate records.",
