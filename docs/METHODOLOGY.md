@@ -89,11 +89,89 @@ titled `DEFAULT SOIL — not measured`. Its note states that the values are not 
 Chickpea is left out because FAO-56 Table 11 gives no stage lengths for it. The corrections relative to the Phase 0
 fixture are listed in the `contract` issue opened with the engine's first release.
 
-## 5. Not yet implemented
+## 5. Soil water balance (FAO-56 chapter 8)
 
-Soil water balance and water-stress coefficient Ks (FAO-56 ch. 8), climate adjustment of Kc mid / end (FAO-56 eq. 62),
-yield response (FAO-33 / FAO-66), trend tests (Mann-Kendall, Sen's slope), rotation enumeration and scoring, validation
-against MODIS and HLS NDVI, and the GPM IMERG precipitation cross-check. Each will be documented here when it lands.
+A daily root-zone balance in depletion form (eq. 85), with runoff and capillary rise set to zero:
+
+```
+Dr,i = Dr,i−1 − P,i − I,i + ETc,adj,i + DP,i          0 ≤ Dr ≤ TAW
+```
+
+| Quantity | Definition | Source |
+|---|---|---|
+| TAW | AWC per metre (`awc_mm` of the 0–100 cm profile) × crop rooting depth Zr; layers below 100 cm are assumed to hold the same water per metre | FAO-56 eq. 82 |
+| p | Table 22 value adjusted daily for the ETc rate, p = p_tab + 0.04 (5 − ETc), limited to 0.1–0.8 | Table 22 footnote |
+| RAW | p × TAW | eq. 83 |
+| Ks | 1 while Dr ≤ RAW, else (TAW − Dr) / ((1 − p) TAW) | eq. 84 |
+| Kc | piecewise-linear curve from Table 12 values and Table 11 stage lengths; Kc mid and Kc end (when ≥ 0.45) adjusted for the season's mean wind and RHmin | eqs. 62, 63, 65, 66 |
+| ETc,adj | Ks × Kc × ET0 | eq. 81 |
+| DP | water above field capacity drains the same day | eq. 88 |
+
+**Between crops** the field is bare. Evaporation follows the two-stage model of chapter 7 with Kcb = 0:
+E = Kr × 1.20 × ET0 (eq. 72 with crop height 0), Kr = 1 until the evaporation layer has lost REW, then
+(TEW − De)/(TEW − REW) (eq. 74). TEW = 1000 (θFC − 0.5 θWP) × 0.10 m (eq. 73) from the 0–15 cm Saxton & Rawls water
+contents; REW is the midpoint of the FAO-56 Table 19 range for the soil texture (classes missing from Table 19 use the
+closest listed class). Evaporation can only dry the evaporation layer, so deeper water is kept for the next crop.
+
+**Irrigated mode.** On any crop day that starts with Dr > RAW, the root zone is refilled to field capacity early in the
+day (the convention of FAO-56 Example 38). Ks therefore stays at 1 and the reported deficit is the irrigation
+requirement.
+
+**Verification.** A hypothesis property test runs random rain series, ET0, Kc, initial depletion, sowing offsets and
+both modes, and checks that the change in stored water equals rain + irrigation − ET − evaporation − drainage to 10⁻⁶
+mm, that 0 ≤ Dr ≤ TAW, and that actual ET never exceeds potential ET. Ks, Kr and the p adjustment are tested against
+the equations directly.
+
+## 6. Crop calendar
+
+Agricultural year Y runs from 1 October of Y − 1 to 30 September of Y. Each crop is sown on the date derived from its
+Table 11 row (see `crops.yaml`) and harvested `growing_days` later. One crop occupies each agricultural year; autumn
+sowings belong to the year in which they are harvested.
+
+## 7. Rotations
+
+**Rules** applied when enumerating sequences of 3–5 crops:
+
+1. No two consecutive crops from the same botanical family. A perennial stand continuing into its next year is the
+   exception.
+2. The next crop must be sown after the previous one is harvested (season compatibility).
+3. At least one legume per rotation.
+4. A perennial (alfalfa) stand lasts at least two consecutive years.
+
+With all 12 crops this yields 545, 5,437 and 51,021 candidates for 3, 4 and 5 years.
+
+**Back-cast.** Each candidate is run through every window of consecutive agricultural years in the record (20 windows
+of 5 years for 2002–2025). The soil-water state at the start of a window comes from a continuous bare-soil balance
+over the whole record, started at field capacity on 1 January 2001 (nine months of spin-up). From one crop to the next
+the depletion fraction Dr/TAW is carried over, so a crop that leaves the soil dry hands that dryness on. To keep
+exploration fast, every (previous crop, crop, year) segment is simulated once for 11 starting depletion fractions
+(0, 0.1, …, 1) and rotations interpolate linearly between them.
+
+**Scores** (each 0–1, higher is better; relative indices, not forecasts):
+
+| Score | Definition |
+|---|---|
+| water | median over windows of the share of crop water demand (Σ ETc) met by rain and stored soil water: 1 − Σ deficit / Σ ETc, where the deficit is ETc − ETc,adj (rain-fed) or the irrigation requirement (irrigated) |
+| risk | 1 − (0.5 × P90 + 0.5 × (P90 − P10)) of the unmet share of single seasons across all windows: high when even the driest seasons are mostly met and outcomes are consistent |
+| soil | mean of four indicators, each divided by its maximum among the candidates: legume nitrogen credit to the following non-legume crops (UW-Extension A3517: alfalfa fair stand 160 lb N/acre in the first year and 50 in the second, soybean 40, pea and dry bean 20 — applied to lentil and faba bean as the closest category; reduced on sands and loamy sands as the source specifies), number of botanical families, range of rooting depths, and share of days under a crop |
+| income | mean over all simulated seasons of ETc,adj / ETc with every crop valued equally. No price or market data is used, so this is a water-limited production index, not a profit estimate |
+| total | priority-weighted mean of the four scores, weights as given by the user (equal weights if all are zero) |
+
+The response returns the ten highest totals. Yearly figures are medians across windows. Explanations are generated from
+the same numbers (window count and period, median demand and deficit, the 90th-percentile unmet share and the most
+extreme season, the nitrogen credit, diversity and cover).
+
+**Limitations.** Runoff is ignored, so heavy-rain years overstate infiltration; deep-percolation losses are counted as
+lost to the crop. Stage lengths are generic Table 11 rows, not local observations. Overlapping windows are not
+independent samples. POWER rain is a 0.5° grid-cell average, which smooths local storms. The income score is not
+informative under irrigation, where every crop meets its demand. Fallow and cover-crop options are not yet in the crop
+table.
+
+## 8. Not yet implemented
+
+Yield response with Ky (FAO-33 / FAO-66), trend tests (Mann-Kendall, Sen's slope), P10/P50/P90 outcomes and the
+Pareto set in the explore response, validation against MODIS and HLS NDVI, and the GPM IMERG precipitation
+cross-check. Each will be documented here when it lands.
 
 ## References
 
@@ -104,4 +182,6 @@ against MODIS and HLS NDVI, and the GPM IMERG precipitation cross-check. Each wi
   solutions. *Soil Science Society of America Journal* 70, 1569–1578. https://doi.org/10.2136/sssaj2005.0117
 - Poggio, L., de Sousa, L. M., Batjes, N. H., et al. (2021). SoilGrids 2.0: producing soil information for the globe
   with quantified spatial uncertainty. *SOIL* 7, 217–240. https://doi.org/10.5194/soil-7-217-2021
+- Bundy, L. G., Kelling, K. A., Ward Good, L. (1997). *Using Legumes as a Nitrogen Source.* University of
+  Wisconsin-Extension A3517.
 - Soil Science Division Staff (2017). *Soil Survey Manual.* USDA Handbook 18.

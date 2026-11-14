@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,9 @@ import yaml
 from fastapi.testclient import TestClient
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
+
+from tests.conftest import FakeUpstream, make_client
+from travertine_engine.config import Settings
 
 SPEC_PATH = Path(__file__).resolve().parents[3] / "packages" / "contract" / "openapi.yaml"
 FIXTURES = SPEC_PATH.parent / "fixtures"
@@ -62,3 +66,44 @@ def test_error_bodies_follow_contract(client: TestClient) -> None:
     assert r.status_code == 422
     assert errors("Error", r.json()) == []
     assert r.json()["code"] == "invalid_request"
+
+
+def test_rotations_explore(settings: Settings) -> None:
+    long = Settings(cache_dir=settings.cache_dir, first_year=2001, last_year=2008, rate_limit_per_minute=1000)
+    request = json.loads((FIXTURES / "rotations-explore.request.json").read_text(encoding="utf-8"))
+    request.pop("field_id")
+    request.update(lat=37.89, lon=28.98)
+    assert errors("RotationExploreRequest", request) == []
+    with make_client(long, FakeUpstream()) as c:
+        r = c.post("/v1/rotations/explore", json=request)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert errors("RotationExploreResponse", body) == []
+    totals = [rot["scores"]["total"] for rot in body["rotations"]]
+    assert totals == sorted(totals, reverse=True)
+    for rot in body["rotations"]:
+        assert len(rot["sequence"]) == request["horizon_years"]
+        assert [y["crop_id"] for y in rot["yearly"]] == rot["sequence"]
+        assert rot["explanation"]
+    assert any("no price" in p["note"] for p in body["provenance"])
+
+
+def test_rotations_explore_errors(settings: Settings) -> None:
+    with make_client(settings, FakeUpstream()) as c:
+        base = {
+            "horizon_years": 3,
+            "priorities": {"water": 1, "income": 0, "soil": 0, "risk": 0},
+            "irrigated": False,
+        }
+        missing = c.post("/v1/rotations/explore", json=base)
+        unknown = c.post(
+            "/v1/rotations/explore", json={**base, "lat": 37.89, "lon": 28.98, "crop_ids": ["rice"]}
+        )
+        no_legume = c.post(
+            "/v1/rotations/explore",
+            json={**base, "lat": 37.89, "lon": 28.98, "crop_ids": ["maize", "winter_wheat"]},
+        )
+        bad_id = c.post("/v1/rotations/explore", json={**base, "field_id": "fld_denizli_demo"})
+    for r in (missing, unknown, no_legume, bad_id):
+        assert r.status_code == 422, r.text
+        assert errors("Error", r.json()) == []

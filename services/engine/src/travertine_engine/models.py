@@ -86,6 +86,51 @@ class FieldAnalysis(_Model):
     provenance: list[Provenance]
 
 
+class Priorities(_Model):
+    water: Unit01
+    income: Unit01
+    soil: Unit01
+    risk: Unit01
+
+
+class RotationExploreRequest(_Model):
+    field_id: str | None = None
+    lat: Latitude | None = None
+    lon: Longitude | None = None
+    horizon_years: Literal[3, 4, 5]
+    priorities: Priorities
+    irrigated: bool
+    crop_ids: list[str] | None = None
+
+
+class RotationScores(_Model):
+    water: Unit01
+    income: Unit01
+    soil: Unit01
+    risk: Unit01
+    total: Unit01
+
+
+class RotationYear(_Model):
+    year_index: int = Field(ge=1)
+    crop_id: str
+    water_demand_mm: float = Field(ge=0)
+    water_deficit_mm: float = Field(ge=0)
+    stress_index: Unit01
+
+
+class Rotation(_Model):
+    sequence: list[str]
+    scores: RotationScores
+    yearly: list[RotationYear]
+    explanation: list[str]
+
+
+class RotationExploreResponse(_Model):
+    rotations: list[Rotation]
+    provenance: list[Provenance]
+
+
 class ErrorBody(_Model):
     code: str
     message: str

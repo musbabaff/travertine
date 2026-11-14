@@ -16,7 +16,12 @@
 #   * `stages` are one Table 11 row (initial / development / mid-season / late-season days). The row chosen is named
 #     in `sources.stages`; Mediterranean or arid-region rows are preferred because the demo field is in inland Aegean
 #     Turkey. Stage lengths are regional and should be replaced with local observations where they exist.
-#   * `sowing_month` is the planting month listed in that same Table 11 row.
+#   * `sowing_month` / `sowing_day` place the planting date from the month listed in that same Table 11 row: the 15th
+#     of a single listed month, or the 1st of the second month when the row lists a two-month window (e.g. Oct/Nov →
+#     1 November, April/May → 1 May, Mar–May → 15 April).
+#   * `n_credit` (legumes only) is the nitrogen fertilizer replacement credit to the following non-legume crop, from
+#     University of Wisconsin-Extension A3517 (Midwest US rotation studies). It is used only as a relative soil-health
+#     indicator, not as a fertilizer recommendation for the field.
 #   * `ky` is null where FAO-56 Table 24 (FAO-33) gives no value for the crop. The engine reports yield response only
 #     for crops with a sourced Ky.
 #
@@ -31,6 +36,7 @@ crops:
     is_legume: false
     season: winter
     sowing_month: 11
+    sowing_day: 15
     stages: { ini: 30, dev: 140, mid: 40, late: 30 }
     kc: { ini: 0.70, mid: 1.15, end: 0.25 }
     kc_end_range: [0.25, 0.40]
@@ -51,8 +57,9 @@ crops:
     family: Poaceae
     is_legume: false
     season: winter
-    sowing_month: 10
-    stages: { ini: 25, dev: 35, mid: 65, late: 40 }
+    sowing_month: 11
+    sowing_day: 15
+    stages: { ini: 40, dev: 60, mid: 60, late: 40 }
     kc: { ini: 0.30, mid: 1.15, end: 0.25 }
     height_m: 1.0
     root_depth_m: 1.25
@@ -60,7 +67,7 @@ crops:
     p: 0.55
     ky: null
     sources:
-      stages: "FAO-56 Table 11, Grains (small), Oct/Nov planting, Pakistan; Arid Region (25/35/65/40 days)"
+      stages: "FAO-56 Table 11, Barley/Oats/Wheat, November planting (40/60/60/40 days; Table 11 gives no location for this row). Chosen over the Oct/Nov arid-region row (165 days) because that row ends the season in early April, before the spring growth period of autumn-sown barley in the Aegean interior"
       kc: "FAO-56 Table 12, Barley (Kc ini 0.3 from the cereals group, Kc mid 1.15, Kc end 0.25)"
       root_depth: "FAO-56 Table 22, Barley (1.0–1.5 m)"
       p: "FAO-56 Table 22, Barley (0.55)"
@@ -71,7 +78,8 @@ crops:
     family: Fabaceae
     is_legume: true
     season: winter
-    sowing_month: 10
+    sowing_month: 11
+    sowing_day: 1
     stages: { ini: 25, dev: 35, mid: 70, late: 40 }
     kc: { ini: 0.40, mid: 1.10, end: 0.30 }
     height_m: 0.5
@@ -79,12 +87,14 @@ crops:
     root_depth_range_m: [0.6, 0.8]
     p: 0.50
     ky: null
+    n_credit: { first_year_kg_ha: 22.4, second_year_kg_ha: 0.0 }
     sources:
       stages: "FAO-56 Table 11, Lentil, Oct/Nov planting, Arid Region (25/35/70/40 days)"
       kc: "FAO-56 Table 12, Lentil (Kc ini 0.4 from the legumes group, Kc mid 1.10, Kc end 0.30)"
       root_depth: "FAO-56 Table 22, Lentil (0.6–0.8 m)"
       p: "FAO-56 Table 22, Lentil (0.50)"
       ky: "Not listed in FAO-56 Table 24 / FAO-33; yield response not computed"
+      n_credit: "Bundy, Kelling & Ward Good (1997), Using Legumes as a Nitrogen Source, University of Wisconsin-Extension A3517, table 'Legume N fertilizer replacement value': lentil is not listed; the value for pea and dry bean (20 lb N/acre) is applied as the closest category"
 
   - id: faba_bean
     name: Faba bean (dry)
@@ -92,6 +102,7 @@ crops:
     is_legume: true
     season: winter
     sowing_month: 11
+    sowing_day: 15
     stages: { ini: 90, dev: 45, mid: 40, late: 60 }
     kc: { ini: 0.50, mid: 1.15, end: 0.30 }
     height_m: 0.8
@@ -99,12 +110,14 @@ crops:
     root_depth_range_m: [0.5, 0.7]
     p: 0.45
     ky: null
+    n_credit: { first_year_kg_ha: 22.4, second_year_kg_ha: 0.0 }
     sources:
       stages: "FAO-56 Table 11, Faba bean, dry, November planting, Europe (90/45/40/60 days)"
       kc: "FAO-56 Table 12, Fababean (broad bean), Dry/Seed (0.5, 1.15, 0.30)"
       root_depth: "FAO-56 Table 22, Fababean, Dry/Seed (0.5–0.7 m)"
       p: "FAO-56 Table 22, Fababean, Dry/Seed (0.45)"
       ky: "Not listed in FAO-56 Table 24 / FAO-33 (the 'Beans' value refers to Phaseolus); yield response not computed"
+      n_credit: "Bundy, Kelling & Ward Good (1997), Using Legumes as a Nitrogen Source, University of Wisconsin-Extension A3517, table 'Legume N fertilizer replacement value': faba bean is not listed; the value for pea and dry bean (20 lb N/acre) is applied as the closest category"
 
   - id: maize
     name: Maize (grain)
@@ -112,6 +125,7 @@ crops:
     is_legume: false
     season: summer
     sowing_month: 4
+    sowing_day: 15
     stages: { ini: 30, dev: 40, mid: 50, late: 30 }
     kc: { ini: 0.30, mid: 1.20, end: 0.35 }
     kc_end_range: [0.35, 0.60]
@@ -132,7 +146,8 @@ crops:
     family: Poaceae
     is_legume: false
     season: summer
-    sowing_month: 5
+    sowing_month: 6
+    sowing_day: 1
     stages: { ini: 20, dev: 35, mid: 40, late: 30 }
     kc: { ini: 0.30, mid: 1.05, end: 0.55 }
     kc_mid_range: [1.00, 1.10]
@@ -154,6 +169,7 @@ crops:
     is_legume: false
     season: summer
     sowing_month: 4
+    sowing_day: 15
     stages: { ini: 30, dev: 50, mid: 60, late: 55 }
     kc: { ini: 0.35, mid: 1.175, end: 0.60 }
     kc_mid_range: [1.15, 1.20]
@@ -175,7 +191,8 @@ crops:
     family: Asteraceae
     is_legume: false
     season: summer
-    sowing_month: 4
+    sowing_month: 5
+    sowing_day: 1
     stages: { ini: 25, dev: 35, mid: 45, late: 25 }
     kc: { ini: 0.35, mid: 1.075, end: 0.35 }
     kc_mid_range: [1.00, 1.15]
@@ -197,6 +214,7 @@ crops:
     is_legume: false
     season: summer
     sowing_month: 5
+    sowing_day: 15
     stages: { ini: 25, dev: 35, mid: 50, late: 50 }
     kc: { ini: 0.35, mid: 1.20, end: 0.70 }
     height_m: 0.5
@@ -216,7 +234,8 @@ crops:
     family: Solanaceae
     is_legume: false
     season: summer
-    sowing_month: 4
+    sowing_month: 5
+    sowing_day: 1
     stages: { ini: 30, dev: 40, mid: 45, late: 30 }
     kc: { ini: 0.60, mid: 1.15, end: 0.80 }
     kc_end_range: [0.70, 0.90]
@@ -238,6 +257,7 @@ crops:
     is_legume: true
     season: summer
     sowing_month: 5
+    sowing_day: 15
     stages: { ini: 20, dev: 35, mid: 60, late: 25 }
     kc: { ini: 0.40, mid: 1.15, end: 0.50 }
     height_m: 0.75
@@ -245,12 +265,14 @@ crops:
     root_depth_range_m: [0.6, 1.3]
     p: 0.50
     ky: 0.85
+    n_credit: { first_year_kg_ha: 44.8, second_year_kg_ha: 0.0 }
     sources:
       stages: "FAO-56 Table 11, Soybeans, May planting, Central USA (20/30–35/60/25 days, total 140; 35 days development used to match the listed total)"
       kc: "FAO-56 Table 12, Soybeans (Kc ini 0.4 from the legumes group, Kc mid 1.15, Kc end 0.50)"
       root_depth: "FAO-56 Table 22, Soybeans (0.6–1.3 m)"
       p: "FAO-56 Table 22, Soybeans (0.50)"
       ky: "FAO-56 Table 24 (from FAO-33), Soybean (0.85)"
+      n_credit: "Bundy, Kelling & Ward Good (1997), Using Legumes as a Nitrogen Source, University of Wisconsin-Extension A3517, table 'Legume N fertilizer replacement value': soybean, 40 lb N/acre"
 
   - id: alfalfa
     name: Alfalfa (hay)
@@ -258,6 +280,7 @@ crops:
     is_legume: true
     season: perennial
     sowing_month: 4
+    sowing_day: 1
     stages: { ini: 10, dev: 30, mid: 160, late: 10 }
     kc: { ini: 0.40, mid: 0.95, end: 0.90 }
     height_m: 0.7
@@ -265,9 +288,11 @@ crops:
     root_depth_range_m: [1.0, 2.0]
     p: 0.55
     ky: 1.1
+    n_credit: { first_year_kg_ha: 179.3, second_year_kg_ha: 56.0 }
     sources:
       stages: "FAO-56 Table 11, Alfalfa, Idaho, USA: 1st cutting cycle 10/30/25/10 days and other cutting cycles 5/20/10/10 days; four cycles (75 + 3 × 45 = 210 days) as in the FAO-56 Figure 35 example, expressed as one averaged curve (10/30/160/10)"
       kc: "FAO-56 Table 12, Alfalfa Hay, averaged cutting effects (0.40, 0.95, 0.90)"
       root_depth: "FAO-56 Table 22, Alfalfa for hay (1.0–2.0 m)"
       p: "FAO-56 Table 22, Alfalfa for hay (0.55)"
       ky: "FAO-56 Table 24 (from FAO-33), Alfalfa (1.1)"
+      n_credit: "Bundy, Kelling & Ward Good (1997), Using Legumes as a Nitrogen Source, University of Wisconsin-Extension A3517, table 'Legume N fertilizer replacement value': alfalfa, fair stand, 160 lb N/acre first year and 50 lb N/acre second year (× 1.12085 kg/ha per lb/acre)"
