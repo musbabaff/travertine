@@ -227,5 +227,5 @@
   "error.title": "Something went wrong",
   "error.body": "The page failed to load. Your field and priorities are still in the address bar.",
   "error.retry": "Try again",
-  "state.slow": "Still working. The engine may need up to a minute to wake up when it has been idle."
+  "state.slow": "Still working. The first analysis of a new location fetches 25 years of daily climate data and can take a few minutes; the engine may also need up to a minute to wake up. Later visits are faster."
 }
