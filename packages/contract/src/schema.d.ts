@@ -138,6 +138,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/field/hazards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Frost, heat, heavy-rain and dry-spell indices per year from NASA POWER */
+        get: operations["getFieldHazards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/field/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Crop calendar of a sequence with bare-field periods and monthly vulnerability */
+        post: operations["getFieldCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/field/analyze": {
         parameters: {
             query?: never;
@@ -390,6 +424,8 @@ export interface components {
             crop_ids?: string[];
             /** @description Language of rotations[].explanation[]. Default en. */
             language?: components["schemas"]["Language"];
+            /** @description Optional. Sensitivity test: the historical daily series are changed by these amounts before ET0 and the water balance are recomputed. Not a forecast. */
+            scenario?: components["schemas"]["Scenario"];
             /** @description Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`. */
             current_rotation?: string[];
             /** @description Optional. The farmer's own soil test and crop values; each one replaces the dataset estimate it names in the response's inputs[]. The allowed crops are crop_ids and irrigation is irrigated. */
@@ -458,6 +494,110 @@ export interface components {
             /** @description Optional. Structured reasoning built from this strategy's own numbers, in the request language. */
             reasoning?: components["schemas"]["RotationReasoning"];
         };
+        Scenario: {
+            /** @description Every day's precipitation is multiplied by this (unitless, 1 = unchanged). */
+            precipitation_factor: number;
+            /** @description Added to daily mean, maximum, minimum and dew-point temperature (°C, 0 = unchanged). */
+            temperature_change_c: number;
+        };
+        ScenarioApplied: {
+            precipitation_factor: number;
+            temperature_change_c: number;
+            /** @description Says, in the request language, that the results are a sensitivity test on past years and not a forecast. The UI shows it next to every score. */
+            label: string;
+        };
+        HazardYear: {
+            year: number;
+            /** @description Days with minimum temperature below 0 °C (ETCCDI FD). */
+            frost_days: number;
+            /**
+             * Format: date
+             * @description Last day before 1 August with minimum temperature below 0 °C. Omitted when there was none or in the southern hemisphere.
+             */
+            last_spring_frost?: string;
+            /**
+             * Format: date
+             * @description First day from 1 August with minimum temperature below 0 °C. Omitted when there was none or in the southern hemisphere.
+             */
+            first_autumn_frost?: string;
+            /** @description Days between last_spring_frost and first_autumn_frost, exclusive. Omitted when either is omitted. */
+            frost_free_days?: number;
+            /** @description Days with maximum temperature above 25 °C (ETCCDI SU). */
+            summer_days: number;
+            /** @description Days with maximum temperature above the record's 90th percentile for that calendar month (simplified ETCCDI TX90p). */
+            warm_days: number;
+            /** @description Highest daily maximum temperature of the year (°C, ETCCDI TXx). */
+            txx_c: number;
+            /** @description Days with at least 10 mm precipitation (ETCCDI R10mm). */
+            r10mm_days: number;
+            /** @description Days with at least 20 mm precipitation (ETCCDI R20mm). */
+            r20mm_days: number;
+            /** @description Highest one-day precipitation (mm, ETCCDI Rx1day). */
+            rx1day_mm: number;
+            /** @description Longest run of consecutive days with less than 1 mm precipitation within the year (ETCCDI CDD). */
+            cdd_days: number;
+        };
+        FieldHazards: {
+            years: components["schemas"]["HazardYear"][];
+            /** @description Median over years of every numeric index, same names and units as HazardYear; frost dates as day of year (last_spring_frost_doy, first_autumn_frost_doy). */
+            median: {
+                [key: string]: number;
+            };
+            /** @description Limitations. The UI renders these verbatim. */
+            caveats: string[];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        FieldCalendarRequest: {
+            lat: components["schemas"]["Latitude"];
+            lon: components["schemas"]["Longitude"];
+            /** @description crop_id per agricultural year (1 October to 30 September), any crops from /v1/crops. */
+            sequence: string[];
+            language?: components["schemas"]["Language"];
+        };
+        CalendarSeason: {
+            year_index: number;
+            crop_id: string;
+            /** @description MM-DD (FAO-56 Table 11 planting month, crops.yaml). */
+            sowing: string;
+            /** @description MM-DD, sowing + growing_days − 1. */
+            harvest: string;
+        };
+        BarePeriod: {
+            /** @description The field is bare after this year's harvest until the next crop is sown; after the last year, until the first crop of the repeated cycle. */
+            after_year_index: number;
+            start: string;
+            end: string;
+            days: number;
+        };
+        CalendarMonth: {
+            year_index: number;
+            crop_id: string;
+            month: number;
+            /** @description Median over years of max(0, 1 − P/ETc) for the crop's days in that month: a climatic deficit from POWER precipitation and FAO-56 ETc (table Kc × ET0), without soil water. */
+            water_deficit_share: components["schemas"]["Unit01"];
+            /** @description Share of the crop's days in that month, over all years, with minimum temperature below 0 °C. */
+            frost_day_share: components["schemas"]["Unit01"];
+            /** @description Share of the crop's days in that month, over all years, with maximum temperature above the month's 90th percentile of the record. */
+            warm_day_share: components["schemas"]["Unit01"];
+        };
+        FieldCalendar: {
+            seasons: components["schemas"]["CalendarSeason"][];
+            bare_periods: components["schemas"]["BarePeriod"][];
+            /** @description One item per crop year and calendar month the crop is in the field, in season order. */
+            months: components["schemas"]["CalendarMonth"][];
+            /** @description Per crop year and hazard, the month with the highest share; omitted for a hazard whose share is 0 in every month. */
+            most_vulnerable: {
+                year_index: number;
+                crop_id: string;
+                /** @enum {string} */
+                hazard: "water_deficit" | "frost" | "warm_days";
+                month: number;
+                share: components["schemas"]["Unit01"];
+            }[];
+            /** @description Limitations, in the request language. The UI renders these verbatim. */
+            caveats: string[];
+            provenance: components["schemas"]["Provenance"][];
+        };
         EvidenceItem: {
             /** @description What the value is, in the request language. */
             statement: string;
@@ -510,6 +650,8 @@ export interface components {
             rotations: components["schemas"]["Rotation"][];
             /** @description Optional. Present when the request carried current_rotation. */
             baseline?: components["schemas"]["BaselineRotation"];
+            /** @description Optional. Present when the request carried a scenario. */
+            scenario?: components["schemas"]["ScenarioApplied"];
             /** @description Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default. */
             inputs?: components["schemas"]["InputSource"][];
             provenance: components["schemas"]["Provenance"][];
@@ -771,6 +913,57 @@ export interface operations {
             };
             422: components["responses"]["Error"];
             502: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldHazards: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per complete year of the record, ascending, with medians. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldHazards"];
+                };
+            };
+            422: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FieldCalendarRequest"];
+            };
+        };
+        responses: {
+            /** @description Calendar of the sequence over the historical record. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldCalendar"];
+                };
+            };
+            422: components["responses"]["Error"];
             default: components["responses"]["Error"];
         };
     };
