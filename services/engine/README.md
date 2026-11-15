@@ -17,7 +17,9 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 | `GET /v1/health` | implemented |
 | `GET /v1/crops` | implemented — 12 crops from `data/crops.yaml`, every value cited to an FAO table |
 | `POST /v1/field/analyze` | implemented — NASA POWER daily climate (2001 to the last full year), FAO-56 Penman-Monteith ET0, SoilGrids soil and available water capacity, MODIS growing-season NDVI history |
-| `GET /v1/field/ndvi` | implemented, pending contract #12 — 30 m HLS NDVI history since 2020 at the field centre |
+| `GET /v1/field/climate`, `/v1/field/soil`, `/v1/field/vegetation` | implemented — the three parts of `/v1/field/analyze` on their own, so the client shows climate as soon as NASA POWER answers (about 3.5 s for a new location) while SoilGrids (often 20 s or more) and MODIS load separately; `climate` starts the other two in the background |
+| `GET /v1/field/ndvi` | implemented — 30 m HLS NDVI history since 2020 at the field centre, with its difference from MODIS for the same years |
+| `GET /v1/showcase` | implemented — the eight multi-site validation locations, their back-test results from `data/multisite.json` and the pooled result; their data are in the snapshot |
 | `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]` |
 | `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md`; `?language=tr` for Turkish caveats |
 
