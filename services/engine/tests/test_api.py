@@ -160,3 +160,24 @@ def test_daily_climate_is_computed_once_per_location(settings: Settings, fake: F
         first = c.portal.call(service.daily_climate, 37.89, 28.98)  # type: ignore[union-attr]
         again = c.portal.call(service.daily_climate, 37.8901, 28.9799)  # type: ignore[union-attr]
     assert again[0] is first[0]
+
+
+def test_explore_explanations_follow_language(settings: Settings, fake: FakeUpstream) -> None:
+    long = replace(settings, last_year=2008)
+    body = {
+        **DEMO,
+        "horizon_years": 3,
+        "priorities": {"water": 0.4, "income": 0.2, "soil": 0.2, "risk": 0.2},
+    }
+    with make_client(long, fake) as c:
+        en = c.post("/v1/rotations/explore", json=body).json()
+        tr = c.post("/v1/rotations/explore", json={**body, "language": "tr"}).json()
+        bad = c.post("/v1/rotations/explore", json={**body, "language": "de"})
+    assert bad.status_code == 422
+    for a, b in zip(en["rotations"], tr["rotations"], strict=True):
+        assert {k: v for k, v in a.items() if k != "explanation"} == {
+            k: v for k, v in b.items() if k != "explanation"
+        }
+        assert len(a["explanation"]) == len(b["explanation"])
+        assert b["explanation"][0].startswith("Kayıttaki ")
+    assert en["provenance"] == tr["provenance"]

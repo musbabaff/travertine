@@ -21,8 +21,9 @@ from travertine_engine.explore import ExploreService
 from travertine_engine.field import FieldService
 from travertine_engine.logs import configure_logging
 from travertine_engine.science.ndvi import pooled_paired_bootstrap
+from travertine_engine.text import verdict
 from travertine_engine.upstream import Upstream
-from travertine_engine.validation import RESAMPLES, SEED, BackTest, back_test, verdict
+from travertine_engine.validation import RESAMPLES, SEED, BackTest, back_test
 
 SITES = [
     ("tr-saraykoy", "Sarayköy, Denizli, Türkiye", 37.89, 28.98),
