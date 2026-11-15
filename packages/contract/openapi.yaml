@@ -120,6 +120,7 @@ paths:
       parameters:
         - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
         - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+        - { name: language, in: query, required: false, schema: { $ref: "#/components/schemas/Language" }, description: "Language of caveats[]. Default en." }
       responses:
         "200":
           description: Year-by-year back-test.
@@ -141,6 +142,11 @@ components:
     Latitude: { type: number, minimum: -90, maximum: 90, description: WGS84 latitude in decimal degrees. }
     Longitude: { type: number, minimum: -180, maximum: 180, description: WGS84 longitude in decimal degrees. }
     Unit01: { type: number, minimum: 0, maximum: 1 }
+    Language:
+      type: string
+      enum: [en, tr]
+      default: en
+      description: "Language of engine-written sentences (explanations, caveats). Numbers inside them follow that language's convention (tr: 0,55, %4, 1 234). Ids, units, method and provenance stay English. Other values return 422."
 
     Error:
       type: object
@@ -281,6 +287,9 @@ components:
           type: array
           description: Restrict candidates to these crops. Omit for all crops.
           items: { type: string }
+        language:
+          $ref: "#/components/schemas/Language"
+          description: "Language of rotations[].explanation[]. Default en."
       anyOf:
         - required: [field_id]
         - required: [lat, lon]

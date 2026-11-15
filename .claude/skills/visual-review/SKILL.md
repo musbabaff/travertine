@@ -64,9 +64,32 @@ route: /app/explore  viewport: 390
 Repeat until a full pass finds no defects. In the final report state: routes reviewed, viewports, states, number of
 defects found and fixed, and anything knowingly deferred (with reason).
 
-## 5. Pass criteria (all must hold)
+## 5. Live review on the deployed site (mandatory, after every merge)
+
+Mocked tiles and fixtures hide real problems: blurry imagery, slow cold starts, real engine text in Turkish, layout
+with real data lengths. A defect the human can see in thirty seconds on a phone must never reach them. So, once a
+change is live on https://travertinefields.com (check the `travertine-commit` meta tag matches the merged commit):
+
+1. Open the production URL in a real browser with **real network data**: no route interception, no fixtures, no
+   `fakeEngine`.
+2. At **390 px and 1440 px**, exercise the real flow end to end:
+   - choose a field (the demo field **and** one field elsewhere, ideally on another continent);
+   - wait for the real engine responses (they can take minutes on a cold location; the slow hint must show);
+   - switch map views (Map and Satellite) and zoom in on the field;
+   - open Explore, move a slider, change the horizon; open Evidence;
+   - switch the language to Turkish and back.
+3. Take screenshots at each step, **open and look at every one**, and list defects as in §4.
+4. Fix, merge, and repeat the live pass until clean. Only then report the item as done, and include the live
+   screenshots (or the most relevant ones) in the report.
+
+Script it with Playwright against the production URL (`page.goto("https://travertinefields.com/...")`, no
+`page.route`), or drive the built-in browser pane. Record in the report which fields, viewports and steps were run
+live, and which real responses were slow or failed.
+
+## 6. Pass criteria (all must hold)
 
 - [ ] All touched routes × 3 viewports × all states captured and opened.
 - [ ] Zero open defects, or each deferred one listed with a reason and agreed with the human.
 - [ ] No horizontal scroll at 390 px (`document.documentElement.scrollWidth <= 390`).
 - [ ] No console errors or React warnings during the capture run.
+- [ ] The live pass of §5 ran on production with real data at 390 and 1440 px and found no open defects.

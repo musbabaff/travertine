@@ -181,3 +181,15 @@ def test_explore_explanations_follow_language(settings: Settings, fake: FakeUpst
         assert len(a["explanation"]) == len(b["explanation"])
         assert b["explanation"][0].startswith("Kayıttaki ")
     assert en["provenance"] == tr["provenance"]
+
+
+def test_health_version_carries_the_deployed_commit(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("ENGINE_COMMIT", raising=False)
+    monkeypatch.delenv("RENDER_GIT_COMMIT", raising=False)
+    assert client.get("/v1/health").json()["version"] == "0.1.0"
+    monkeypatch.setenv("RENDER_GIT_COMMIT", "69B6D7B0c1af4f6b325a97f9d6a5c1af4f6b325a")
+    assert client.get("/v1/health").json()["version"] == "0.1.0+69b6d7b"
+    monkeypatch.setenv("ENGINE_COMMIT", "not a commit")
+    assert client.get("/v1/health").json()["version"] == "0.1.0+69b6d7b"

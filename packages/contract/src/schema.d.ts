@@ -121,6 +121,12 @@ export interface components {
         /** @description WGS84 longitude in decimal degrees. */
         Longitude: number;
         Unit01: number;
+        /**
+         * @description Language of engine-written sentences (explanations, caveats). Numbers inside them follow that language's convention (tr: 0,55, %4, 1 234). Ids, units, method and provenance stay English. Other values return 422.
+         * @default en
+         * @enum {string}
+         */
+        Language: "en" | "tr";
         Error: {
             /**
              * @example invalid_geometry
@@ -237,6 +243,8 @@ export interface components {
             irrigated: boolean;
             /** @description Restrict candidates to these crops. Omit for all crops. */
             crop_ids?: string[];
+            /** @description Language of rotations[].explanation[]. Default en. */
+            language?: components["schemas"]["Language"];
         } | unknown | unknown;
         /** @description All scores 0–1, higher is better. `risk` is high when risk is LOW. */
         RotationScores: {
@@ -488,6 +496,8 @@ export interface operations {
             query: {
                 lat: components["schemas"]["Latitude"];
                 lon: components["schemas"]["Longitude"];
+                /** @description Language of caveats[]. Default en. */
+                language?: components["schemas"]["Language"];
             };
             header?: never;
             path?: never;

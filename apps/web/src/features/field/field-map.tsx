@@ -1,9 +1,11 @@
 "use client";
 
 import * as maplibregl from "maplibre-gl";
-import type { GeoJSONSource, Map as MLMap, MapMouseEvent, StyleSpecification } from "maplibre-gl";
+import type { GeoJSONSource, Map as MLMap, MapMouseEvent } from "maplibre-gl";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { useI18n } from "@/i18n";
 import { closeRing, type LngLat } from "@/lib/geo";
+import { nativeMaxZoom, S2_NATIVE_ZOOM, satelliteProvider, satelliteStyle, VECTOR_MAX_ZOOM } from "@/lib/imagery";
 
 export type Basemap = "map" | "satellite";
 export type MapMode = "point" | "draw";
@@ -11,22 +13,6 @@ export type MapMode = "point" | "draw";
 export const DENIZLI_VIEW = { center: [28.98, 37.89] as LngLat, zoom: 13 };
 
 const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/positron";
-const SATELLITE_STYLE: StyleSpecification = {
-  version: 8,
-  glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-  sources: {
-    s2: {
-      type: "raster",
-      tiles: ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg"],
-      tileSize: 256,
-      maxzoom: 15,
-      attribution:
-        '<a href="https://s2maps.eu" target="_blank" rel="noreferrer">Sentinel-2 cloudless – s2maps.eu</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2020)',
-    },
-  },
-  layers: [{ id: "s2", type: "raster", source: "s2" }],
-};
-
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
 // MapLibre paint cannot read CSS variables, so the resolved token values are read once on the client.
@@ -69,11 +55,21 @@ function addOverlay(map: MLMap) {
 }
 
 export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMapClick, onReady }: Props) {
+  const { t } = useI18n();
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
+  /** Current zoom cap; re-applied after every style load so an async style swap cannot undo it. */
+  const capRef = useRef(VECTOR_MAX_ZOOM);
+  const applyCap = (z: number) => {
+    capRef.current = z;
+    mapRef.current?.setMaxZoom(z);
+  };
   const state = useRef({ point, ring, draft, mode, onMapClick });
   useLayoutEffect(() => {
     state.current = { point, ring, draft, mode, onMapClick };
+    // Static caps follow the basemap prop directly, so they hold even if the map was not ready when it changed.
+    if (basemap !== "satellite") capRef.current = VECTOR_MAX_ZOOM;
+    else if (satelliteProvider === "s2") capRef.current = S2_NATIVE_ZOOM;
   });
 
   const sync = () => {
@@ -95,7 +91,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     if (!container.current) return;
     const map = new maplibregl.Map({
       container: container.current,
-      style: VECTOR_STYLE,
+      style: basemap === "satellite" ? satelliteStyle() : VECTOR_STYLE,
       center: DENIZLI_VIEW.center,
       zoom: DENIZLI_VIEW.zoom,
       attributionControl: { compact: true },
@@ -103,8 +99,11 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
       dragRotate: false,
       pitchWithRotate: false,
       maxPitch: 0,
+      maxZoom: capRef.current,
     });
     mapRef.current = map;
+    // Exposed for end-to-end tests (zoom-cap assertions); read-only use.
+    (container.current as HTMLDivElement & { __map?: MLMap }).__map = map;
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     // Keep the field clear of the floating panel on wide screens.
@@ -112,6 +111,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     pad();
     window.addEventListener("resize", pad);
     map.on("style.load", () => {
+      map.setMaxZoom(capRef.current);
       addOverlay(map);
       sync();
     });
@@ -143,7 +143,32 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    map.setStyle(basemap === "satellite" ? SATELLITE_STYLE : VECTOR_STYLE, { diff: false });
+    map.setStyle(basemap === "satellite" ? satelliteStyle() : VECTOR_STYLE, { diff: false });
+    if (basemap !== "satellite") {
+      applyCap(VECTOR_MAX_ZOOM);
+      return;
+    }
+    if (satelliteProvider === "s2") {
+      applyCap(S2_NATIVE_ZOOM);
+      return;
+    }
+    // Esri: never show imagery beyond its native zoom at the place being viewed.
+    let ctrl: AbortController | null = null;
+    const cap = () => {
+      ctrl?.abort();
+      ctrl = new AbortController();
+      const { lng, lat } = map.getCenter();
+      const signal = ctrl.signal;
+      void nativeMaxZoom(lng, lat, signal).then((z) => {
+        if (!signal.aborted) applyCap(z);
+      });
+    };
+    cap();
+    map.on("moveend", cap);
+    return () => {
+      ctrl?.abort();
+      map.off("moveend", cap);
+    };
   }, [basemap]);
 
   useEffect(() => {
@@ -158,13 +183,22 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     if (!map || !flyTo) return;
     if (flyTo.bounds) {
       const pad = Math.round(Math.min(map.getContainer().clientWidth, map.getContainer().clientHeight) * 0.25);
-      map.fitBounds(flyTo.bounds, { padding: pad, maxZoom: 15.5, animate: !reducedMotion(), duration: 900 });
+      map.fitBounds(flyTo.bounds, { padding: pad, maxZoom: Math.min(16.5, map.getMaxZoom()), animate: !reducedMotion(), duration: 900 });
       return;
     }
-    const opts = { center: flyTo.center as [number, number], zoom: flyTo.zoom ?? Math.max(map.getZoom(), 14) };
+    const opts = { center: flyTo.center as [number, number], zoom: Math.min(flyTo.zoom ?? Math.max(map.getZoom(), 14), map.getMaxZoom()) };
     if (reducedMotion()) map.jumpTo(opts);
     else map.flyTo({ ...opts, duration: 900 });
   }, [flyTo]);
 
-  return <div ref={container} className="h-full w-full" data-testid="field-map" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={container} className="h-full w-full" data-testid="field-map" />
+      {basemap === "satellite" && (
+        <p data-testid="imagery-credit" className="pointer-events-none absolute left-2 top-2 max-w-[calc(100%-13rem)] rounded-sm bg-surface/90 px-1.5 py-0.5 text-xs text-ink-2 lg:left-[456px] lg:top-3">
+          {satelliteProvider === "esri" ? t("field.imagery.esri") : t("field.imagery.s2")}
+        </p>
+      )}
+    </div>
+  );
 }

@@ -46,6 +46,16 @@ const ROUTES: Record<string, { path: string; settle: number; states: State[] }> 
       { name: "error", mode: "error", query: DEMO_QUERY, ready: alert },
       { name: "fallback", mode: "down", query: DEMO_QUERY, ready: (p) => expect(p.getByTestId("demo-badge")).toBeVisible() },
       { name: "loaded-tr", mode: "ok", query: DEMO_QUERY, locale: "tr", ready: (p) => expect(p.getByText("Killi tın")).toBeVisible() },
+      {
+        name: "satellite",
+        mode: "ok",
+        query: DEMO_QUERY,
+        ready: (p) => expect(p.getByText("Clay loam")).toBeVisible(),
+        act: async (p) => {
+          await p.getByRole("radio", { name: "Satellite" }).click();
+          await expect(p.getByTestId("imagery-credit")).toBeVisible();
+        },
+      },
     ],
   },
   explore: {
@@ -81,6 +91,18 @@ const ROUTES: Record<string, { path: string; settle: number; states: State[] }> 
         },
       },
       { name: "loaded-tr", mode: "ok", query: DEMO_QUERY, locale: "tr", ready: (p) => expect(p.getByText("Bu sıralamanın nedeni").first()).toBeVisible() },
+    ],
+  },
+  data: {
+    path: "/app/data",
+    settle: 400,
+    states: [
+      { name: "no-field", mode: "ok", query: "", ready: (p) => expect(p.getByText("Choose a field to see its sources")).toBeVisible() },
+      { name: "loaded", mode: "ok", query: DEMO_QUERY, ready: (p) => expect(p.getByRole("heading", { name: /Datasets \(\d+\)/ })).toBeVisible() },
+      { name: "partial", mode: "partial", query: DEMO_QUERY, ready: (p) => expect(p.getByText("Demo data (contract fixture)").first()).toBeVisible() },
+      { name: "loading", mode: "slow", query: DEMO_QUERY, ready: (p) => expect(p.getByText("Loading…").first()).toBeVisible() },
+      { name: "error", mode: "error", query: DEMO_QUERY, ready: (p) => expect(p.getByText("Failed").first()).toBeVisible() },
+      { name: "loaded-tr", mode: "ok", query: DEMO_QUERY, locale: "tr", ready: (p) => expect(p.getByRole("heading", { name: /Veri kümeleri/ })).toBeVisible() },
     ],
   },
   evidence: {

@@ -130,7 +130,7 @@ Motor, her yanıtın arkasındaki veri kümelerini `provenance` dizisinde dönd�
 | Harmonized Landsat Sentinel-2 (HLS) v2.0 — *incelemede* | NASA LP DAAC, Microsoft Planetary Computer üzerinden | 30 m | Tarla ölçeğinde NDVI (2020'den itibaren) | [Veri kümesi](https://planetarycomputer.microsoft.com/dataset/hls2-l30) |
 | GPM IMERG — *planlanan* | NASA GES DISC | 0,1° | Bağımsız yağış karşılaştırması | — |
 
-Altlık haritalar: OpenFreeMap (OpenStreetMap verisi) ve EOX Sentinel-2 cloudless 2020. Yer arama: Photon (OpenStreetMap).
+Altlık haritalar: OpenFreeMap (OpenStreetMap verisi); uydu görüntüsü Esri World Imagery (ArcGIS API anahtarıyla) ya da anahtar yoksa EOX Sentinel-2 cloudless 2016 (CC BY 4.0). Yer arama: Photon (OpenStreetMap).
 
 ## Kanıt ve doğrulama
 

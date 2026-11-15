@@ -127,7 +127,7 @@ The engine returns the datasets behind every response in its `provenance` array;
 | Harmonized Landsat Sentinel-2 (HLS) v2.0 — *in review* | NASA LP DAAC, via Microsoft Planetary Computer | 30 m | Field-scale NDVI (2020 onwards) | [Dataset](https://planetarycomputer.microsoft.com/dataset/hls2-l30) |
 | GPM IMERG — *planned* | NASA GES DISC | 0.1° | Independent precipitation cross-check | — |
 
-Basemaps: OpenFreeMap (OpenStreetMap data) and EOX Sentinel-2 cloudless 2020. Place search: Photon (OpenStreetMap).
+Basemaps: OpenFreeMap (OpenStreetMap data); satellite imagery from Esri World Imagery (with an ArcGIS API key) or, without a key, EOX Sentinel-2 cloudless 2016 (CC BY 4.0). Place search: Photon (OpenStreetMap).
 
 ## Evidence and validation
 
