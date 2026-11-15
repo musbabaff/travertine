@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/brand/travertine-logo-stacked.svg" alt="Travertine" width="260"></p>
+<p align="center"><img src="docs/images/social-preview.png" alt="Travertine: crop-rotation decisions from Earth observation data" width="640"></p>
 
 <p align="center"><strong>English</strong> | <a href="README.tr.md">Türkçe</a></p>
 
