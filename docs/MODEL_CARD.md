@@ -14,6 +14,10 @@ improve agreement with observations. Details are in `docs/METHODOLOGY.md`.
 - Showing a farmer or adviser which seasons were hardest and how much of the crops' water demand went unmet.
 - Teaching and discussion. It is a decision-support aid for people who know the field.
 
+The tool can score the rotation a farmer already grows next to the alternatives it proposes, including one that
+breaks its own rotation rules, and reports the difference in every score. It supports the farmer's judgment and local
+expertise; it does not replace them.
+
 ## Not intended for
 
 - Yield, income or fertilizer recommendations for a specific field. Income uses an equal value per crop unless the user
