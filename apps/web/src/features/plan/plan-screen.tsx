@@ -43,7 +43,7 @@ function useDayMonth(locale: "en" | "tr") {
 
 function Card({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section aria-labelledby={id} className="tv-plan-card rounded-md border border-border bg-surface p-4 md:p-5">
+    <section aria-labelledby={id} className="tv-plan-card min-w-0 rounded-md border border-border bg-surface p-4 md:p-5">
       <h2 id={id} className="text-h3 font-semibold text-ink">
         {title}
       </h2>
@@ -60,7 +60,8 @@ function Calendar({ cal, name }: { cal: FieldCalendar; name: (id: string) => str
   const years = cal.seasons;
   return (
     <>
-      <table className="mt-3 w-full text-sm">
+      <div className="mt-3 overflow-x-auto">
+      <table className="w-full text-sm">
         <caption className="sr-only">{t("plan.calendar.title")}</caption>
         <thead className="text-left text-xs text-ink-2">
           <tr>
@@ -86,6 +87,7 @@ function Calendar({ cal, name }: { cal: FieldCalendar; name: (id: string) => str
           })}
         </tbody>
       </table>
+      </div>
 
       <h3 className="mt-5 text-sm font-semibold text-ink">{t("plan.months.title")}</h3>
       <p className="text-xs text-ink-muted">{t("plan.months.subtitle")}</p>

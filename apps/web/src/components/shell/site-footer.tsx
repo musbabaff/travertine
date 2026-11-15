@@ -15,7 +15,10 @@ export function SiteFooter() {
         <Link href="/" aria-label={t("nav.home")} className="w-fit rounded-sm">
           <BrandMark className="h-5" />
         </Link>
-        <p className="max-w-[80ch]">{t("footer.disclaimer")}</p>
+        <div className="max-w-[80ch] space-y-1">
+          <p className="font-medium text-ink">{t("landing.supports")}</p>
+          <p>{t("footer.disclaimer")}</p>
+        </div>
         <a href={REPO} className="w-fit rounded-sm font-medium text-teal-700 underline-offset-2 hover:underline md:ml-auto">
           {t("footer.source")}
         </a>

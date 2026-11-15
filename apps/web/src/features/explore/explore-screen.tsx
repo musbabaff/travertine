@@ -267,7 +267,7 @@ export function ExploreScreen() {
       {/* Compare tray: sticky inside the screen so it follows the viewport but never covers the site footer. */}
       {list && list.length > 1 ? (
         <div className="sticky bottom-0 z-20 -mx-4 mt-8 border-t border-border bg-surface/95 px-4 py-3 shadow-3 backdrop-blur-sm md:-mx-6 md:px-6 xl:-mx-8 xl:px-8" role="region" aria-label={t("explore.compare.title")}>
-          <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-3">
+          <div className="tv-compare-tray-inner mx-auto flex max-w-[1280px] flex-wrap items-center gap-3">
             <Columns2 aria-hidden className="hidden size-5 text-ink-muted sm:block" strokeWidth={1.5} />
             <p className="mr-auto text-sm text-ink-2" aria-live="polite">
               {activeSel.length === 0 ? t("explore.compare.hint") : t("explore.compare.selected", { count: activeSel.length })}

@@ -13,7 +13,7 @@ import { parseField } from "@/lib/url-state";
 import { useHazards } from "@/features/field/use-hazards";
 import { askField, fieldStarters, type FieldContext } from "./field-answers";
 import { askCosmo, GREETING, startersFor, type CosmoLink } from "./brain";
-import { COSMO_ASK, useGaze } from "./gaze";
+import { COSMO_ASK, COSMO_PENDING, useGaze } from "./gaze";
 import { useCosmoSpeech } from "./speech";
 import CosmoStage from "./stage";
 import CosmoMascot from "./mascot";
@@ -146,11 +146,14 @@ export default function CosmoAssistant() {
 
   useEffect(() => {
     function summoned(event: Event) {
+      delete (window as unknown as Record<string, unknown>)[COSMO_PENDING];
       show();
       const question = (event as CustomEvent<string | undefined>).detail;
       if (question) send(question);
     }
     window.addEventListener(COSMO_ASK, summoned);
+    const pending = (window as unknown as Record<string, unknown>)[COSMO_PENDING];
+    if (pending) summoned(new CustomEvent(COSMO_ASK, { detail: typeof pending === "string" ? pending : undefined }));
 
     let seen = true;
     try {

@@ -13,6 +13,7 @@ import { parseExplore, type Horizon } from "@/lib/priorities";
 import { useCrops, useRotations } from "../explore/use-explore";
 import { useValidation } from "../evidence/use-validation";
 import { useField, useFieldAnalysis, useFieldNdvi } from "../field/use-field";
+import { useHazards } from "../field/use-hazards";
 
 type Screen = "field" | "explore" | "evidence";
 
@@ -108,6 +109,7 @@ export function DataScreen() {
   const rotations = useRotations(field, explore.priorities, horizon, [], locale);
   const validation = useValidation(field, locale);
   const ndvi30 = useFieldNdvi(field);
+  const hazards = useHazards(field);
   const crops = useCrops();
 
   const status = (q: { isPending: boolean; isError: boolean }) => (q.isPending ? "pending" : q.isError ? "error" : "ok") as RequestState["status"];
@@ -116,6 +118,7 @@ export function DataScreen() {
         { key: "data.req.field", screen: "field", status: status(analysis), demo: source !== "engine", provenance: analysis.data?.provenance ?? [], retry: () => analysis.refetch() },
         { key: "data.req.ndvi30", screen: "field", status: status(ndvi30), demo: !!ndvi30.data?.fromFixture, provenance: ndvi30.data?.data.provenance ?? [], retry: () => ndvi30.refetch() },
         { key: "data.req.rotations", screen: "explore", status: status(rotations), demo: source !== "engine", provenance: rotations.data?.provenance ?? [], retry: () => rotations.refetch() },
+        { key: "data.req.hazards", screen: "field", status: status(hazards), demo: !!hazards.data?.fromFixture, provenance: hazards.data?.data.provenance ?? [], retry: () => hazards.refetch() },
         { key: "data.req.validation", screen: "evidence", status: status(validation), demo: !!validation.data?.fromFixture, provenance: validation.data?.data.provenance ?? [], retry: () => validation.refetch() },
       ]
     : [];
@@ -132,14 +135,17 @@ export function DataScreen() {
   const qs = params.toString();
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-4 pb-16 pt-6 md:px-6 md:pt-8">
-      <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
-        {t("data.title")}
-      </h1>
-      <p className="mt-1 max-w-[72ch] text-sm text-ink-2 md:text-body">{t("data.intro")}</p>
+    <div className="tv-feature-page mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-6 md:pt-8 xl:px-8">
+      <div className="tv-page-banner mb-6">
+        <span className="tv-banner-eyebrow">{t("data.eyebrow")}</span>
+        <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
+          {t("data.title")}
+        </h1>
+        <p className="mt-1 max-w-[72ch] text-sm md:text-body">{t("data.intro")}</p>
+      </div>
 
       {!field ? (
-        <div className="mt-6 rounded-md border border-border bg-surface p-5">
+        <div className="tv-card rounded-md border border-border bg-surface p-5">
           <div className="flex items-start gap-3">
             <MapPinned aria-hidden className="mt-0.5 size-5 shrink-0 text-teal-700" strokeWidth={1.5} />
             <div>
@@ -152,8 +158,8 @@ export function DataScreen() {
           </div>
         </div>
       ) : (
-        <>
-          <section aria-labelledby="requests-title" className="mt-6 rounded-md border border-border bg-surface px-4 py-2 shadow-1 md:px-5">
+        <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <section aria-labelledby="requests-title" className="tv-card self-start rounded-md border border-border bg-surface px-4 py-2 md:px-5 lg:sticky lg:top-6">
             <h2 id="requests-title" className="pt-2 text-h3 font-semibold">
               {t("data.requests")}
             </h2>
@@ -164,7 +170,7 @@ export function DataScreen() {
             </ul>
           </section>
 
-          <section aria-labelledby="datasets-title" className="mt-8">
+          <section aria-labelledby="datasets-title">
             <h2 id="datasets-title" className="text-h3 font-semibold">
               {t("data.datasets", { count: datasets.size })}
             </h2>
@@ -182,11 +188,11 @@ export function DataScreen() {
               )}
             </div>
           </section>
-        </>
+        </div>
       )}
 
       {crops.data && crops.data.length > 0 && (
-        <section aria-labelledby="crops-title" className="mt-8">
+        <section aria-labelledby="crops-title" className="tv-card mt-8 rounded-md border border-border bg-surface p-4 md:p-5">
           <h2 id="crops-title" className="text-h3 font-semibold">
             {t("data.crops")}
           </h2>
@@ -212,7 +218,7 @@ export function DataScreen() {
         </section>
       )}
 
-      <section aria-labelledby="map-title" className="mt-8">
+      <section aria-labelledby="map-title" className="tv-card mt-8 rounded-md border border-border bg-surface p-4 md:p-5">
         <h2 id="map-title" className="text-h3 font-semibold">
           {t("data.map")}
         </h2>
