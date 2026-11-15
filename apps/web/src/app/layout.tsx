@@ -9,8 +9,7 @@ import "./travertine-ui.css";
 import { pageMetadata, SITE_URL } from "@/lib/site";
 import { Providers } from "./providers";
 import { AppHeader } from "@/components/shell/app-header";
-import CosmoAssistant from "@/components/cosmo/assistant";
-import CosmoIntro from "@/components/cosmo/intro";
+import { LazyCosmo } from "@/components/cosmo/lazy";
 import { Suspense } from "react";
 
 const plex = IBM_Plex_Sans({
@@ -39,8 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Providers>
           <Suspense fallback={null}><AppHeader /></Suspense>
           <div className="tv-content">{children}</div>
-          <Suspense fallback={null}><CosmoAssistant /></Suspense>
-          <CosmoIntro />
+          <LazyCosmo />
         </Providers>
       </body>
     </html>
