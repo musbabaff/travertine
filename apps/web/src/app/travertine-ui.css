@@ -219,3 +219,6 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .tv-card, .tv-field-hero, .tv-bars span, .tv-dropdown, .tv-mobile-menu { animation: none; }
 }
+
+/* Map zoom buttons sit under the Map/Satellite toggle so the Cosmo guide (bottom right) never covers them. */
+.maplibregl-ctrl-top-right { top: 64px; }

@@ -105,7 +105,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     // Exposed for end-to-end tests (zoom-cap assertions); read-only use.
     (container.current as HTMLDivElement & { __map?: MLMap }).__map = map;
     map.touchZoomRotate.disableRotation();
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     // Keep the field clear of the floating panel on wide screens.
     const pad = () => map.setPadding({ top: 0, right: 0, bottom: 0, left: window.innerWidth >= 1024 ? 440 : 0 });
     pad();
