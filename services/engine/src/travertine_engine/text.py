@@ -554,3 +554,19 @@ def calendar_caveats(lang: Language, *, first: int, last: int) -> list[str]:
         "The warm-day threshold is the record's own monthly 90th percentile, not a crop-specific heat-stress "
         "threshold.",
     ]
+
+
+def scenario_label(lang: Language, *, factor: float, delta: float) -> str:
+    share = pct(factor, lang)
+    change = num(delta, 1, lang, sign=True)
+    if lang == "tr":
+        return (
+            f"Duyarlılık testi: geçmiş yılların yağışı {share} ölçeğinde alındı ve sıcaklıklara {change} °C "
+            "eklendi. Sonuçlar bu değişiklikle geçmiş yılların nasıl puanlanacağını gösterir; gelecek iklim için "
+            "bir tahmin değildir."
+        )
+    return (
+        f"Sensitivity test: past years' precipitation scaled to {share} and {change} °C added to temperatures. "
+        "The results show how those past years would have scored with that change; they are not a forecast of "
+        "future climate."
+    )

@@ -131,6 +131,17 @@ class InputSource(_Model):
     replaces: str
 
 
+class Scenario(_Model):
+    precipitation_factor: float = Field(ge=0.5, le=1.5)
+    temperature_change_c: float = Field(ge=-3, le=5)
+
+
+class ScenarioApplied(_Model):
+    precipitation_factor: float
+    temperature_change_c: float
+    label: str
+
+
 class RotationExploreRequest(_Model):
     field_id: str | None = None
     lat: Latitude | None = None
@@ -142,6 +153,7 @@ class RotationExploreRequest(_Model):
     language: Language = "en"
     farmer_inputs: FarmerInputs | None = None
     current_rotation: list[str] | None = Field(default=None, min_length=1, max_length=5)
+    scenario: Scenario | None = None
 
 
 class RotationScores(_Model):
@@ -209,6 +221,7 @@ class BaselineRotation(Rotation):
 class RotationExploreResponse(_Model):
     rotations: list[Rotation]
     baseline: BaselineRotation | None = None
+    scenario: ScenarioApplied | None = None
     inputs: list[InputSource]
     provenance: list[Provenance]
 

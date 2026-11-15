@@ -20,6 +20,7 @@ expertise; it does not replace them. Each strategy lists its information gaps an
 
 ## Not intended for
 
+- Climate projection: the scenario inputs are a sensitivity test on past years, not a forecast.
 - Yield, income or fertilizer recommendations for a specific field. Income uses an equal value per crop unless the user
   supplies one; legume nitrogen credits come from a US Midwest extension publication and are used only as a relative
   soil indicator.

@@ -224,6 +224,17 @@ crop is in the field: the median over years of the climatic deficit max(0, 1 −
 soil water), and the share of the crop's days with frost or warm days. The most vulnerable month per hazard is the one
 with the highest share. These are past frequencies, not forecasts.
 
+## 7c. Scenario sensitivity test
+
+`scenario` on `/v1/rotations/explore` multiplies every day's NASA POWER precipitation by `precipitation_factor`
+(0.5–1.5) and adds `temperature_change_c` (−3 to +5 °C) to daily mean, maximum, minimum and dew-point temperature.
+Shifting the dew point with the air keeps relative humidity roughly unchanged; wind, radiation and pressure stay as
+recorded. FAO-56 Penman-Monteith ET0, the Kc climate adjustment and the soil water balance are then recomputed and the
+rotations are scored as usual. The response is labelled as a sensitivity test on past years: it shows how those years
+would have scored under the change and is not a projection of future climate. Example, demo field, lentil → barley
+over 4 years: precipitation × 0.8 and +2 °C raise median demand from 1,060 to 1,128 mm and unmet demand from 45 to
+116 mm; the water score falls from 0.956 to 0.899.
+
 ## 8. Vegetation record and validation
 
 **NDVI history.** `/v1/field/analyze` returns `ndvi_history`: for each year, the mean MODIS/Terra MOD13Q1 v061 NDVI
