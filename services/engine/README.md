@@ -66,6 +66,16 @@ The current snapshot (14 November 2026): POWER and SoilGrids fetched live; the 2
 earlier the same day because the ORNL service was answering 502 at the time, and the manifest marks them
 `seeded_from_earlier_fetch`.
 
+Since 15 November 2026 the snapshot also holds the eight multi-site validation locations (`scripts/validate_sites.py`):
+POWER, SoilGrids and every complete MODIS season, as fetched live for the multi-site run on 14 November. They open
+offline in about a second. At two of them (Settat, Great Bend) SoilGrids has no complete prediction, so their field
+analysis uses the labelled default soil, exactly as a live request would. To add them to a fresh snapshot:
+
+```bash
+uv run python scripts/validate_sites.py                     # fetches the sites live into data/cache
+uv run python scripts/add_sites_to_snapshot.py data/cache   # copies their responses into data/snapshot
+```
+
 ## Environment variables
 
 All optional. See the root `.env.example`.

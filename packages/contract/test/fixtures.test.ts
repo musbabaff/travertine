@@ -34,6 +34,10 @@ describe("contract fixtures validate against openapi.yaml", () => {
   });
   it("validation", () => expect(validate("Validation", fixture("validation.json"))).toEqual([]));
   it("field ndvi (30 m)", () => expect(validate("FieldNdvi", fixture("field-ndvi.json"))).toEqual([]));
+  it("field climate", () => expect(validate("FieldClimate", fixture("field-climate.json"))).toEqual([]));
+  it("field soil", () => expect(validate("FieldSoil", fixture("field-soil.json"))).toEqual([]));
+  it("field vegetation", () => expect(validate("FieldVegetation", fixture("field-vegetation.json"))).toEqual([]));
+  it("showcase", () => expect(validate("Showcase", fixture("showcase.json"))).toEqual([]));
 });
 
 describe("fixture consistency", () => {
