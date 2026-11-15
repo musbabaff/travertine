@@ -11,6 +11,10 @@ change anything. These rules override defaults; if a rule blocks you, stop and a
 | **Web agent** | `apps/web/**`, `packages/contract/**`, `.claude/**`, root config (`package.json`, `pnpm-workspace.yaml`, `.github/**`, `README.md`, `CLAUDE.md`, `docs/AI_USE.md`) | `services/engine/**` |
 | **Engine agent** | `services/engine/**`, `docs/METHODOLOGY.md`, `docs/AI_USE.md` (append only) | `apps/web/**`, `packages/contract/**`, `.claude/**`, `.github/**` |
 
+- **Change of ownership, 15 November 2026 (final hours of the hackathon):** the web agent ran out of usage and
+  stopped (handover in issue #75). One agent now owns the whole repository: `apps/web`, `packages/contract`,
+  `.claude`, `.github` and `services/engine`. Contract changes still go in their own `contract:` PR. The table above
+  applies again if a second agent joins.
 - If you need a change in an area you do not own, open an issue (or tell your human) describing exactly what and why.
   Do not make the change yourself, not even a one-line fix.
 - The engine agent may add an engine CI job by asking the web agent; the root workflow already runs engine tests when

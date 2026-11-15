@@ -39,8 +39,9 @@ export function DashboardScreen() {
   const exploreHref = `/app/explore?${query}`;
   const evidenceHref = `/app/evidence?${query}`;
   const maxRain = Math.max(1, ...recent.map((y) => y.precipitation_mm));
-  const textureKey = `texture.${data?.soil.texture.toLowerCase()}` as MessageKey;
-  const texture = data ? (t(textureKey) === textureKey ? data.soil.texture : t(textureKey)) : "—";
+  const soil = data?.soil;
+  const textureKey = `texture.${soil?.texture.toLowerCase()}` as MessageKey;
+  const texture = soil ? (t(textureKey) === textureKey ? soil.texture : t(textureKey)) : "—";
   const pending = analysis.isError ? t("overview.failed") : t("overview.loading");
   const ratio = rainfall === null || et0 === null ? null : Math.round((rainfall / Math.max(et0, 1)) * 100);
 
@@ -108,11 +109,11 @@ export function DashboardScreen() {
                 </div>
                 <div>
                   <span>{t("summary.ph")}</span>
-                  <strong>{data ? n(data.soil.ph, 1) : "—"}</strong>
+                  <strong>{soil ? n(soil.ph, 1) : "—"}</strong>
                 </div>
                 <div>
                   <span>{t("summary.oc")}</span>
-                  <strong>{data ? `${n(data.soil.organic_carbon, 1)} ${t("unit.gkg")}` : "—"}</strong>
+                  <strong>{soil ? `${n(soil.organic_carbon, 1)} ${t("unit.gkg")}` : "—"}</strong>
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ShowcasePicker } from "../showcase/showcase-picker";
 import type { Map as MLMap } from "maplibre-gl";
 import { ArrowRight, Check, Crosshair, MapPinned, Trash2, Undo2, X } from "lucide-react";
 import Link from "next/link";
@@ -227,16 +228,19 @@ export function FieldScreen() {
           {!field && (
             <div className="border-t border-border pt-5">
               <EmptyState title={t("empty.title")} body={t("empty.body")} />
+              <div className="mt-5">
+                <ShowcasePicker />
+              </div>
             </div>
           )}
 
           {field && (
             <div>
               <h2 className="mb-4 text-h3 font-semibold">{t("summary.title")}</h2>
-              {analysis.isPending ? (
+              {analysis.isError && !analysis.data ? (
+                <FieldSummaryError message={analysis.error?.message ?? ""} onRetry={() => analysis.refetch()} />
+              ) : !analysis.data ? (
                 <FieldSummarySkeleton />
-              ) : analysis.isError ? (
-                <FieldSummaryError message={analysis.error.message} onRetry={() => analysis.refetch()} />
               ) : (
                 <>
                   <FieldSummary data={analysis.data} field={field} />

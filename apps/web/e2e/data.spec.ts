@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import field from "../../../packages/contract/fixtures/field-analyze.json";
+import climate from "../../../packages/contract/fixtures/field-climate.json";
+import soil from "../../../packages/contract/fixtures/field-soil.json";
+import vegetation from "../../../packages/contract/fixtures/field-vegetation.json";
 import validation from "../../../packages/contract/fixtures/validation.json";
 import { DEMO_QUERY, fakeEngine } from "./engine";
 
@@ -9,7 +11,7 @@ test.describe("Data screen", () => {
     await fakeEngine(page);
     await page.goto(`/app/data?${DEMO_QUERY}`);
     await expect(page.getByRole("heading", { name: /Datasets \(\d+\)/ })).toBeVisible();
-    const names = new Set([...field.provenance, ...validation.provenance].map((p) => p.dataset));
+    const names = new Set([...climate.provenance, ...soil.provenance, ...vegetation.provenance, ...validation.provenance].map((p) => p.dataset));
     for (const name of names) await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
     await expect(page.getByText("Live engine").first()).toBeVisible();
     await expect(page.getByRole("link", { name: /Open dataset/ }).first()).toHaveAttribute("href", /^https:\/\//);

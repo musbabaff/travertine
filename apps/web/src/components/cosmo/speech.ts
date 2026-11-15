@@ -35,6 +35,19 @@ const errors: Record<string, string> = {
   network: "cosmo.speech.network",
 };
 
+type BraveNavigator = Navigator & { brave?: unknown };
+const NOTE_SEEN = "cosmo-voice-note-seen";
+
+/**
+ * Speech recognition that can work here. Firefox has no SpeechRecognition; Brave exposes webkitSpeechRecognition but
+ * blocks the Google service behind it, so every attempt ends in a network error. Both count as unsupported.
+ */
+export function voiceInputSupported(w: Window): boolean {
+  const vw = w as VoiceWindow;
+  if ((w.navigator as BraveNavigator).brave !== undefined) return false;
+  return Boolean(vw.SpeechRecognition || vw.webkitSpeechRecognition);
+}
+
 export function useCosmoSpeech(onTranscript: (text: string) => void) {
   const receiver = useRef(onTranscript);
 
@@ -54,11 +67,20 @@ export function useCosmoSpeech(onTranscript: (text: string) => void) {
   const [enabled, setEnabled] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [error, setError] = useState("");
+  const [showUnsupportedNote, setShowUnsupportedNote] = useState(false);
 
   useEffect(() => {
-    const voiceWindow = window as VoiceWindow;
     const frame = requestAnimationFrame(() => {
-      setInputSupported(Boolean(voiceWindow.SpeechRecognition || voiceWindow.webkitSpeechRecognition));
+      const supported = voiceInputSupported(window);
+      setInputSupported(supported);
+      if (!supported) {
+        try {
+          setShowUnsupportedNote(localStorage.getItem(NOTE_SEEN) !== "1");
+          localStorage.setItem(NOTE_SEEN, "1");
+        } catch {
+          setShowUnsupportedNote(true);
+        }
+      }
       setOutputSupported("speechSynthesis" in window && "SpeechSynthesisUtterance" in window);
     });
     return () => {
@@ -176,5 +198,5 @@ export function useCosmoSpeech(onTranscript: (text: string) => void) {
     }
   }
 
-  return { inputSupported, outputSupported, listening, speaking, enabled, transcript, error, toggleListening, toggleOutput, speak, stop, clearTranscript: () => setTranscript("") };
+  return { inputSupported, showUnsupportedNote, outputSupported, listening, speaking, enabled, transcript, error, toggleListening, toggleOutput, speak, stop, clearTranscript: () => setTranscript("") };
 }

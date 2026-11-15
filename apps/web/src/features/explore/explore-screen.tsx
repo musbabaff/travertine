@@ -91,7 +91,7 @@ export function ExploreScreen() {
   return (
     <div className="tv-feature-page mx-auto w-full max-w-[1280px] px-4 pt-6 md:px-6 md:pt-8 xl:px-8">
       <div className="tv-page-banner mb-6">
-        <span className="tv-banner-eyebrow">TRAVERTINE / ANALİZLER</span>
+        <span className="tv-banner-eyebrow">{t("explore.eyebrow")}</span>
         <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
           {t("explore.title")}
         </h1>

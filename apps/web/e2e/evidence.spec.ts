@@ -33,7 +33,7 @@ test.describe("Evidence screen", () => {
     await expect(box).toContainText(validation.baseline!.name);
     await expect(box).toContainText(`95 % interval ${validation.correlation_ci95![0].toFixed(2)} to ${validation.correlation_ci95![1].toFixed(2)}`);
     await expect(box).toContainText(`95 % interval ${validation.baseline!.correlation_ci95[0].toFixed(2)} to ${validation.baseline!.correlation_ci95[1].toFixed(2)}`);
-    await expect(page.getByTestId("verdict")).toContainText("No detectable difference between the model and the baseline: the interval of the difference includes 0.");
+    await expect(page.getByTestId("verdict")).toContainText("A difference between the model and the baseline is not established: the interval of the difference includes 0.");
   });
 
   test("labels the fixture as demo data when the engine does not serve validation", async ({ page }) => {
@@ -50,7 +50,8 @@ test.describe("Evidence screen", () => {
     await page.keyboard.press("Home");
     await expect(page.getByText(`${validation.years[0].year}: stress`)).toBeVisible();
     await page.getByRole("button", { name: "View as table" }).click();
-    await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(validation.years.length);
+    const years = page.getByRole("table").filter({ hasText: String(validation.years[0].year) });
+    await expect(years.locator("tbody tr")).toHaveCount(validation.years.length);
   });
 
   test("shows an error with retry", async ({ page }) => {

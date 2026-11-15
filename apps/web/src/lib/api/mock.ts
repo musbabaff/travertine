@@ -5,6 +5,8 @@ import rotations from "@travertine/contract/fixtures/rotations-explore.json";
 import validation from "@travertine/contract/fixtures/validation.json";
 import fieldNdvi from "@travertine/contract/fixtures/field-ndvi.json";
 import showcase from "@travertine/contract/fixtures/showcase.json";
+import fieldClimate from "@travertine/contract/fixtures/field-climate.json";
+import fieldSoil from "@travertine/contract/fixtures/field-soil.json";
 import fieldRequest from "@travertine/contract/fixtures/field-analyze.request.json";
 import exploreRequest from "@travertine/contract/fixtures/rotations-explore.request.json";
 import { weightedTotal } from "../priorities";
@@ -61,6 +63,10 @@ export function mockResponse(method: string, url: string, body: string | null = 
       return json(fieldNdvi);
     case "GET /v1/showcase":
       return json(showcase);
+    case "GET /v1/field/climate":
+      return json(fieldClimate);
+    case "GET /v1/field/soil":
+      return json(fieldSoil);
     default:
       return null;
   }

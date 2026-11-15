@@ -12,6 +12,10 @@ const ROUTES: Record<string, string> = {
   "/v1/rotations/explore": "rotations-explore.json",
   "/v1/validation": "validation.json",
   "/v1/field/ndvi": "field-ndvi.json",
+  "/v1/field/climate": "field-climate.json",
+  "/v1/field/soil": "field-soil.json",
+  "/v1/field/vegetation": "field-vegetation.json",
+  "/v1/showcase": "showcase.json",
 };
 
 const cors = {
