@@ -254,5 +254,7 @@
   "evidence.verdict.no_detectable_difference": "No detectable difference between the model and the baseline: the interval of the difference includes 0.",
   "evidence.axis.baseline": "Baseline index",
   "evidence.axis.index": "Index (0–1)",
-  "evidence.legend.baseline": "Baseline dryness index"
+  "evidence.legend.baseline": "Baseline dryness index",
+  "field.imagery.esri": "Powered by Esri",
+  "field.imagery.s2": "Sentinel-2 imagery, 10 m per pixel. Zoom is limited so it is not stretched."
 }

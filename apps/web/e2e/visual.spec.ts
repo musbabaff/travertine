@@ -46,6 +46,16 @@ const ROUTES: Record<string, { path: string; settle: number; states: State[] }> 
       { name: "error", mode: "error", query: DEMO_QUERY, ready: alert },
       { name: "fallback", mode: "down", query: DEMO_QUERY, ready: (p) => expect(p.getByTestId("demo-badge")).toBeVisible() },
       { name: "loaded-tr", mode: "ok", query: DEMO_QUERY, locale: "tr", ready: (p) => expect(p.getByText("Killi tın")).toBeVisible() },
+      {
+        name: "satellite",
+        mode: "ok",
+        query: DEMO_QUERY,
+        ready: (p) => expect(p.getByText("Clay loam")).toBeVisible(),
+        act: async (p) => {
+          await p.getByRole("radio", { name: "Satellite" }).click();
+          await expect(p.getByTestId("imagery-credit")).toBeVisible();
+        },
+      },
     ],
   },
   explore: {

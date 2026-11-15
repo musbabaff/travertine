@@ -27,6 +27,15 @@ test.describe("Field screen", () => {
     await expect(box).toContainText(ndvi30.caveats[0]);
   });
 
+  test("never zooms satellite imagery beyond its native resolution", async ({ page }) => {
+    await fakeEngine(page);
+    await page.goto(`/app?${DEMO_QUERY}`);
+    await page.getByRole("radio", { name: "Satellite" }).click();
+    await expect(page.getByTestId("imagery-credit")).toBeVisible();
+    // Without an ArcGIS key the 10 m Sentinel-2 layer is used, capped at zoom 14.
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __travertineMap?: { getMaxZoom(): number } }).__travertineMap?.getMaxZoom())).toBe(14);
+  });
+
   test("restores the field from a shared URL and toggles irrigation", async ({ page }) => {
     await fakeEngine(page);
     await page.goto(`/app?${DEMO_QUERY}`);
