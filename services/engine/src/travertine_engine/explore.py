@@ -13,8 +13,11 @@ import numpy as np
 
 from travertine_engine import text
 from travertine_engine.errors import InvalidRequest
+from travertine_engine.farmer import SoilChoice, choose_soil, crop_weights, other_records
 from travertine_engine.field import FieldService, parse_field_id, power_provenance, resolve_soil
 from travertine_engine.models import (
+    FarmerInputs,
+    FarmerSoil,
     Priorities,
     Provenance,
     Rotation,
@@ -35,7 +38,7 @@ from travertine_engine.science.rotations import (
     enumerate_rotations,
     soil_indicators,
 )
-from travertine_engine.science.soil import OC_TO_OM, depth_weighted_mean, saxton_rawls_water_contents
+from travertine_engine.science.soil import saxton_rawls_water_contents
 from travertine_engine.science.water import surface_layer
 from travertine_engine.text import crop_name
 
@@ -105,10 +108,8 @@ class Scored:
 class ExploreService:
     def __init__(self, fields: FieldService) -> None:
         self.fields = fields
-        self._tables: OrderedDict[
-            tuple[float, float, bool, tuple[str, ...]], tuple[RotationTables, FieldInputs]
-        ] = OrderedDict()
-        self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
+        self._tables: OrderedDict[tuple[object, ...], tuple[RotationTables, FieldInputs]] = OrderedDict()
+        self._locks: dict[tuple[object, ...], asyncio.Lock] = {}
         self._scores: OrderedDict[tuple[object, ...], CandidateScores] = OrderedDict()
         self._score_locks: dict[tuple[object, ...], asyncio.Lock] = {}
         # One heavy computation at a time: on a 512 MB instance a background warm-up and a user request building
@@ -116,17 +117,19 @@ class ExploreService:
         self._heavy = asyncio.Semaphore(1)
 
     async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
+        inputs, provenance, choice = await self.field_inputs(lat, lon, None)
+        return inputs, provenance, choice.texture
+
+    async def field_inputs(
+        self, lat: float, lon: float, test: FarmerSoil | None
+    ) -> tuple[FieldInputs, list[Provenance], SoilChoice]:
         (daily, api_version), soil = await asyncio.gather(
             self.fields.daily_climate(lat, lon),
             resolve_soil(self.fields.upstream, self.fields.cache, lat, lon),
         )
         df = daily.frame
-        top = [layer for layer in soil.layers if layer.bottom_cm <= 15]
-        sand = depth_weighted_mean(top, "sand_pct", 15)
-        silt = depth_weighted_mean(top, "silt_pct", 15)
-        clay = depth_weighted_mean(top, "clay_pct", 15)
-        soc = depth_weighted_mean(top, "soc_g_kg", 15)
-        theta_wp, theta_fc = saxton_rawls_water_contents(sand, clay, soc / 10.0 * OC_TO_OM)
+        choice = choose_soil(soil, test)
+        theta_wp, theta_fc = saxton_rawls_water_contents(choice.sand, choice.clay, choice.om_pct)
         first_day = df.index[0].date()
         inputs = FieldInputs(
             first_day=first_day,
@@ -135,25 +138,30 @@ class ExploreService:
             tmax=df["T2M_MAX"].to_numpy(dtype=float),
             tdew=df["T2MDEW"].to_numpy(dtype=float),
             u2=df["WS2M"].to_numpy(dtype=float),
-            awc_mm_per_m=soil.soil.awc_mm,
-            surface=surface_layer(theta_fc, theta_wp, sand, silt, clay),
-            texture=soil.soil.texture,
+            awc_mm_per_m=choice.awc_mm_per_m,
+            surface=surface_layer(theta_fc, theta_wp, choice.sand, choice.silt, choice.clay),
+            texture=choice.texture,
         )
         years, dropped = annual_summary(daily)
         first = years[0].year if years else self.fields.settings.first_year
         last = years[-1].year if years else self.fields.settings.last_year
         provenance = [power_provenance(daily, first, last, api_version, dropped), soil.provenance]
-        return inputs, provenance, soil.soil.texture
+        return inputs, provenance, choice
 
     async def tables(
-        self, lat: float, lon: float, irrigated: bool, crops: tuple[CropParams, ...]
-    ) -> tuple[RotationTables, FieldInputs, list[Provenance]]:
-        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops))
-        inputs, provenance, _ = await self.inputs(lat, lon)
+        self,
+        lat: float,
+        lon: float,
+        irrigated: bool,
+        crops: tuple[CropParams, ...],
+        test: FarmerSoil | None = None,
+    ) -> tuple[RotationTables, FieldInputs, list[Provenance], SoilChoice]:
+        inputs, provenance, choice = await self.field_inputs(lat, lon, test)
+        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops), choice.key)
         cached = self._tables.get(key)
         if cached is not None:
             self._tables.move_to_end(key)
-            return cached[0], cached[1], provenance
+            return cached[0], cached[1], provenance, choice
         lock = self._locks.setdefault(key, asyncio.Lock())
         async with lock:
             cached = self._tables.get(key)
@@ -169,15 +177,31 @@ class ExploreService:
                 while len(self._tables) > TABLE_CACHE_SIZE:
                     self._tables.popitem(last=False)
                 cached = self._tables[key]
-        return cached[0], cached[1], provenance
+        return cached[0], cached[1], provenance, choice
 
     async def scores(
-        self, lat: float, lon: float, irrigated: bool, crops: tuple[CropParams, ...], horizon: int
-    ) -> tuple[RotationTables, FieldInputs, list[Provenance], CandidateScores]:
+        self,
+        lat: float,
+        lon: float,
+        irrigated: bool,
+        crops: tuple[CropParams, ...],
+        horizon: int,
+        test: FarmerSoil | None = None,
+        weights: np.ndarray | None = None,
+    ) -> tuple[RotationTables, FieldInputs, list[Provenance], CandidateScores, SoilChoice]:
         """Candidate scores are independent of the priorities, so they are computed once per field, mode, crop set
         and horizon; a request then only weighs them and describes the top ten."""
-        tables, inputs, provenance = await self.tables(lat, lon, irrigated, crops)
-        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops), horizon)
+        tables, inputs, provenance, choice = await self.tables(lat, lon, irrigated, crops, test)
+        values = None if weights is None else tuple(round(float(w), 6) for w in weights)
+        key = (
+            round(lat, 4),
+            round(lon, 4),
+            irrigated,
+            tuple(c.id for c in crops),
+            horizon,
+            choice.key,
+            values,
+        )
         cached = self._scores.get(key)
         if cached is None:
             async with self._score_locks.setdefault(key, asyncio.Lock()):
@@ -185,7 +209,9 @@ class ExploreService:
                 if cached is None:
                     started = time.perf_counter()
                     async with self._heavy:
-                        cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
+                        cached = await asyncio.to_thread(
+                            score_candidates, tables, inputs.texture, horizon, weights
+                        )
                     log.info(
                         "candidate scores built",
                         extra={
@@ -197,7 +223,7 @@ class ExploreService:
                     while len(self._scores) > SCORE_CACHE_SIZE:
                         self._scores.popitem(last=False)
         self._scores.move_to_end(key)
-        return tables, inputs, provenance, cached
+        return tables, inputs, provenance, cached, choice
 
     async def warm(self, lat: float, lon: float, horizons: tuple[int, ...] = (3, 4, 5)) -> None:
         """Fill the table and score caches for one field, rain-fed then irrigated, all crops."""
@@ -214,8 +240,10 @@ class ExploreService:
         else:
             raise InvalidRequest("Provide field_id or both lat and lon.")
         crops = select_crops(req.crop_ids)
-        tables, inputs, provenance, scores = await self.scores(
-            lat, lon, req.irrigated, crops, req.horizon_years
+        farmer = req.farmer_inputs or FarmerInputs()
+        weights = crop_weights(crops, farmer.crop_values)
+        tables, inputs, provenance, scores, choice = await self.scores(
+            lat, lon, req.irrigated, crops, req.horizon_years, farmer.soil, weights
         )
         result = await asyncio.to_thread(rank_scores, tables, scores, req.priorities)
         rotations = describe(tables, result, inputs.texture, req)
@@ -226,7 +254,8 @@ class ExploreService:
             A3517_PROVENANCE,
             scoring_provenance(n_windows, tables.years[0], tables.years[-1], req.horizon_years),
         ]
-        return RotationExploreResponse(rotations=rotations, provenance=provenance)
+        records = [*choice.records, *other_records(crops, req.crop_ids, farmer.crop_values, req.irrigated)]
+        return RotationExploreResponse(rotations=rotations, inputs=records, provenance=provenance)
 
 
 def select_crops(crop_ids: list[str] | None) -> tuple[CropParams, ...]:
@@ -282,7 +311,11 @@ class Ranked:
 CHUNK = 1024  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
 
 
-def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _chunk_scores(
+    cast: Backcast, weights: np.ndarray | None = None
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """`weights` (rotations × years) scale each crop year's share of demand met by the farmer's value for that crop,
+    relative to the most valuable one; without them every crop counts the same."""
     ok = cast.window_valid
     n = ok.shape[0]
     demand = cast.etc.sum(axis=2)
@@ -296,7 +329,10 @@ def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     p90 = row_percentile(unmet, 90)
     risk = np.clip(1.0 - (0.5 * p90 + 0.5 * (p90 - p10)), 0.0, 1.0)
 
-    rel_et = np.where(ok[:, :, None], cast.eta / np.maximum(cast.etc, 1e-9), np.nan).reshape(n, -1)
+    rel_et = cast.eta / np.maximum(cast.etc, 1e-9)
+    if weights is not None:
+        rel_et = rel_et * weights[:, None, :]
+    rel_et = np.where(ok[:, :, None], rel_et, np.nan).reshape(n, -1)
     with np.errstate(invalid="ignore"):
         income = np.clip(np.nanmean(rel_et, axis=1), 0.0, 1.0)
     return water, income, risk
@@ -315,7 +351,9 @@ class CandidateScores:
     window_years: tuple[int, ...]  # first year of every window valid for at least one candidate
 
 
-def score_candidates(tables: RotationTables, texture: str, horizon: int) -> CandidateScores:
+def score_candidates(
+    tables: RotationTables, texture: str, horizon: int, crop_weights: np.ndarray | None = None
+) -> CandidateScores:
     rot, indicators = candidates(tables.crops, horizon, texture)
     if rot.shape[0] == 0:
         raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
@@ -325,9 +363,11 @@ def score_candidates(tables: RotationTables, texture: str, horizon: int) -> Cand
     windows_used: np.ndarray | None = None
     window_years: tuple[int, ...] = ()
     for lo in range(0, n, CHUNK):
-        part = backcast(tables, rot[lo : lo + CHUNK])
+        chunk = rot[lo : lo + CHUNK]
+        part = backcast(tables, chunk)
         hi = lo + part.etc.shape[0]
-        water[lo:hi], income[lo:hi], risk[lo:hi] = _chunk_scores(part)
+        weights = None if crop_weights is None else crop_weights[chunk]
+        water[lo:hi], income[lo:hi], risk[lo:hi] = _chunk_scores(part, weights)
         any_valid[lo:hi] = part.window_valid.any(axis=1)
         used = part.window_valid.any(axis=0)
         windows_used = used if windows_used is None else windows_used | used
@@ -439,7 +479,7 @@ def describe(
             text.diversity(
                 lang, families=ind.families, root_range_m=ind.root_range_m, cover=ind.cover_fraction
             ),
-            text.income_note(lang),
+            text.income_note(lang, weighted=bool(req.farmer_inputs and req.farmer_inputs.crop_values)),
         ]
         out.append(
             Rotation(

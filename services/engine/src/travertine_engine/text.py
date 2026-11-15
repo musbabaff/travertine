@@ -131,7 +131,19 @@ def diversity(lang: Language, *, families: int, root_range_m: float, cover: floa
     )
 
 
-def income_note(lang: Language) -> str:
+def income_note(lang: Language, *, weighted: bool = False) -> str:
+    if weighted:
+        if lang == "tr":
+            return (
+                "Gelir endeksi her ürün yılını, o ürün için girdiğiniz değerin en yüksek değere oranıyla ve "
+                "ürünün su ihtiyacının karşılanan payıyla ağırlıklandırır; maliyet ve verim kullanmaz, bu yüzden "
+                "onu kâr tahmini olarak değil, değerle ağırlıklandırılmış bir üretim endeksi olarak okuyun."
+            )
+        return (
+            "The income index weights each crop year by the value you gave for that crop, relative to the highest "
+            "value, times the share of its water demand that was met; it uses no costs or yields, so treat it as a "
+            "value-weighted production index, not a profit estimate."
+        )
     if lang == "tr":
         return (
             "Gelir endeksi yalnızca her ürünün su ihtiyacının ne kadarının karşılandığını yansıtır; fiyat "
