@@ -15,7 +15,7 @@ CROP_NAMES_TR = {
     "barley": "arpa",
     "lentil": "mercimek",
     "faba_bean": "bakla (kuru tane)",
-    "maize": "mısır (dane)",
+    "maize": "dane mısır",
     "sorghum": "sorgum (dane)",
     "cotton": "pamuk",
     "sunflower": "ayçiçeği",
@@ -63,9 +63,7 @@ def water_summary(
         )
         if irrigated:
             return head + f"bunun {u} mm'sinin ({share}) sulamayla karşılanması gerekti."
-        return (
-            head + f"yağışa dayalı tarımda yağış ve topraktaki su bunun {u} mm'sini ({share}) karşılayamadı."
-        )
+        return head + f"kuru tarımda yağış ve topraktaki su bunun {u} mm'sini ({share}) karşılayamadı."
     head = (
         f"Across {windows} historical {years}-year windows (agricultural years {span}), the median crop water "
         f"demand was {d} mm"
@@ -207,7 +205,7 @@ VALIDATION_FIXED: dict[Language, list[str]] = {
         "NDVI is a single 250 m pixel; it may mix several fields and land uses.",
     ],
     "tr": [
-        "Pikselin arazi kullanımı bilinmiyor. Model yağışa dayalı kışlık buğday varsayıyor; pikselde sulanan ya da "
+        "Pikselin arazi kullanımı bilinmiyor. Model kuru tarımda yetiştirilen kışlık buğday varsayıyor; pikselde sulanan ya da "
         "yazlık bir ürün, meyve bahçesi, mera veya bunların karışımı varsa yeşilliği başka etkenlere bağlıdır.",
         "Sulama modelde yer almıyor: sulanan tarlalar kurak yıllarda da yeşil kalabilir ve bu, ilişkiyi zayıflatır.",
         "NDVI tek bir 250 m pikseldir; birkaç tarlayı ve arazi kullanımını bir arada içerebilir.",
