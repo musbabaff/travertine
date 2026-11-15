@@ -455,6 +455,31 @@ export interface components {
             explanation: string[];
             /** @description Optional. Present on every alternative when the request carried current_rotation. */
             vs_baseline?: components["schemas"]["ScoreDifference"];
+            /** @description Optional. Structured reasoning built from this strategy's own numbers, in the request language. */
+            reasoning?: components["schemas"]["RotationReasoning"];
+        };
+        EvidenceItem: {
+            /** @description What the value is, in the request language. */
+            statement: string;
+            /** @description The value itself, as computed by the engine. */
+            value: number;
+            /** @description Unit of value, e.g. mm, mm/m, kg N/ha, windows. Empty string if unitless. */
+            unit: string;
+            /** @description Dataset or published source the value rests on, English, as named in provenance[] or inputs[]. */
+            dataset: string;
+        };
+        /** @description Five parts, each a list that may be empty: a part is left empty when the engine has nothing specific to this strategy to say. The UI renders the sentences verbatim. Decision support only; it does not replace the farmer's judgment or local expertise. */
+        RotationReasoning: {
+            /** @description Why the engine ranked this strategy where it did. Empty for the baseline, which the engine did not suggest. */
+            why_suggested: string[];
+            /** @description The values behind the scores, each with its dataset. */
+            evidence: components["schemas"]["EvidenceItem"][];
+            /** @description Benefits the strategy may offer, stated with the numbers they rest on. */
+            benefits: string[];
+            /** @description What the engine did not know for this request and how it filled the gap. */
+            information_gaps: string[];
+            /** @description Risks and assumptions that farmers or local agricultural experts should review. */
+            local_review: string[];
         };
         /** @description Score of an alternative minus the same score of the baseline (the current rotation), unitless, −1 to 1. Positive means the alternative scores higher. Differences between relative indices on past years, not predicted gains. */
         ScoreDifference: {
