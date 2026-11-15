@@ -1,0 +1,18 @@
+{
+  "soil": {
+    "texture": "clay loam",
+    "organic_carbon": 16.0,
+    "ph": 6.7,
+    "awc_mm": 139.0
+  },
+  "provenance": [
+    {
+      "dataset": "SoilGrids 2.0 (clay, sand, silt, soc, phh2o; mean and 5th/95th percentiles)",
+      "provider": "ISRIC — World Soil Information",
+      "spatial_resolution": "250 m",
+      "temporal_coverage": "Static; predictions from soil profiles collected over several decades",
+      "access_url": "https://rest.isric.org/soilgrids/v2.0/docs",
+      "note": "Texture class (USDA), organic carbon and pH are depth-weighted means of 0–30 cm. Available water capacity is the 0–100 cm sum of field capacity (−33 kPa) minus wilting point (−1500 kPa) from the Saxton & Rawls (2006) pedotransfer functions (Soil Sci. Soc. Am. J. 70:1569–1578), with organic matter = 1.724 × organic carbon; gravel and salinity are not accounted for. SoilGrids 90 % prediction interval for 0–30 cm at this point: clay 3–92 %, organic carbon 2.9–44.2 g/kg; values derived from the mean prediction carry that uncertainty."
+    }
+  ]
+}

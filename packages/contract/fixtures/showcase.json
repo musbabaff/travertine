@@ -1,0 +1,209 @@
+{
+  "fields": [
+    {
+      "id": "tr-saraykoy",
+      "name": "Sarayköy, Denizli, Türkiye",
+      "lat": 37.89,
+      "lon": 28.98,
+      "field_id": "fld_37.8900_28.9800",
+      "validation": {
+        "status": "ok",
+        "n": 24,
+        "correlation": -0.665,
+        "correlation_ci95": [
+          -0.845,
+          -0.428
+        ],
+        "baseline_correlation": -0.526,
+        "baseline_correlation_ci95": [
+          -0.74,
+          -0.257
+        ],
+        "difference": -0.138,
+        "difference_ci95": [
+          -0.337,
+          0.028
+        ],
+        "verdict": "no_detectable_difference"
+      }
+    },
+    {
+      "id": "tr-cihanbeyli",
+      "name": "Cihanbeyli, Konya, Türkiye",
+      "lat": 38.65,
+      "lon": 32.93,
+      "field_id": "fld_38.6500_32.9300",
+      "validation": {
+        "status": "ok",
+        "n": 24,
+        "correlation": -0.856,
+        "correlation_ci95": [
+          -0.948,
+          -0.638
+        ],
+        "baseline_correlation": -0.656,
+        "baseline_correlation_ci95": [
+          -0.856,
+          -0.331
+        ],
+        "difference": -0.201,
+        "difference_ci95": [
+          -0.467,
+          0.001
+        ],
+        "verdict": "no_detectable_difference"
+      }
+    },
+    {
+      "id": "tr-polatli",
+      "name": "Polatlı, Ankara, Türkiye",
+      "lat": 39.58,
+      "lon": 32.15,
+      "field_id": "fld_39.5800_32.1500",
+      "validation": {
+        "status": "ok",
+        "n": 24,
+        "correlation": -0.49,
+        "correlation_ci95": [
+          -0.711,
+          -0.179
+        ],
+        "baseline_correlation": -0.566,
+        "baseline_correlation_ci95": [
+          -0.782,
+          -0.239
+        ],
+        "difference": 0.076,
+        "difference_ci95": [
+          -0.146,
+          0.249
+        ],
+        "verdict": "no_detectable_difference"
+      }
+    },
+    {
+      "id": "ma-settat",
+      "name": "Settat, Chaouia, Morocco",
+      "lat": 33.0,
+      "lon": -7.62,
+      "field_id": "fld_33.0000_-7.6200",
+      "validation": {
+        "status": "not_computed",
+        "reason": "SoilGrids has no complete prediction (mean and 5th/95th percentiles) at this point."
+      }
+    },
+    {
+      "id": "es-tierra-de-campos",
+      "name": "Tierra de Campos, Valladolid, Spain",
+      "lat": 41.95,
+      "lon": -4.95,
+      "field_id": "fld_41.9500_-4.9500",
+      "validation": {
+        "status": "ok",
+        "n": 24,
+        "correlation": -0.691,
+        "correlation_ci95": [
+          -0.837,
+          -0.514
+        ],
+        "baseline_correlation": -0.653,
+        "baseline_correlation_ci95": [
+          -0.881,
+          -0.429
+        ],
+        "difference": -0.037,
+        "difference_ci95": [
+          -0.208,
+          0.172
+        ],
+        "verdict": "no_detectable_difference"
+      }
+    },
+    {
+      "id": "ro-baragan",
+      "name": "Bărăgan plain, Călărași, Romania",
+      "lat": 44.35,
+      "lon": 27.2,
+      "field_id": "fld_44.3500_27.2000",
+      "validation": {
+        "status": "ok",
+        "n": 24,
+        "correlation": -0.417,
+        "correlation_ci95": [
+          -0.783,
+          -0.025
+        ],
+        "baseline_correlation": -0.196,
+        "baseline_correlation_ci95": [
+          -0.647,
+          0.182
+        ],
+        "difference": -0.22,
+        "difference_ci95": [
+          -0.339,
+          -0.02
+        ],
+        "verdict": "model_better"
+      }
+    },
+    {
+      "id": "us-kansas",
+      "name": "Great Bend, Kansas, USA",
+      "lat": 38.36,
+      "lon": -98.76,
+      "field_id": "fld_38.3600_-98.7600",
+      "validation": {
+        "status": "not_computed",
+        "reason": "SoilGrids has no complete prediction (mean and 5th/95th percentiles) at this point."
+      }
+    },
+    {
+      "id": "fr-beauce",
+      "name": "Beauce, Eure-et-Loir, France",
+      "lat": 48.25,
+      "lon": 1.75,
+      "field_id": "fld_48.2500_1.7500",
+      "validation": {
+        "status": "ok",
+        "n": 23,
+        "correlation": -0.493,
+        "correlation_ci95": [
+          -0.706,
+          -0.239
+        ],
+        "baseline_correlation": -0.344,
+        "baseline_correlation_ci95": [
+          -0.617,
+          -0.027
+        ],
+        "difference": -0.148,
+        "difference_ci95": [
+          -0.503,
+          0.147
+        ],
+        "verdict": "no_detectable_difference"
+      }
+    }
+  ],
+  "pooled": {
+    "sites": 6,
+    "mean_correlation": -0.602,
+    "mean_correlation_ci95": [
+      -0.7,
+      -0.498
+    ],
+    "mean_baseline_correlation": -0.49,
+    "mean_baseline_correlation_ci95": [
+      -0.612,
+      -0.371
+    ],
+    "mean_difference": -0.112,
+    "mean_difference_ci95": [
+      -0.203,
+      -0.021
+    ],
+    "verdict": "model_better"
+  },
+  "protocol": "docs/VALIDATION.md section 4",
+  "computed_at": "2026-11-15T06:22:43+00:00"
+}
