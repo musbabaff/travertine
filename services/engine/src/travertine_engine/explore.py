@@ -27,6 +27,7 @@ from travertine_engine.models import (
     RotationScores,
     RotationYear,
     RuleViolation,
+    ScenarioApplied,
     ScoreDifference,
 )
 from travertine_engine.reasoning import Facts
@@ -139,10 +140,10 @@ class ExploreService:
         return inputs, provenance, choice.texture
 
     async def field_inputs(
-        self, lat: float, lon: float, test: FarmerSoil | None
+        self, lat: float, lon: float, test: FarmerSoil | None, scenario: tuple[float, float] | None = None
     ) -> tuple[FieldInputs, list[Provenance], SoilChoice]:
         (daily, api_version), soil = await asyncio.gather(
-            self.fields.daily_climate(lat, lon),
+            self.fields.daily_climate(lat, lon, scenario),
             resolve_soil(self.fields.upstream, self.fields.cache, lat, lon),
         )
         df = daily.frame
@@ -164,6 +165,8 @@ class ExploreService:
         first = years[0].year if years else self.fields.settings.first_year
         last = years[-1].year if years else self.fields.settings.last_year
         provenance = [power_provenance(daily, first, last, api_version, dropped), soil.provenance]
+        if scenario is not None:
+            provenance.append(scenario_provenance(*scenario))
         return inputs, provenance, choice
 
     async def tables(
@@ -176,9 +179,11 @@ class ExploreService:
         *,
         enforce_rules: bool = True,
         years: tuple[int, ...] | None = None,
+        scenario: tuple[float, float] | None = None,
     ) -> tuple[RotationTables, FieldInputs, list[Provenance], SoilChoice]:
-        inputs, provenance, choice = await self.field_inputs(lat, lon, test)
+        inputs, provenance, choice = await self.field_inputs(lat, lon, test, scenario)
         key = (
+            scenario,
             round(lat, 4),
             round(lon, 4),
             irrigated,
@@ -224,12 +229,16 @@ class ExploreService:
         horizon: int,
         test: FarmerSoil | None = None,
         weights: np.ndarray | None = None,
+        scenario: tuple[float, float] | None = None,
     ) -> tuple[RotationTables, FieldInputs, list[Provenance], CandidateScores, SoilChoice]:
         """Candidate scores are independent of the priorities, so they are computed once per field, mode, crop set
         and horizon; a request then only weighs them and describes the top ten."""
-        tables, inputs, provenance, choice = await self.tables(lat, lon, irrigated, crops, test)
+        tables, inputs, provenance, choice = await self.tables(
+            lat, lon, irrigated, crops, test, scenario=scenario
+        )
         values = None if weights is None else tuple(round(float(w), 6) for w in weights)
         key = (
+            scenario,
             round(lat, 4),
             round(lon, 4),
             irrigated,
@@ -279,7 +288,7 @@ class ExploreService:
         farmer = req.farmer_inputs or FarmerInputs()
         weights = crop_weights(crops, farmer.crop_values)
         tables, inputs, provenance, scores, choice = await self.scores(
-            lat, lon, req.irrigated, crops, req.horizon_years, farmer.soil, weights
+            lat, lon, req.irrigated, crops, req.horizon_years, farmer.soil, weights, scenario_of(req)
         )
         current = expand_current(req.current_rotation, req.horizon_years)
         result = await asyncio.to_thread(
@@ -321,8 +330,19 @@ class ExploreService:
             ),
         ]
         records = [*choice.records, *other_records(crops, req.crop_ids, farmer.crop_values, req.irrigated)]
+        applied = None
+        if req.scenario is not None:
+            applied = ScenarioApplied(
+                precipitation_factor=req.scenario.precipitation_factor,
+                temperature_change_c=req.scenario.temperature_change_c,
+                label=text.scenario_label(
+                    req.language,
+                    factor=req.scenario.precipitation_factor,
+                    delta=req.scenario.temperature_change_c,
+                ),
+            )
         return RotationExploreResponse(
-            rotations=rotations, baseline=baseline, inputs=records, provenance=provenance
+            rotations=rotations, baseline=baseline, scenario=applied, inputs=records, provenance=provenance
         )
 
     async def baseline(
@@ -355,7 +375,14 @@ class ExploreService:
         possible = set(agricultural_years(inputs, own))
         years = tuple(y for y in tables.years if y in possible)
         own_tables, _, _, _ = await self.tables(
-            lat, lon, req.irrigated, own, farmer.soil, enforce_rules=False, years=years
+            lat,
+            lon,
+            req.irrigated,
+            own,
+            farmer.soil,
+            enforce_rules=False,
+            years=years,
+            scenario=scenario_of(req),
         )
         return await asyncio.to_thread(
             describe_baseline,
@@ -381,6 +408,31 @@ def select_crops(crop_ids: list[str] | None) -> tuple[CropParams, ...]:
     if not any(c.is_legume for c in chosen):
         raise InvalidRequest("crop_ids must include at least one legume; every rotation needs one per cycle.")
     return chosen
+
+
+def scenario_of(req: RotationExploreRequest) -> tuple[float, float] | None:
+    """The request's scenario as a cache key; an unchanged scenario (factor 1, change 0) is the plain record."""
+    s = req.scenario
+    if s is None or (s.precipitation_factor == 1.0 and s.temperature_change_c == 0.0):
+        return None
+    return (round(s.precipitation_factor, 3), round(s.temperature_change_c, 2))
+
+
+def scenario_provenance(factor: float, delta: float) -> Provenance:
+    return Provenance(
+        dataset="Sensitivity test on the NASA POWER record (not a forecast)",
+        provider="Travertine engine",
+        spatial_resolution="Same as NASA POWER",
+        temporal_coverage="Same years as the NASA POWER record",
+        access_url="https://github.com/musbabaff/travertine/blob/main/docs/METHODOLOGY.md",
+        note=(
+            f"Every day's precipitation was multiplied by {factor:g} and {delta:+g} °C was added to daily mean, "
+            "maximum, minimum and dew-point temperature; wind, radiation and pressure are as recorded. FAO-56 "
+            "Penman-Monteith ET0, the crop coefficients' climate adjustment and the soil water balance were then "
+            "recomputed. Results show how the past years would have scored under that change; they are not a "
+            "projection of future climate."
+        ),
+    )
 
 
 def expand_current(current: list[str] | None, horizon: int) -> list[CropParams]:

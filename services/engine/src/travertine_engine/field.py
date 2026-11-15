@@ -30,11 +30,27 @@ from travertine_engine.science.soil import (
     usda_texture_class,
 )
 from travertine_engine.sources.modis import SEASON_COMPOSITES, fetch_ndvi_seasons
-from travertine_engine.sources.power import fetch_power_daily
+from travertine_engine.sources.power import PowerDaily, fetch_power_daily
 from travertine_engine.sources.soilgrids import SoilGridsNoData, fetch_soilgrids
 from travertine_engine.upstream import Upstream
 
 log = logging.getLogger(__name__)
+
+TEMPERATURE_COLUMNS = ("T2M", "T2M_MAX", "T2M_MIN", "T2MDEW")
+
+
+def apply_scenario(power: PowerDaily, precipitation_factor: float, temperature_change_c: float) -> PowerDaily:
+    """Sensitivity test on the historical record: every day's precipitation times the factor, and the change added
+    to mean, maximum, minimum and dew-point temperature. Shifting the dew point with the air temperature keeps
+    relative humidity roughly unchanged; wind, radiation and pressure are left as recorded. ET0 is then recomputed
+    from the changed series, so warmer days raise crop water demand through FAO-56 Penman-Monteith."""
+    df = power.frame.copy()
+    df["PRECTOTCORR"] = df["PRECTOTCORR"] * precipitation_factor
+    for column in TEMPERATURE_COLUMNS:
+        if column in df:
+            df[column] = df[column] + temperature_change_c
+    return replace(power, frame=df)
+
 
 CLIMATE_CACHE_SIZE = 16
 _FIELD_ID = re.compile(r"^fld_(-?\d{1,2}\.\d{4})_(-?\d{1,3}\.\d{4})$")
@@ -209,11 +225,15 @@ class FieldService:
         self.cache = cache
         # Parsing 25 years of daily POWER data and computing Penman-Monteith ET0 takes seconds on a small CPU share;
         # the result for a location never changes while the process runs.
-        self._climate: OrderedDict[tuple[float, float], tuple[DailyClimate, str]] = OrderedDict()
+        self._climate: OrderedDict[tuple[object, ...], tuple[DailyClimate, str]] = OrderedDict()
         self._prefetching: set[asyncio.Task[None]] = set()
 
-    async def daily_climate(self, lat: float, lon: float) -> tuple[DailyClimate, str]:
-        key = (round(lat, 3), round(lon, 3))
+    async def daily_climate(
+        self, lat: float, lon: float, scenario: tuple[float, float] | None = None
+    ) -> tuple[DailyClimate, str]:
+        """`scenario` = (precipitation factor, temperature change in °C): a sensitivity test applied to the daily
+        series before ET0 is recomputed (see apply_scenario)."""
+        key: tuple[object, ...] = (round(lat, 3), round(lon, 3), scenario)
         hit = self._climate.get(key)
         if hit is not None:
             self._climate.move_to_end(key)
@@ -222,6 +242,8 @@ class FieldService:
             power = await fetch_power_daily(
                 self.upstream, self.cache, lat, lon, self.settings.first_year, self.settings.last_year
             )
+        if scenario is not None:
+            power = apply_scenario(power, *scenario)
         daily = await asyncio.to_thread(compute_daily_et0, power)
         result = replace(daily, source_note=reads.note("power_daily")), power.api_version
         self._climate[key] = result
