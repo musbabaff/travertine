@@ -12,6 +12,7 @@ export const APP_TABS: { href: string; key: MessageKey }[] = [
   { href: "/app", key: "nav.field" },
   { href: "/app/explore", key: "nav.explore" },
   { href: "/app/evidence", key: "nav.evidence" },
+  { href: "/app/data", key: "nav.data" },
 ];
 
 export function AppHeader() {
