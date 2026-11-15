@@ -290,6 +290,12 @@ components:
         language:
           $ref: "#/components/schemas/Language"
           description: "Language of rotations[].explanation[]. Default en."
+        current_rotation:
+          type: array
+          description: "Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`."
+          minItems: 1
+          maxItems: 5
+          items: { type: string }
         farmer_inputs:
           $ref: "#/components/schemas/FarmerInputs"
           description: "Optional. The farmer's own soil test and crop values; each one replaces the dataset estimate it names in the response's inputs[]. The allowed crops are crop_ids and irrigation is irrigated."
@@ -372,6 +378,46 @@ components:
           type: array
           description: Plain-language English sentences explaining the score.
           items: { type: string }
+        vs_baseline:
+          $ref: "#/components/schemas/ScoreDifference"
+          description: "Optional. Present on every alternative when the request carried current_rotation."
+
+    ScoreDifference:
+      type: object
+      required: [water, income, soil, risk, total]
+      description: "Score of an alternative minus the same score of the baseline (the current rotation), unitless, −1 to 1. Positive means the alternative scores higher. Differences between relative indices on past years, not predicted gains."
+      properties:
+        water: { type: number, minimum: -1, maximum: 1 }
+        income: { type: number, minimum: -1, maximum: 1 }
+        soil: { type: number, minimum: -1, maximum: 1 }
+        risk: { type: number, minimum: -1, maximum: 1 }
+        total: { type: number, minimum: -1, maximum: 1 }
+
+    RuleViolation:
+      type: object
+      required: [rule, message]
+      properties:
+        rule:
+          type: string
+          enum: [same_family_in_consecutive_years, no_legume_in_cycle, perennial_single_year]
+          description: "The rotation rule the current rotation breaks (docs/METHODOLOGY.md, section 7)."
+        year_index:
+          type: integer
+          minimum: 1
+          description: "1-based rotation year the violation falls in. Omitted for rules about the whole sequence (no_legume_in_cycle)."
+        message: { type: string, description: "Which crops and why, in the request language. The UI renders it verbatim." }
+
+    BaselineRotation:
+      description: "The current rotation, expanded to horizon_years and scored like a candidate. It never carries vs_baseline."
+      allOf:
+        - $ref: "#/components/schemas/Rotation"
+        - type: object
+          required: [rule_violations]
+          properties:
+            rule_violations:
+              type: array
+              description: "Every rotation rule the sequence breaks, in year order. Empty when it breaks none."
+              items: { $ref: "#/components/schemas/RuleViolation" }
 
     RotationExploreResponse:
       type: object
@@ -379,7 +425,11 @@ components:
       properties:
         rotations:
           type: array
+          description: "Sorted by scores.total, highest first. When the request carried current_rotation, that sequence is left out of this list and returned as `baseline`."
           items: { $ref: "#/components/schemas/Rotation" }
+        baseline:
+          $ref: "#/components/schemas/BaselineRotation"
+          description: "Optional. Present when the request carried current_rotation."
         inputs:
           type: array
           description: "Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default."

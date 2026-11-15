@@ -95,6 +95,26 @@ class Priorities(_Model):
     risk: Unit01
 
 
+class FarmerSoil(_Model):
+    sand_pct: float | None = Field(default=None, ge=0, le=100)
+    clay_pct: float | None = Field(default=None, ge=0, le=100)
+    organic_carbon_pct: float | None = Field(default=None, ge=0, le=20)
+    available_water_mm_per_m: float | None = Field(default=None, ge=20, le=400)
+
+
+class FarmerInputs(_Model):
+    soil: FarmerSoil | None = None
+    crop_values: dict[str, Annotated[float, Field(ge=0)]] | None = None
+
+
+class InputSource(_Model):
+    name: str
+    value: float | str
+    unit: str
+    source: Literal["farmer", "dataset", "default"]
+    replaces: str
+
+
 class RotationExploreRequest(_Model):
     field_id: str | None = None
     lat: Latitude | None = None
@@ -104,6 +124,7 @@ class RotationExploreRequest(_Model):
     irrigated: bool
     crop_ids: list[str] | None = None
     language: Language = "en"
+    farmer_inputs: FarmerInputs | None = None
 
 
 class RotationScores(_Model):
@@ -131,6 +152,7 @@ class Rotation(_Model):
 
 class RotationExploreResponse(_Model):
     rotations: list[Rotation]
+    inputs: list[InputSource]
     provenance: list[Provenance]
 
 
