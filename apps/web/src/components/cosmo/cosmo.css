@@ -1,0 +1,530 @@
+.cosmo-dock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+  font-family: Inter, Arial, sans-serif;
+}
+.cosmo-dock > * {
+  pointer-events: auto;
+}
+.cosmo-fab {
+  position: relative;
+  width: 112px;
+  height: 164px;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  isolation: isolate;
+  transition: transform var(--motion-fast);
+}
+.cosmo-fab::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 18px;
+  right: 18px;
+  bottom: 4px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1c34293d;
+  filter: blur(7px);
+}
+.cosmo-fab .cosmo {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 112px;
+  height: auto;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 9px 10px #183c4652);
+  pointer-events: none;
+}
+.cosmo-fab:hover {
+  filter: none;
+  transform: translateY(-5px);
+}
+.cosmo-fab:focus-visible {
+  outline: 2px solid #3a8157;
+  outline-offset: 2px;
+}
+.cosmo-nudge {
+  display: flex;
+  align-items: center;
+  max-width: 250px;
+  padding: 4px 4px 4px 14px;
+  border-radius: 14px 14px 4px 14px;
+  background: #fff;
+  box-shadow: 0 10px 28px #1a2b1c24;
+  animation: page-enter 300ms var(--motion-ease) both;
+}
+.cosmo-nudge button:first-child {
+  padding: 8px 0;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #2c362d;
+}
+.cosmo-nudge button:last-child {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  color: #7b867a;
+}
+.cosmo-nudge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cosmo-chat {
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(600px, calc(100dvh - 48px));
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  color: #202720;
+  box-shadow: 0 24px 60px #12221133, 0 0 0 1px #20392914;
+  transform-origin: bottom right;
+  animation: cosmo-open 220ms var(--motion-ease) both;
+}
+@keyframes cosmo-open {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+}
+.cosmo-chat > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 18px 18px 0 0;
+  background: #203929;
+  color: #fff;
+}
+.cosmo-chat > header > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.cosmo-chat > header strong {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.cosmo-chat > header small {
+  font-size: 11px;
+  color: #cfe0c9;
+}
+.cosmo-chat > header button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff1c;
+}
+.cosmo-chat > header button svg {
+  width: 18px;
+  height: 18px;
+}
+.cosmo-chat > header button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+.cosmo-chat > header .cosmo-audio-toggle[aria-pressed="true"] {
+  background: #ffffff33;
+}
+.cosmo-presence {
+  position: relative;
+  flex: none;
+  height: 126px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 70%, #426a4b, #244330 54%, #203929 82%);
+  border-bottom: 1px solid #dbe8d6;
+}
+.cosmo-presence.is-listening,
+.cosmo-presence.is-speaking {
+  height: 180px;
+}
+.cosmo-presence::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -52px;
+  width: 175px;
+  height: 118px;
+  border-radius: 50%;
+  background: #b7d99b24;
+  filter: blur(20px);
+  transform: translateX(-50%);
+}
+.cosmo-presence.is-listening::before {
+  animation: cosmo-presence-glow 1.6s ease-in-out infinite alternate;
+}
+.cosmo-presence-mascot {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 102px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.cosmo-presence.is-listening .cosmo-presence-mascot,
+.cosmo-presence.is-speaking .cosmo-presence-mascot {
+  top: 80px;
+  transform: translateX(-50%) scale(.72);
+  transform-origin: top center;
+}
+@media (min-height: 760px) {
+  .cosmo-presence.is-listening,
+  .cosmo-presence.is-speaking {
+    height: 220px;
+  }
+  .cosmo-presence.is-listening .cosmo-presence-mascot,
+  .cosmo-presence.is-speaking .cosmo-presence-mascot {
+    top: 98px;
+    transform: translateX(-50%) scale(.88);
+  }
+}
+.cosmo-presence-waves {
+  position: absolute;
+  inset: auto 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  opacity: .72;
+}
+.cosmo-presence-waves i {
+  width: 3px;
+  flex: none;
+  border-radius: 8px;
+  background: #c3e6a6;
+  animation: cosmo-presence-wave 690ms ease-in-out infinite alternate;
+}
+.cosmo-presence.is-speaking .cosmo-presence-waves i { background: #e8ecae; animation-duration: 510ms; }
+.cosmo-presence.is-listening .cosmo-presence-mascot::before,
+.cosmo-presence.is-speaking .cosmo-presence-mascot::before,
+.cosmo-presence.is-listening .cosmo-presence-mascot::after,
+.cosmo-presence.is-speaking .cosmo-presence-mascot::after {
+  content: "";
+  position: absolute;
+  top: 41px;
+  left: 50%;
+  width: 85px;
+  height: 85px;
+  border: 1px solid #d8f286a8;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  animation: cosmo-sound-ring 1.7s ease-out infinite;
+}
+.cosmo-presence.is-listening .cosmo-presence-mascot::after,
+.cosmo-presence.is-speaking .cosmo-presence-mascot::after { animation-delay: -.85s; }
+.cosmo-presence-mascot .cosmo {
+  position: relative;
+  width: 100%;
+  filter: drop-shadow(0 8px 8px #0b291d70);
+}
+.cosmo-mouth-anchor {
+  position: absolute;
+  left: 50%;
+  top: 79%;
+  width: 2px;
+  height: 2px;
+}
+.cosmo-presence-label {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  color: #d6e9cf;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .13em;
+}
+.cosmo-thought {
+  position: absolute;
+  top: 27px;
+  left: calc(50% + 44px);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f1f7e9;
+  color: #2c6845;
+  box-shadow: 0 6px 16px #0b291d45;
+  font-size: 18px;
+  font-weight: 700;
+  animation: cosmo-thought-float 900ms ease-in-out infinite alternate;
+}
+.cosmo-thought::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  bottom: -5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f1f7e9;
+}
+@keyframes cosmo-presence-glow {
+  to { opacity: .42; transform: translateX(-50%) scale(1.28); }
+}
+@keyframes cosmo-presence-wave {
+  from { transform: scaleY(.28); opacity: .45; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+@keyframes cosmo-sound-ring {
+  from { opacity: .8; transform: translateX(-50%) scale(.76); }
+  to { opacity: 0; transform: translateX(-50%) scale(1.8); }
+}
+@keyframes cosmo-thought-float {
+  to { transform: translate(3px, -7px) rotate(7deg); }
+}
+.cosmo-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  scrollbar-width: thin;
+}
+.cosmo-msg {
+  max-width: 86%;
+  padding: 10px 13px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  animation: page-enter 220ms var(--motion-ease) both;
+}
+.cosmo-msg p {
+  white-space: pre-line;
+}
+.cosmo-msg.from-cosmo {
+  align-self: flex-start;
+  background: #f2f5ec;
+  border-bottom-left-radius: 4px;
+}
+.cosmo-msg.from-cosmo.is-arriving {
+  animation: cosmo-answer-land 380ms cubic-bezier(.2, .9, .3, 1.1) 600ms both;
+}
+@keyframes cosmo-answer-land {
+  from { opacity: 0; transform: translateY(-13px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.cosmo-msg.from-user {
+  align-self: flex-end;
+  background: #315e3b;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.cosmo-msg-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+.cosmo-msg-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 11px;
+  border-radius: 20px;
+  background: #fff;
+  color: #2f603b;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--motion-fast);
+}
+.cosmo-msg-links a:hover {
+  background: #d8f286;
+}
+.cosmo-thinking-note {
+  align-self: flex-start;
+  padding: 5px 2px;
+  color: #66806b;
+  font-size: 12px;
+  letter-spacing: .01em;
+}
+.cosmo-word-trail {
+  position: absolute;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.cosmo-word-trail span {
+  position: absolute;
+  padding: 3px 6px;
+  border-radius: 7px;
+  background: #e9f1de;
+  color: #1e5030;
+  box-shadow: 0 3px 9px #0c281e25;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: cosmo-word-flight 720ms cubic-bezier(.28, .6, .2, 1) both;
+}
+@keyframes cosmo-word-flight {
+  0% { opacity: 0; transform: translate(-50%, -20%) scale(.55); }
+  18% { opacity: 1; transform: translate(-50%, 9px) scale(.9); }
+  72% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(var(--flight-x) - 50%), calc(var(--flight-y) - 50%)) scale(.55); }
+}
+.cosmo-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 16px 12px;
+}
+.cosmo-starters button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1px solid #dfe5d6;
+  font-size: 12px;
+  color: #3d4c3d;
+}
+.cosmo-starters button:hover:not(:disabled) {
+  background: #eef1e9;
+  filter: none;
+}
+.cosmo-starters button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cosmo-voice-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 55px;
+  margin: 0 12px 8px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: #f0f4ec;
+  color: #4a5b4b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.cosmo-voice-status.is-listening {
+  background: #e8f4e9;
+  color: #245c3a;
+}
+.cosmo-voice-status.is-speaking { background: #f1f4dd; color: #4a632e; }
+.cosmo-voice-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  gap: 2px;
+  width: 95px;
+  height: 32px;
+}
+.cosmo-voice-wave i {
+  flex: none;
+  width: 3px;
+  border-radius: 4px;
+  background: #397f4b;
+  animation: cosmo-voice-wave 650ms ease-in-out infinite alternate;
+}
+.cosmo-voice-status.is-speaking .cosmo-voice-wave i { background: #789949; animation-duration: 480ms; }
+@keyframes cosmo-voice-wave {
+  from { transform: scaleY(.36); opacity: .62; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+.cosmo-compose {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #e9ede3;
+}
+.cosmo-compose input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: #f2f5ec;
+  color: inherit;
+  font-size: 14px;
+}
+.cosmo-compose input::placeholder {
+  color: #869184;
+}
+.cosmo-compose input:focus-visible {
+  outline: 0;
+  border-color: #559e59;
+  background: #fff;
+}
+.cosmo-compose button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #d8f286;
+  color: #20341d;
+}
+.cosmo-compose .cosmo-mic {
+  border: 1px solid #dce6d8;
+  background: #f2f6ef;
+  color: #305c3b;
+}
+.cosmo-compose .cosmo-mic.is-listening {
+  position: relative;
+  border-color: #74ae7b;
+  background: #e3f2e4;
+  color: #27663b;
+  animation: cosmo-mic-pulse 1.5s ease-in-out infinite;
+}
+.cosmo-compose .cosmo-mic.is-listening::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid #559b68;
+  border-radius: 15px;
+  pointer-events: none;
+  animation: cosmo-mic-ring 1.5s ease-out infinite;
+}
+@keyframes cosmo-mic-pulse {
+  50% { box-shadow: 0 0 0 7px #74ae7b30; }
+}
+@keyframes cosmo-mic-ring {
+  to { opacity: 0; transform: scale(1.25); }
+}
+.cosmo-compose button:disabled {
+  background: #eef1e9;
+  color: #9aa597;
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .cosmo-dock { right: 10px; bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .cosmo-fab { width: 94px; height: 140px; }
+  .cosmo-fab .cosmo { width: 94px; }
+  .cosmo-chat { max-height: calc(100dvh - 110px - env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cosmo-chat, .cosmo-nudge { animation: none; }
+  .cosmo-fab { transition: none; }
+  .cosmo-presence::before, .cosmo-thought, .cosmo-voice-wave i, .cosmo-presence-waves i, .cosmo-presence-mascot::before, .cosmo-presence-mascot::after, .cosmo-word-trail span, .cosmo-msg.from-cosmo.is-arriving, .cosmo-compose .cosmo-mic.is-listening, .cosmo-compose .cosmo-mic.is-listening::after { animation: none; }
+  .cosmo-word-trail { display: none; }
+}
+@media print {
+  .cosmo-dock { display: none; }
+}

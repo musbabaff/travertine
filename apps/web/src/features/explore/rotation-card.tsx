@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 import { WaterYearsChart } from "@/components/charts/water-years-chart";
 import { useI18n } from "@/i18n";
 import type { Crop, Rotation } from "@/lib/api/types";
+import { explanationText } from "@/lib/localize-engine";
 import { CropTimeline, cropName } from "./crop-timeline";
 import { ScoreBars } from "./score-bars";
 
@@ -47,7 +48,7 @@ export function RotationCard({
         <div className="min-w-0 flex-1">
           <h3 id={`${id}-title`} className="text-sm font-semibold text-ink">
             <span className="sr-only">{t("explore.rank", { n: rank })}: </span>
-            {rotation.sequence.map((c) => cropName(c, crops)).join(" → ")}
+            {rotation.sequence.map((c) => cropName(c, crops, locale)).join(" → ")}
           </h3>
         </div>
         <div className="shrink-0 text-right">
@@ -69,12 +70,11 @@ export function RotationCard({
       {rotation.explanation.length > 0 && (
         <div className="mt-4">
           <h4 className="text-xs font-medium text-ink-2">{t("explore.why")}</h4>
-          {locale !== "en" && <p className="text-xs text-ink-muted">{t("explore.why.language")}</p>}
-          <ul className="mt-1.5 space-y-1 text-sm text-ink-2" lang="en">
+          <ul className="mt-1.5 space-y-1 text-sm text-ink-2">
             {rotation.explanation.map((e) => (
               <li key={e} className="flex gap-2">
                 <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-ink-muted" />
-                <span>{e}</span>
+                <span>{explanationText(e, locale)}</span>
               </li>
             ))}
           </ul>
@@ -110,7 +110,7 @@ export function RotationCard({
 
       {showWater && (
         <div id={`${id}-water`} className="mt-3">
-          <WaterYearsChart yearly={rotation.yearly} cropLabel={(c) => cropName(c, crops)} irrigated={irrigated} />
+          <WaterYearsChart yearly={rotation.yearly} cropLabel={(c) => cropName(c, crops, locale)} irrigated={irrigated} />
         </div>
       )}
     </article>

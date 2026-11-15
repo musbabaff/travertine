@@ -9,6 +9,7 @@ the same pull request that introduces it.
 | Tool | Provider | Used for |
 |---|---|---|
 | Claude Code (Claude Opus models) | Anthropic | Code generation, refactoring, tests, documentation drafts, data-fetching scripts, visual review of screenshots |
+| OpenAI Codex | OpenAI | A teammate used it to build the current interface (layout, header, overview dashboard) and the Cosmo guide, under human review |
 
 ## How it is used
 
@@ -33,3 +34,4 @@ the same pull request that introduces it.
 | 2026-11-14 | Rotation exploration, MODIS NDVI history and the `/v1/validation` back-test written with Claude Code (engine agent). The validation protocol was committed before results were computed; citations (FAO-56 examples, DOIs) were checked against the source pages by the agent. Humans review every PR. |
 | 2026-11-14 | Brand assets: the original logo and favicon set were supplied by the team. Claude Code wrote the scripts that trace the logo with potrace (a deterministic tracer, not a generative model), compose the lockups by translation and uniform scaling only, render the icons and social images, and check the trace against the original pixels (IoU 0.990 / 0.991). No AI image generation was used for derived assets. |
 | 2026-11-14 | Container start fix and committed demo-field snapshot written with Claude Code (engine agent); verified offline as a non-root user before merge. Humans review every PR. |
+| 2026-11-15 | Interface and Cosmo guide: a teammate used OpenAI Codex, alongside Claude Code, to build the new interface and the Cosmo guide (branch `feat/travertine-ui-cosmo-tour`), under human review. The 3D model `apps/web/public/cosmo.glb` was exported with three.js (its glTF header records `THREE.GLTFExporter r187`): 52 meshes and eight animation clips (idle, wave, point, cheer, jump, walk, think, sleep), no image textures. The SVG mascot is hand-written code. Cosmo answers only from fixed, reviewed text in the locale files; it uses no language model and generates no text. Claude Code merged the branch onto main, moved Cosmo's text into the locale files in English and Turkish, and added the glossary. |
