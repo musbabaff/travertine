@@ -38,6 +38,7 @@ export function RotationCard({
 }) {
   const { t, n, locale } = useI18n();
   const source = useDataSource();
+  const englishOnly = source !== "engine" && locale === "tr";
   const [showWater, setShowWater] = useState(false);
   const id = useId();
   const top = rank === 1;
@@ -92,7 +93,8 @@ export function RotationCard({
       {rotation.explanation.length > 0 && (
         <div className="mt-4">
           <h4 className="text-xs font-medium text-ink-2">{t("explore.why")}</h4>
-          <ul className="mt-1.5 space-y-1 text-sm text-ink-2">
+          {englishOnly && <p className="mt-1 text-xs text-warning">{t("demo.englishOnly")}</p>}
+          <ul className="mt-1.5 space-y-1 text-sm text-ink-2" lang={englishOnly ? "en" : undefined}>
             {rotation.explanation.map((e) => (
               <li key={e} className="flex gap-2">
                 <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-ink-muted" />

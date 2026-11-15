@@ -13,6 +13,7 @@ import { useI18n } from "@/i18n";
 import type { Validation } from "@/lib/api/types";
 import { caveatText, methodText } from "@/lib/localize-engine";
 import { useField } from "../field/use-field";
+import { MultiSite } from "../landing/landing-extra";
 import { ModelVsBaseline } from "./model-vs-baseline";
 import { period, useValidation } from "./use-validation";
 
@@ -87,7 +88,7 @@ export function EvidenceScreen() {
   return (
     <div className="tv-feature-page mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-6 md:pt-8 xl:px-8">
       <div className="tv-page-banner mb-6">
-        <span className="tv-banner-eyebrow">TRAVERTINE / VERİ VE YÖNTEM</span>
+        <span className="tv-banner-eyebrow">{t("evidence.eyebrow")}</span>
         <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
           {t("evidence.title")}
         </h1>
@@ -231,7 +232,7 @@ export function EvidenceScreen() {
             </section>
 
             <ModelVsBaseline v={v} />
-            {/* The multi-site table with confidence intervals slots in here once the contract carries it. */}
+            <MultiSite title="evidence.multi.title" />
           </div>
 
           <aside aria-labelledby="method-title" className="space-y-4 lg:col-start-2 lg:row-start-2">
@@ -243,7 +244,8 @@ export function EvidenceScreen() {
                 {methodText(v.method, locale)}
               </p>
               <h2 className="mt-5 text-h3 font-semibold">{t("evidence.caveats")}</h2>
-              <ul className="mt-2 space-y-2 text-sm text-ink-2" data-testid="caveats">
+              {validationResponse.fromFixture && locale === "tr" && <p className="mt-2 text-xs text-warning">{t("demo.englishOnly")}</p>}
+              <ul className="mt-2 space-y-2 text-sm text-ink-2" data-testid="caveats" lang={validationResponse.fromFixture ? "en" : undefined}>
                 {v.caveats.map((c) => (
                   <li key={c} className="flex gap-2">
                     <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-warning" />

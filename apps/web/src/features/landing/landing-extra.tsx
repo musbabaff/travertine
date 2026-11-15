@@ -1,12 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { useI18n, type MessageKey } from "@/i18n";
-import { api, isFixtureResponse, unwrap } from "@/lib/api/client";
+import { useShowcase } from "../showcase/use-showcase";
 import { DEMO_FIELD, FIXTURE_HORIZON } from "@/lib/api/mock";
 import { useDataSource } from "@/lib/api/source";
 import type { Crop } from "@/lib/api/types";
@@ -77,21 +76,14 @@ export function CurrentEntry({ demoHref }: { demoHref: string }) {
 }
 
 /** Multi-site back-test and showcase fields, shown only when the live engine serves /v1/showcase. */
-export function MultiSite() {
+export function MultiSite({ title }: { title?: MessageKey } = {}) {
   const { t, n } = useI18n();
-  const q = useQuery({
-    queryKey: ["showcase"],
-    staleTime: Infinity,
-    queryFn: async ({ signal }) => {
-      const res = await api.GET("/v1/showcase", { signal });
-      return { data: unwrap(res), fromFixture: isFixtureResponse(res.response) };
-    },
-  });
+  const q = useShowcase();
   if (!q.data || q.data.fromFixture) return null;
   const { fields, pooled } = q.data.data;
   const verdict = (v?: string) => (v ? t(`evidence.verdict.${v}` as MessageKey) : "");
   return (
-    <Section id="multisite" title={t("landing.multi.title")}>
+    <Section id="multisite" title={t(title ?? "landing.multi.title")}>
       <p className="mt-2 max-w-[70ch] text-sm text-ink-2">{t("landing.multi.body")}</p>
       {pooled && (
         <p className="tv-card mt-4 rounded-md border border-border bg-surface p-4 text-sm text-ink" data-testid="pooled">

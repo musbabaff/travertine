@@ -9,7 +9,7 @@ import { ErrorState, Skeleton } from "@/components/ui/states";
 import { useI18n, type MessageKey } from "@/i18n";
 import { FIXTURE_LOCATION } from "@/lib/api/mock";
 import { useDataSource } from "@/lib/api/source";
-import type { FieldAnalysis } from "@/lib/api/types";
+import type { FieldView } from "./use-field";
 import { distanceKm } from "@/lib/geo";
 import { NdviCompare } from "./ndvi-compare";
 import type { FieldState } from "@/lib/url-state";
@@ -37,6 +37,16 @@ function Stat({ label, value, unit, hint }: { label: string; value: string; unit
         {unit && <span className="ml-1 text-xs text-ink-muted">{unit}</span>}
         {hint && <span className="block text-xs text-ink-muted">{hint}</span>}
       </dd>
+    </div>
+  );
+}
+
+function SectionLoading({ pending, label, failed }: { pending: boolean; label: string; failed: string }) {
+  if (!pending) return <p className="text-sm text-ink-2">{failed}</p>;
+  return (
+    <div aria-busy="true" className="space-y-2">
+      <p className="text-xs text-ink-muted">{label}</p>
+      <Skeleton className="h-10 w-full" />
     </div>
   );
 }
@@ -71,7 +81,7 @@ export function FieldSummaryError({ message, onRetry }: { message: string; onRet
   return <ErrorState title={t("state.error.title")} body={t("state.error.body", { message })} retryLabel={t("state.retry")} onRetry={onRetry} />;
 }
 
-export function FieldSummary({ data, field }: { data: FieldAnalysis; field: FieldState }) {
+export function FieldSummary({ data, field }: { data: FieldView; field: FieldState }) {
   const { t, n } = useI18n();
   const source = useDataSource();
   const climate = [...data.climate].sort((a, b) => a.year - b.year);
@@ -80,11 +90,12 @@ export function FieldSummary({ data, field }: { data: FieldAnalysis; field: Fiel
   const ndvi = data.ndvi_history ?? [];
   const ndviMin = ndvi.length ? ndvi.reduce((a, b) => (b.mean_ndvi < a.mean_ndvi ? b : a)) : null;
   const ndviMax = ndvi.length ? ndvi.reduce((a, b) => (b.mean_ndvi > a.mean_ndvi ? b : a)) : null;
-  const textureKey = `texture.${data.soil.texture.toLowerCase()}` as MessageKey;
-  const texture = t(textureKey) === textureKey ? data.soil.texture : t(textureKey);
+  const soil = data.soil;
+  const textureKey = `texture.${soil?.texture.toLowerCase()}` as MessageKey;
+  const texture = soil ? (t(textureKey) === textureKey ? soil.texture : t(textureKey)) : "";
 
   const climateSrc = pickProvenance(data.provenance, /POWER|ERA5|CHIRPS|IMERG|precip|climate|temperature/i);
-  const soilSrc = pickProvenance(data.provenance, /soil/i);
+  const soilSrc = soil ? pickProvenance(data.provenance, /SoilGrids|DEFAULT SOIL/i) : [];
   const ndviSrc = pickProvenance(data.provenance, /NDVI|MODIS|VIIRS|vegetation/i);
 
   return (
@@ -114,13 +125,17 @@ export function FieldSummary({ data, field }: { data: FieldAnalysis; field: Fiel
         </Section>
       )}
 
-      <Section title={t("summary.soil")} sources={<ProvenanceChips items={soilSrc} />}>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
-          <Stat label={t("summary.texture")} value={texture} />
-          <Stat label={t("summary.awc")} value={n(data.soil.awc_mm)} unit={t("unit.mm")} hint={t("summary.awc.hint")} />
-          <Stat label={t("summary.oc")} value={n(data.soil.organic_carbon, 1)} unit={t("unit.gkg")} hint={t("summary.oc.hint")} />
-          <Stat label={t("summary.ph")} value={n(data.soil.ph, 1)} hint={t("summary.ph.hint")} />
-        </dl>
+      <Section title={t("summary.soil")} sources={soilSrc.length ? <ProvenanceChips items={soilSrc} /> : undefined}>
+        {soil ? (
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
+            <Stat label={t("summary.texture")} value={texture} />
+            <Stat label={t("summary.awc")} value={n(soil.awc_mm)} unit={t("unit.mm")} hint={t("summary.awc.hint")} />
+            <Stat label={t("summary.oc")} value={n(soil.organic_carbon, 1)} unit={t("unit.gkg")} hint={t("summary.oc.hint")} />
+            <Stat label={t("summary.ph")} value={n(soil.ph, 1)} hint={t("summary.ph.hint")} />
+          </dl>
+        ) : (
+          <SectionLoading pending={data.soilPending} label={t("summary.soil.loading")} failed={t("summary.soil.failed")} />
+        )}
       </Section>
 
       <Section title={t("summary.ndvi")} sources={ndvi.length > 0 ? <ProvenanceChips items={ndviSrc} /> : undefined}>
@@ -132,6 +147,8 @@ export function FieldSummary({ data, field }: { data: FieldAnalysis; field: Fiel
               hint={t("summary.ndvi.range", { minYear: ndviMin.year, min: n(ndviMin.mean_ndvi, 2), maxYear: ndviMax.year, max: n(ndviMax.mean_ndvi, 2) })}
             />
           </dl>
+        ) : data.ndviPending ? (
+          <SectionLoading pending label={t("summary.ndvi.loading")} failed="" />
         ) : (
           <p className="text-sm text-ink-2">{t("summary.ndvi.missing")}</p>
         )}

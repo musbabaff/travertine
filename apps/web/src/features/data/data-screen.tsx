@@ -105,8 +105,8 @@ export function DataScreen() {
   const horizon: Horizon = source === "engine" ? explore.horizon : (FIXTURE_HORIZON as Horizon);
 
   const analysis = useFieldAnalysis(field);
-  const rotations = useRotations(field, explore.priorities, horizon);
-  const validation = useValidation(field);
+  const rotations = useRotations(field, explore.priorities, horizon, [], locale);
+  const validation = useValidation(field, locale);
   const ndvi30 = useFieldNdvi(field);
   const crops = useCrops();
 
