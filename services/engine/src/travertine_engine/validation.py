@@ -132,13 +132,19 @@ def back_test(inputs: FieldInputs, ndvi_by_year: dict[int, float]) -> BackTest:
     return BackTest(years, m, b, v, z, paired_bootstrap(m, b, z, resamples=RESAMPLES, seed=SEED))
 
 
-def verdict(stats: PairedBootstrap) -> str:
-    lo, hi = stats.ci_diff
+def verdict(ci_diff: tuple[float, float]) -> str:
+    lo, hi = ci_diff
     if hi < 0:
-        return "The model's correlation is more negative than the baseline's and the difference is outside the noise."
+        return (
+            "The model's correlation is more negative than the baseline's, and the difference is established: "
+            "its interval lies below 0."
+        )
     if lo > 0:
-        return "The baseline's correlation is more negative than the model's and the difference is outside the noise."
-    return "No detectable difference between the model and the baseline: the interval of the difference includes 0."
+        return (
+            "The baseline's correlation is more negative than the model's, and the difference is established: "
+            "its interval lies above 0."
+        )
+    return "A difference between the model and the baseline is not established: the interval of the difference includes 0."
 
 
 def _ci(ci: tuple[float, float]) -> str:
@@ -170,7 +176,7 @@ class ValidationService:
         caveats = [
             f"Model (winter-wheat water balance): r = {s.r_a:+.2f}, 95 % interval {_ci(s.ci_a)}. "
             f"Baseline (April–September 1 − P/ET0): r = {s.r_b:+.2f}, 95 % interval {_ci(s.ci_b)}. "
-            f"Difference model − baseline: {s.r_a - s.r_b:+.2f}, 95 % interval {_ci(s.ci_diff)}. {verdict(s)}",
+            f"Difference model − baseline: {s.r_a - s.r_b:+.2f}, 95 % interval {_ci(s.ci_diff)}. {verdict(s.ci_diff)}",
             "The land use of the pixel is not known. The model assumes rain-fed winter wheat; if the pixel holds an "
             "irrigated or summer crop, orchard, pasture or a mix, its greenness follows other drivers.",
             "Irrigation is not represented: irrigated fields can stay green in dry years, which weakens the relationship.",
