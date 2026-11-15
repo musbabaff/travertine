@@ -25,7 +25,8 @@ ENV PATH=/app/.venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1 \
     ENGINE_CACHE_DIR=/app/data/cache \
     ENGINE_SNAPSHOT_DIR=/app/data/snapshot \
-    ENGINE_LAST_YEAR=2025 \n    ENGINE_WARM_FIELDS=37.89,28.98
+    ENGINE_LAST_YEAR=2025 \
+    ENGINE_WARM_FIELDS=37.89,28.98
 
 # The demo field comes from the committed snapshot, with no network call. A live refresh may add to it, but it
 # is capped at 30 seconds and can neither fail nor hold up the build.
