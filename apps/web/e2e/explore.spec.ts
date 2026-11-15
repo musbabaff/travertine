@@ -5,6 +5,9 @@ import { DEMO_QUERY, fakeEngine } from "./engine";
 const rankings = (page: import("@playwright/test").Page) => page.locator("ol > li article h3");
 
 test.describe("Explore screen", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("travertine.locale", "en"));
+  });
   test("asks for a field when none is set", async ({ page }) => {
     await fakeEngine(page);
     await page.goto("/app/explore");

@@ -42,6 +42,8 @@ olsun olmasın, olduğu gibi gösterilir.
 
 ### Şu anda kullanılabilir
 
+- **Genel Bakış**: seçili tarlanın iklim geçmişi, toprak özellikleri, NDVI ve su dengesini mevcut motor yanıtlarından
+  özetleyen ana ekran. İlk açılışta örnek tarla açıkça etiketlenir.
 - **Tarla**: uydu görüntülü haritada sınır çizin, nokta bırakın ya da yer arayın. Tarla özeti: 2001–2025 iklim
   ortalamaları, yıllara göre yağış ile referans evapotranspirasyon, SoilGrids doku, organik karbon, pH ve kullanılabilir
   su; yetişme dönemi NDVI'si 250 m'de (MODIS) ve varsa yanında 30 m'de (HLS).
@@ -54,17 +56,20 @@ olsun olmasın, olduğu gibi gösterilir.
 - **Her yerde kaynak bilgisi**: her bölümde sağlayıcıyı, çözünürlüğü, kapsamı ve bağlantıyı gösteren kaynak etiketleri.
 - **Dürüst yedek mod**: motora ulaşılamazsa uygulama demo tarla için sözleşme örnek verilerini gösterir ve bunu
   "Demo verisi" rozetiyle belirtir; demo değerlerini başka bir konuma ait gibi asla sessizce göstermez.
-- **İngilizce ve Türkçe**, tarla ve öncelikler için paylaşılabilir bağlantılar, klavyeyle kullanım, 390 px'e kadar
-  duyarlı tasarım.
+- **Cosmo tanıtımı**: mevcut 3B modelin yürüyüş ve işaret etme hareketleriyle Genel Bakış, Tarla İzleme,
+  Ekim Önerileri ve Veri ve Yöntem ekranlarını gezdiren ilk kullanım turu. Sesli giriş ve yanıt tarayıcı desteğine
+  bağlıdır; sohbet içeriği şimdilik arayüz rehberidir.
+- **Türkçe varsayılan arayüz**, tarla ve öncelikler için paylaşılabilir bağlantılar, klavyeyle kullanım, 390 px'e kadar
+  duyarlı tasarım. İngilizce çeviriler kodda korunur.
 
 ### Planlanan
 
-- Veri sayfası (ekrandaki her şeyin kaynak tablosu), açılış sayfası ve tarla genel bakış panosu.
+- Veri sayfası (ekrandaki her şeyin kaynak tablosu) ve ayrı tanıtım sayfası.
 - Yazdırılabilir tek sayfalık PDF ile ekim planı, ürün kütüphanesi, kayıtlı tarlaların yan yana karşılaştırılması.
 - Çiftçi girdileri: izin verilen ürünler, kendi toprak analizi değerleri ve kendi ürün fiyatları (önce sözleşmede
   alanların tanımlanması gerekiyor).
 - İklim ve toprak sayfaları, yöntem sayfası, CSV dışa aktarma, ayarlar.
-- Son tarlanın çevrimdışı açılabildiği kurulabilir uygulama, ilk kullanımda rehberli tur.
+- Son tarlanın çevrimdışı açılabildiği kurulabilir uygulama.
 - Motor: 30 m HLS NDVI uç noktası (incelemede), iklim eğilimi istatistikleri, çok noktalı doğrulama.
 
 ## Nasıl çalışır

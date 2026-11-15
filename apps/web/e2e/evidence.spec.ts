@@ -4,6 +4,9 @@ import validation from "../../../packages/contract/fixtures/validation.json";
 import { DEMO_QUERY, fakeEngine } from "./engine";
 
 test.describe("Evidence screen", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("travertine.locale", "en"));
+  });
   test("asks for a field when none is set", async ({ page }) => {
     await fakeEngine(page);
     await page.goto("/app/evidence");

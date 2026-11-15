@@ -27,7 +27,7 @@ const ROUTES: Record<string, { path: string; settle: number; states: State[] }> 
     path: "/",
     settle: 300,
     states: [
-      { name: "default", mode: "ok", query: "", ready: (p) => expect(p.getByRole("img", { name: "Travertine" }).first()).toBeVisible() },
+      { name: "default", mode: "ok", query: "", ready: (p) => expect(p.getByRole("heading", { name: "Çiftliğe genel bakış" })).toBeVisible() },
       { name: "tr", mode: "ok", query: "", locale: "tr", ready: (p) => expect(p.getByText("Kaynak kodu")).toBeVisible() },
     ],
   },
@@ -126,7 +126,10 @@ for (const [route, cfg] of Object.entries(ROUTES)) {
     for (const s of cfg.states) {
       test(`${route} ${s.name} @${vp.name}`, async ({ page }) => {
         await page.setViewportSize({ width: vp.width, height: vp.height });
-        if (s.locale) await page.addInitScript(() => localStorage.setItem("travertine.locale", "tr"));
+        await page.addInitScript((locale) => {
+          localStorage.setItem("travertine.locale", locale);
+          localStorage.setItem("travertine-cosmo-intro-v4", "seen");
+        }, s.locale ?? "en");
         await fakeEngine(page, s.mode);
         await page.goto(`${cfg.path}${s.query ? `?${s.query}` : ""}`);
         await s.ready(page);

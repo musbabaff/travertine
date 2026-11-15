@@ -179,7 +179,7 @@ export function FieldScreen() {
                 <Crosshair aria-hidden className="size-4" strokeWidth={1.5} />
                 {t("field.useCenter")}
               </Button>
-              <Button size="sm" onClick={useDemo}>
+              <Button size="sm" onClick={useDemo} data-cosmo-tour="demo-field">
                 <MapPinned aria-hidden className="size-4" strokeWidth={1.5} />
                 {t("field.demo")}
               </Button>

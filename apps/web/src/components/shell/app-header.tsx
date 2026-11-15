@@ -2,65 +2,92 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useI18n, type MessageKey } from "@/i18n";
-import { Segmented } from "@/components/ui/segmented";
-import { BrandLockup } from "@/components/brand/logo";
+import { useEffect, useRef, useState } from "react";
+import { ChartNoAxesCombined, ChevronDown, Fingerprint, Home, Layers, Menu, Sprout, X } from "lucide-react";
 import { SourceBadge } from "./source-badge";
 
-/** Tabs are added here as each screen ships. */
-export const APP_TABS: { href: string; key: MessageKey }[] = [
-  { href: "/app", key: "nav.field" },
-  { href: "/app/explore", key: "nav.explore" },
-  { href: "/app/evidence", key: "nav.evidence" },
-];
+const groups = [
+  { label: "İzleme", pages: [{ href: "/app", title: "Tarla İzleme", description: "Konum, harita ve tarla sağlığı" }] },
+  { label: "Analizler", pages: [
+    { href: "/app/explore", title: "Ekim Önerileri", description: "Önceliklerine göre ekim seçenekleri" },
+    { href: "/app/evidence", title: "Veri ve Yöntem", description: "Model doğrulaması ve kaynaklar" },
+  ] },
+] as const;
+
+const rail = [
+  { href: "/", title: "Genel Bakış", icon: Home },
+  { href: "/app", title: "Tarla İzleme", icon: Layers },
+  { href: "/app/explore", title: "Ekim Önerileri", icon: Sprout },
+  { href: "/app/evidence", title: "Veri ve Yöntem", icon: ChartNoAxesCombined },
+] as const;
 
 export function AppHeader() {
-  const { t, locale, setLocale } = useI18n();
   const pathname = usePathname();
   const params = useSearchParams();
-  const qs = params.toString();
+  const [open, setOpen] = useState<string | null>(null);
+  const header = useRef<HTMLElement>(null);
+  const query = params.toString();
+  const hrefWithField = (href: string) => href === "/" || !query ? href : `${href}?${query}`;
+
+  useEffect(() => {
+    const dismiss = (event: PointerEvent) => {
+      if (!header.current?.contains(event.target as Node)) setOpen(null);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(null);
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", escape);
+    };
+  }, []);
 
   return (
-    <header className="relative z-20 border-b border-border bg-surface">
-      <div className="flex flex-wrap items-center gap-x-3 px-4 sm:h-14 sm:flex-nowrap md:gap-x-6 md:px-6 xl:px-8">
-        <Link href="/" aria-label={t("nav.home")} className="flex h-14 shrink-0 items-center rounded-sm">
-          <BrandLockup className="h-6 sm:h-7" />
+    <>
+      <a className="tv-skip" href="#main">İçeriğe geç</a>
+      <header className="tv-header" ref={header}>
+        <Link href="/" className="tv-brand" aria-label="Travertine ana sayfa" onClick={() => setOpen(null)}>
+          <Fingerprint aria-hidden="true" />
+          <span>Travertine</span>
         </Link>
-        <nav aria-label={t("nav.label")} className="order-last -mx-4 flex h-11 w-[calc(100%+2rem)] border-t border-border px-2 sm:order-none sm:mx-0 sm:h-full sm:w-auto sm:border-t-0 sm:px-0">
-          <ul className="flex h-full items-stretch gap-1 overflow-x-auto">
-            {APP_TABS.map((tab) => {
-              const active = pathname === tab.href;
-              return (
-                <li key={tab.href} className="flex">
-                  <Link
-                    href={qs ? `${tab.href}?${qs}` : tab.href}
-                    aria-current={active ? "page" : undefined}
-                    className={`flex items-center whitespace-nowrap border-b-2 px-3 text-sm font-medium ${
-                      active ? "border-teal-700 text-ink" : "border-transparent text-ink-2 hover:text-ink"
-                    }`}
-                  >
-                    {t(tab.key)}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <nav className="tv-topnav" aria-label="Ana gezinme">
+          <Link className={`tv-pill${pathname === "/" ? " is-active" : ""}`} href="/" aria-current={pathname === "/" ? "page" : undefined}>Genel Bakış</Link>
+          {groups.map((group) => (
+            <div className="tv-nav-group" key={group.label}>
+              <button type="button" className={`tv-pill${group.pages.some((page) => page.href === pathname) ? " is-active" : ""}`} aria-expanded={open === group.label} aria-controls={`tv-menu-${group.label}`} onClick={() => setOpen(open === group.label ? null : group.label)}>
+                {group.label}<ChevronDown aria-hidden="true" size={17} />
+              </button>
+              {open === group.label && (
+                <div id={`tv-menu-${group.label}`} className="tv-dropdown">
+                  <span className="tv-dropdown-label">{group.label}</span>
+                  {group.pages.map((page) => (
+                    <Link key={page.href} href={hrefWithField(page.href)} onClick={() => setOpen(null)} aria-current={pathname === page.href ? "page" : undefined}>
+                      <strong>{page.title}</strong><small>{page.description}</small>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </nav>
-        <div className="ml-auto flex h-14 items-center gap-2 md:gap-3">
+        <div className="tv-header-actions">
           <SourceBadge />
-          <Segmented
-            label={t("lang.label")}
-            hideLabel
-            className="w-[5.5rem]"
-            value={locale}
-            onChange={setLocale}
-            options={[
-              { value: "en", label: t("lang.en") },
-              { value: "tr", label: t("lang.tr") },
-            ]}
-          />
+          <button type="button" className="tv-menu-toggle" aria-label={open === "mobile" ? "Menüyü kapat" : "Menüyü aç"} aria-controls="tv-mobile-menu" aria-expanded={open === "mobile"} onClick={() => setOpen(open === "mobile" ? null : "mobile")}>{open === "mobile" ? <X /> : <Menu />}</button>
         </div>
-      </div>
-    </header>
+        {open === "mobile" && (
+          <nav id="tv-mobile-menu" className="tv-mobile-menu" aria-label="Mobil gezinme">
+            {rail.map((item) => <Link key={item.href} href={hrefWithField(item.href)} onClick={() => setOpen(null)} aria-current={pathname === item.href ? "page" : undefined}>{item.title}</Link>)}
+          </nav>
+        )}
+      </header>
+      <nav className="tv-rail" aria-label="Bölümler">
+        {rail.map(({ href, title, icon: Icon }) => <Link key={href} href={hrefWithField(href)} data-cosmo-tour={href === "/app" ? "field-nav" : href === "/app/evidence" ? "evidence-nav" : undefined} aria-label={title} title={title} aria-current={pathname === href ? "page" : undefined}><Icon aria-hidden="true" /></Link>)}
+      </nav>
+      <nav className="tv-bottom-nav" aria-label="Hızlı gezinme">
+        {rail.map(({ href, title, icon: Icon }) => <Link key={href} href={hrefWithField(href)} data-cosmo-tour={href === "/app" ? "field-nav" : href === "/app/evidence" ? "evidence-nav" : undefined} aria-label={title} aria-current={pathname === href ? "page" : undefined}><Icon aria-hidden="true" /><span>{title}</span></Link>)}
+      </nav>
+    </>
   );
 }

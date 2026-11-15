@@ -24,7 +24,7 @@ export function CompareDialog({
   crops?: Map<string, Crop>;
   irrigated: boolean;
 }) {
-  const { t, n } = useI18n();
+  const { t, n, locale } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export function CompareDialog({
                 <div className="flex items-start justify-between gap-3">
                   <h3 id={`cmp-${i}`} className="text-sm font-semibold">
                     <span className="text-ink-muted">#{ranks[i]} · </span>
-                    {r.sequence.map((c) => cropName(c, crops)).join(" → ")}
+                    {r.sequence.map((c) => cropName(c, crops, locale)).join(" → ")}
                   </h3>
                   <span className="text-h3 font-semibold tabular-nums">{n(r.scores.total, 2)}</span>
                 </div>
@@ -83,7 +83,7 @@ export function CompareDialog({
                   </div>
                 </dl>
                 <div className="mt-4">
-                  <WaterYearsChart yearly={r.yearly} cropLabel={(c) => cropName(c, crops)} irrigated={irrigated} yMax={yMax} />
+                  <WaterYearsChart yearly={r.yearly} cropLabel={(c) => cropName(c, crops, locale)} irrigated={irrigated} yMax={yMax} />
                 </div>
               </section>
             );

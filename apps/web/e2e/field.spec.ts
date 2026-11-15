@@ -4,6 +4,11 @@ import ndvi30 from "../../../packages/contract/fixtures/field-ndvi.json";
 import { DEMO_QUERY, fakeEngine } from "./engine";
 
 test.describe("Field screen", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.title !== "switches to Turkish") {
+      await page.addInitScript(() => localStorage.setItem("travertine.locale", "en"));
+    }
+  });
   test("shows the empty state, then analyses the demo field", async ({ page }) => {
     await fakeEngine(page);
     await page.goto("/app");
@@ -67,7 +72,6 @@ test.describe("Field screen", () => {
   test("switches to Turkish", async ({ page }) => {
     await fakeEngine(page);
     await page.goto(`/app?${DEMO_QUERY}`);
-    await page.getByRole("radio", { name: "TR" }).click();
     await expect(page.getByRole("heading", { name: "Tarlanız" })).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("lang", "tr");
   });
