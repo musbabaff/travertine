@@ -12,6 +12,14 @@ well-made instrument than a marketing site.
 All tokens live in `apps/web/src/app/globals.css` as CSS custom properties and are exposed to Tailwind through
 `@theme`. **Components use tokens only. No raw hex, px font sizes or ad-hoc shadows in components.**
 
+
+> **Standing rule (2026-11-15):** the teammate's design is the design of Travertine. Build every page in it: page shell
+> from `components/shell/app-header.tsx` (top navigation groups Field · Decide · Science, icon section rail, bottom
+> shortcuts on phones), page and card styles from `src/app/travertine-ui.css` (`tv-*` classes: `tv-card`, `tv-page-banner`,
+> `tv-pill`, `tv-dashboard*`), its colour tokens (canvas `#f1f2f0`, surface `#fff`, ink `#17251c`, green actions
+> `#286c40`), and the Cosmo guide. Use the prototype in `design-reference/` as the reference for screens not yet built.
+> Brand colours (`--color-brand-*`) stay as sampled from the logo; never put text on a photo, and use no stock imagery.
+
 ## 1. Colour tokens
 
 Contrast ratios below are measured against `--color-canvas` (#F5F1E8). Do not change a value without re-measuring.

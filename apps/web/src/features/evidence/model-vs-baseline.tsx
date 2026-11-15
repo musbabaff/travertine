@@ -2,6 +2,7 @@
 
 import { useI18n, type MessageKey } from "@/i18n";
 import type { Validation } from "@/lib/api/types";
+import { baselineName } from "@/lib/localize-engine";
 
 type Interval = [number, number];
 
@@ -34,7 +35,7 @@ function IntervalRow({ label, r, ci, min, max, color, className = "" }: { label:
  * pre-registered verdict. Rendered only when the response carries all of these fields.
  */
 export function ModelVsBaseline({ v }: { v: Validation }) {
-  const { t, n } = useI18n();
+  const { t, n, locale } = useI18n();
   if (!v.baseline || !v.correlation_ci95 || !v.difference_ci95 || !v.verdict) return null;
   return (
     <section aria-labelledby="compare-title" className="rounded-md border border-border bg-surface p-4 shadow-1 md:p-5" data-testid="model-vs-baseline">
@@ -45,7 +46,7 @@ export function ModelVsBaseline({ v }: { v: Validation }) {
 
       <dl className="mt-4 space-y-3">
         <IntervalRow label={t("evidence.compare.model")} r={v.correlation} ci={v.correlation_ci95 as Interval} min={-1} max={1} color="var(--viz-model)" />
-        <IntervalRow label={v.baseline.name} r={v.baseline.correlation} ci={v.baseline.correlation_ci95 as Interval} min={-1} max={1} color="var(--viz-neutral)" />
+        <IntervalRow label={baselineName(v.baseline.name, locale)} r={v.baseline.correlation} ci={v.baseline.correlation_ci95 as Interval} min={-1} max={1} color="var(--viz-neutral)" />
         <IntervalRow className="border-t border-border pt-3" label={t("evidence.compare.diff")} ci={v.difference_ci95 as Interval} min={-1} max={1} color="var(--viz-observed)" />
       </dl>
       <div aria-hidden className={`${GRID} mt-1`}>

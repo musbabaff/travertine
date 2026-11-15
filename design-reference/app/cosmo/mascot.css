@@ -1,0 +1,524 @@
+.cosmo {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  --tempo: 1;
+}
+
+/* Her hareketli parça mascot.tsx'teki bir eklemin içinde durur; dönüşler
+   eklemin kendi sıfır noktası etrafında olduğu için burada origin verilmez. */
+.cosmo-arm,
+.cosmo-fore,
+.cosmo-hand,
+.cosmo-ant,
+.cosmo-ant-tip,
+.cosmo-head,
+.cosmo-upper,
+.cosmo-lid,
+.cosmo-brow {
+  transition: transform 420ms cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+/* Boşta: ayaklar yerde kalır, ağırlık bir yandan öbürüne geçer. */
+.cosmo-figure {
+  animation: cosmo-breathe calc(3.8s / var(--tempo)) ease-in-out infinite alternate;
+}
+.cosmo-upper {
+  animation: cosmo-shift calc(9s / var(--tempo)) ease-in-out infinite;
+}
+.cosmo-head {
+  animation: cosmo-attend calc(11s / var(--tempo)) ease-in-out infinite;
+}
+.cosmo-ant {
+  animation: cosmo-reed calc(4.6s / var(--tempo)) ease-in-out infinite alternate;
+}
+.cosmo-ant-tip {
+  animation: cosmo-reed-tip calc(4.6s / var(--tempo)) ease-in-out -0.45s infinite alternate;
+}
+/* Sağ taraf aynalı çizildiği için ters yönde oynatılınca iki anten aynı yana eser. */
+.cosmo-ant-r .cosmo-ant {
+  animation-direction: alternate-reverse;
+  animation-delay: -1.6s;
+}
+.cosmo-ant-r .cosmo-ant-tip {
+  animation-direction: alternate-reverse;
+  animation-delay: -2.05s;
+}
+.cosmo-star {
+  animation: cosmo-turn calc(6s / var(--tempo)) ease-in-out infinite alternate;
+}
+.cosmo-glint {
+  opacity: 0;
+  animation: cosmo-glint 7s ease-in-out infinite;
+}
+.cosmo-ant-r .cosmo-glint {
+  animation-delay: -3.2s;
+}
+.cosmo-lid {
+  animation: cosmo-blink 7.4s infinite;
+}
+.cosmo-glance {
+  animation: cosmo-saccade 12s infinite;
+}
+.cosmo-pupil {
+  transform: translate(calc(var(--gaze-x, 0) * 3.2px), calc(var(--gaze-y, 0) * 2.6px));
+  transition: transform 140ms ease-out;
+}
+.cosmo-arm {
+  animation: cosmo-hang calc(4.8s / var(--tempo)) ease-in-out infinite alternate;
+}
+.cosmo-fore {
+  animation: cosmo-hang-fore calc(4.8s / var(--tempo)) ease-in-out -0.5s infinite alternate;
+}
+.cosmo-hand {
+  animation: cosmo-hang-hand calc(4.8s / var(--tempo)) ease-in-out -1s infinite alternate;
+}
+.cosmo-arm-r .cosmo-arm {
+  animation-delay: -2.2s;
+}
+.cosmo-arm-r .cosmo-fore {
+  animation-delay: -2.7s;
+}
+.cosmo-arm-r .cosmo-hand {
+  animation-delay: -3.2s;
+}
+.cosmo-tail {
+  animation: cosmo-sweep calc(3.4s / var(--tempo)) ease-in-out infinite alternate;
+}
+.cosmo-tail-tip {
+  animation: cosmo-sweep-tip calc(3.4s / var(--tempo)) ease-in-out -0.4s infinite alternate;
+}
+.cosmo-shadow {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.cosmo-mouth-shut,
+.cosmo-zzz {
+  display: none;
+}
+
+/* Konuşma ve dinleme pozlardan önce gelir; poz kuralları bunları ezer. */
+.is-talking .cosmo-mouth {
+  animation: cosmo-speak 0.86s linear infinite;
+}
+.is-talking .cosmo-head {
+  animation: cosmo-converse calc(2.6s / var(--tempo)) ease-in-out infinite alternate;
+}
+.is-listening .cosmo-ant {
+  animation: cosmo-perk 0.9s ease-in-out infinite alternate;
+}
+.is-listening .cosmo-ant-tip {
+  animation: cosmo-perk-tip 0.9s ease-in-out -0.2s infinite alternate;
+}
+.is-listening .cosmo-head {
+  animation: none;
+  transform: rotate(3deg);
+}
+.is-listening .cosmo-brow {
+  transform: translateY(-2.5px);
+}
+
+.pose-wave .cosmo-arm-r .cosmo-arm {
+  animation: cosmo-lift calc(0.5s / var(--tempo)) cubic-bezier(0.3, 1.4, 0.5, 1) forwards;
+}
+.pose-wave .cosmo-arm-r .cosmo-fore {
+  animation:
+    cosmo-bend calc(0.5s / var(--tempo)) cubic-bezier(0.3, 1.4, 0.5, 1) forwards,
+    cosmo-greet calc(0.44s / var(--tempo)) ease-in-out calc(0.5s / var(--tempo)) infinite alternate;
+}
+.pose-wave .cosmo-arm-r .cosmo-hand {
+  animation: cosmo-flick calc(0.44s / var(--tempo)) ease-in-out calc(0.58s / var(--tempo)) infinite alternate;
+}
+.pose-wave .cosmo-head {
+  animation: cosmo-greet-head calc(2.4s / var(--tempo)) ease-in-out infinite alternate;
+}
+
+.pose-point .cosmo-arm-l .cosmo-arm {
+  animation: cosmo-indicate calc(1.8s / var(--tempo)) ease-in-out infinite alternate;
+}
+.pose-point .cosmo-arm-l .cosmo-fore {
+  animation: none;
+  transform: rotate(-7deg);
+}
+.pose-point .cosmo-arm-l .cosmo-hand {
+  animation: none;
+  transform: rotate(-4deg);
+}
+.pose-point .cosmo-head {
+  animation: cosmo-indicate-head calc(3.6s / var(--tempo)) ease-in-out infinite alternate;
+}
+
+.pose-cheer .cosmo-figure {
+  animation: cosmo-rejoice calc(2.8s / var(--tempo)) cubic-bezier(0.3, 0, 0.3, 1) infinite;
+}
+.pose-cheer .cosmo-arm {
+  animation: cosmo-arms-up calc(1.4s / var(--tempo)) ease-in-out infinite alternate;
+}
+.pose-cheer .cosmo-fore {
+  animation: cosmo-fore-up calc(1.4s / var(--tempo)) ease-in-out -0.2s infinite alternate;
+}
+.pose-cheer .cosmo-head {
+  animation: cosmo-chin-up calc(1.4s / var(--tempo)) ease-in-out infinite alternate;
+}
+.pose-cheer .cosmo-tail {
+  animation-duration: calc(1.1s / var(--tempo));
+}
+.pose-cheer .cosmo-tail-tip {
+  animation-duration: calc(1.1s / var(--tempo));
+}
+
+.pose-jump .cosmo-figure {
+  animation: cosmo-jump calc(1s / var(--tempo)) cubic-bezier(0.3, 0, 0.4, 1);
+}
+.pose-jump .cosmo-shadow {
+  animation: cosmo-jump-shadow calc(1s / var(--tempo)) cubic-bezier(0.3, 0, 0.4, 1);
+}
+.pose-jump .cosmo-arm {
+  animation: cosmo-swing calc(1s / var(--tempo)) ease-in-out;
+}
+.pose-jump .cosmo-ant-tip {
+  animation: cosmo-whip calc(1s / var(--tempo)) ease-in-out;
+}
+.pose-jump .cosmo-tail {
+  animation: cosmo-trail calc(1s / var(--tempo)) ease-in-out;
+}
+.cosmo-bust.pose-jump .cosmo-figure {
+  animation: cosmo-hop 0.8s ease-out;
+}
+
+.pose-think .cosmo-head {
+  animation: cosmo-ponder calc(5s / var(--tempo)) ease-in-out infinite alternate;
+}
+.pose-think .cosmo-pupil {
+  transform: translate(-3.4px, -4px);
+}
+.pose-think .cosmo-glance {
+  animation: none;
+}
+.pose-think .cosmo-lid {
+  animation: none;
+  transform: translateY(9px);
+}
+.pose-think .cosmo-brow-l {
+  transform: translateY(-3px);
+}
+.pose-think .cosmo-brow-r {
+  transform: translateY(1px);
+}
+.pose-think .cosmo-mouth {
+  display: none;
+}
+.pose-think .cosmo-mouth-shut {
+  display: block;
+}
+.pose-think .cosmo-ant,
+.pose-think .cosmo-ant-tip {
+  animation-duration: calc(2.2s / var(--tempo));
+}
+.pose-think .cosmo-arm-r .cosmo-arm {
+  animation: none;
+  transform: rotate(30deg);
+}
+.pose-think .cosmo-arm-r .cosmo-fore {
+  animation: none;
+  transform: rotate(104deg);
+}
+.pose-think .cosmo-arm-r .cosmo-hand {
+  animation: cosmo-tap calc(1.6s / var(--tempo)) ease-in-out infinite alternate;
+}
+
+.pose-sleep .cosmo-figure {
+  animation: cosmo-slumber calc(5s / var(--tempo)) ease-in-out infinite alternate;
+}
+.pose-sleep .cosmo-upper {
+  animation: none;
+  transform: rotate(1.5deg);
+}
+.pose-sleep .cosmo-head {
+  animation: cosmo-doze calc(5s / var(--tempo)) ease-in-out infinite alternate;
+}
+.pose-sleep .cosmo-lid {
+  animation: none;
+  transform: translateY(44px);
+}
+.pose-sleep .cosmo-mouth {
+  display: none;
+}
+.pose-sleep .cosmo-mouth-shut,
+.pose-sleep .cosmo-zzz {
+  display: block;
+}
+.pose-sleep .cosmo-ant {
+  animation: none;
+  transform: rotate(-14deg);
+}
+.pose-sleep .cosmo-ant-tip {
+  animation: none;
+  transform: rotate(-20deg);
+}
+.pose-sleep .cosmo-arm {
+  animation: none;
+  transform: rotate(-12deg);
+}
+.pose-sleep .cosmo-tail,
+.pose-sleep .cosmo-tail-tip {
+  animation-duration: calc(6s / var(--tempo));
+}
+.cosmo-zzz text {
+  opacity: 0;
+  animation: cosmo-zzz calc(3.2s / var(--tempo)) ease-out infinite;
+}
+.cosmo-zzz text:nth-child(2) {
+  animation-delay: 0.7s;
+}
+.cosmo-zzz text:nth-child(3) {
+  animation-delay: 1.4s;
+}
+
+.cosmo.is-still,
+.cosmo.is-still * {
+  animation: none !important;
+}
+
+@keyframes cosmo-breathe {
+  to { transform: scale(1.004, 1.012); }
+}
+@keyframes cosmo-shift {
+  0%, 22%, 100% { transform: rotate(-0.9deg); }
+  46%, 72% { transform: rotate(1.1deg) translateX(1.5px); }
+}
+@keyframes cosmo-attend {
+  0%, 100% { transform: rotate(0); }
+  16%, 32% { transform: rotate(2.4deg) translateX(1px); }
+  46%, 68% { transform: rotate(-1.8deg) translateX(-1px); }
+  82% { transform: rotate(0.8deg); }
+}
+@keyframes cosmo-reed {
+  from { transform: rotate(-3.5deg); }
+  to { transform: rotate(4deg); }
+}
+@keyframes cosmo-reed-tip {
+  from { transform: rotate(-6deg); }
+  to { transform: rotate(7deg); }
+}
+@keyframes cosmo-turn {
+  from { transform: rotate(-5deg); }
+  to { transform: rotate(6deg); }
+}
+@keyframes cosmo-glint {
+  0%, 44%, 56%, 100% { opacity: 0; transform: scale(0.2) rotate(0); }
+  50% { opacity: 0.95; transform: scale(1) rotate(45deg); }
+}
+@keyframes cosmo-blink {
+  0%, 28%, 31.5%, 69%, 72%, 73.5%, 76.5%, 100% { transform: translateY(0); }
+  29.8%, 70.5%, 75% { transform: translateY(44px); }
+}
+@keyframes cosmo-saccade {
+  0%, 18%, 44%, 100% { transform: translate(0, 0); }
+  19%, 30% { transform: translate(2.2px, -0.6px); }
+  31%, 43% { transform: translate(-1.6px, 0.8px); }
+  62%, 74% { transform: translate(1.2px, 1.4px); }
+  75%, 99% { transform: translate(0, 0); }
+}
+@keyframes cosmo-hang {
+  from { transform: rotate(-1.5deg); }
+  to { transform: rotate(2.5deg); }
+}
+@keyframes cosmo-hang-fore {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(3.5deg); }
+}
+@keyframes cosmo-hang-hand {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(5deg); }
+}
+@keyframes cosmo-sweep {
+  from { transform: rotate(-3deg); }
+  to { transform: rotate(6deg); }
+}
+@keyframes cosmo-sweep-tip {
+  from { transform: rotate(-5deg); }
+  to { transform: rotate(9deg); }
+}
+
+@keyframes cosmo-speak {
+  0%, 100% { transform: scaleY(0.45); }
+  14% { transform: scaleY(1); }
+  30% { transform: scaleY(0.6); }
+  46% { transform: scaleY(0.95) scaleX(0.94); }
+  62% { transform: scaleY(0.3) scaleX(1.04); }
+  80% { transform: scaleY(0.8); }
+}
+@keyframes cosmo-converse {
+  from { transform: rotate(-1.6deg) translateY(0); }
+  to { transform: rotate(1.4deg) translateY(-1.5px); }
+}
+@keyframes cosmo-perk {
+  from { transform: rotate(5deg); }
+  to { transform: rotate(8deg); }
+}
+@keyframes cosmo-perk-tip {
+  from { transform: rotate(7deg); }
+  to { transform: rotate(11deg); }
+}
+
+@keyframes cosmo-lift {
+  to { transform: rotate(52deg); }
+}
+@keyframes cosmo-bend {
+  to { transform: rotate(48deg); }
+}
+@keyframes cosmo-greet {
+  from { transform: rotate(48deg); }
+  to { transform: rotate(86deg); }
+}
+@keyframes cosmo-flick {
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(14deg); }
+}
+@keyframes cosmo-greet-head {
+  from { transform: rotate(-3.5deg); }
+  to { transform: rotate(-0.5deg) translateY(-1px); }
+}
+@keyframes cosmo-indicate {
+  from { transform: rotate(42deg); }
+  to { transform: rotate(49deg); }
+}
+@keyframes cosmo-indicate-head {
+  from { transform: rotate(2deg); }
+  to { transform: rotate(4.5deg) translateX(-1.5px); }
+}
+
+@keyframes cosmo-rejoice {
+  0%, 56%, 100% { transform: translateY(0) scale(1, 1); }
+  10% { transform: translateY(3px) scale(1.01, 0.985); }
+  24% { transform: translateY(-14px) scale(0.995, 1.01); }
+  38% { transform: translateY(0) scale(1.008, 0.99); }
+  46% { transform: translateY(-6px) scale(1, 1); }
+}
+@keyframes cosmo-arms-up {
+  from { transform: rotate(60deg); }
+  to { transform: rotate(70deg); }
+}
+@keyframes cosmo-fore-up {
+  from { transform: rotate(22deg); }
+  to { transform: rotate(38deg); }
+}
+@keyframes cosmo-chin-up {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(2deg) translateY(-2px); }
+}
+
+@keyframes cosmo-jump {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  18% { transform: translateY(7px) scale(1.02, 0.965); }
+  46% { transform: translateY(-40px) scale(0.99, 1.02); }
+  64% { transform: translateY(-30px) scale(1, 1); }
+  84% { transform: translateY(3px) scale(1.015, 0.975); }
+}
+@keyframes cosmo-jump-shadow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  46% { transform: scale(0.7); opacity: 0.5; }
+}
+@keyframes cosmo-swing {
+  0%, 100% { transform: rotate(0); }
+  18% { transform: rotate(-10deg); }
+  46% { transform: rotate(58deg); }
+  84% { transform: rotate(10deg); }
+}
+@keyframes cosmo-whip {
+  0%, 100% { transform: rotate(0); }
+  18% { transform: rotate(6deg); }
+  46% { transform: rotate(-14deg); }
+  84% { transform: rotate(12deg); }
+}
+@keyframes cosmo-trail {
+  0%, 100% { transform: rotate(0); }
+  46% { transform: rotate(16deg); }
+  84% { transform: rotate(-6deg); }
+}
+@keyframes cosmo-hop {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-13px); }
+  70% { transform: translateY(2px); }
+}
+
+@keyframes cosmo-ponder {
+  from { transform: rotate(-6deg) translateX(-1px); }
+  to { transform: rotate(-4deg); }
+}
+@keyframes cosmo-tap {
+  from { transform: rotate(-12deg); }
+  to { transform: rotate(-4deg); }
+}
+@keyframes cosmo-slumber {
+  to { transform: scale(1.006, 1.02); }
+}
+@keyframes cosmo-doze {
+  from { transform: rotate(8deg) translateY(4px); }
+  to { transform: rotate(10deg) translateY(6px); }
+}
+@keyframes cosmo-zzz {
+  0% { transform: translateY(6px); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translateY(-14px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmo,
+  .cosmo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 3B sahne kutusu: SVG ile aynı oranı tutar, tuval üstüne oturur. */
+.cosmo-stage {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 400 / 586;
+}
+.cosmo-stage-bust {
+  aspect-ratio: 232 / 324;
+}
+/* scene.ts'teki HEADROOM ve SIDEROOM ile aynı: tuval kutunun %110'u kadar yukarı, %60'ı kadar iki yana taşar. */
+.cosmo-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+.cosmo-stage.cosmo-stage-bust canvas {
+  top: -110%;
+  left: -60%;
+  width: 220%;
+  height: 210%;
+}
+.cosmo-stage.is-live canvas {
+  opacity: 1;
+}
+.cosmo-stage > svg.cosmo {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  transform: none;
+  filter: none;
+}
+.cosmo-fab .cosmo-stage {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 112px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+@media (max-width: 760px) {
+  .cosmo-fab .cosmo-stage {
+    width: 94px;
+  }
+}
