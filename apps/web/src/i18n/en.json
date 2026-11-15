@@ -476,5 +476,14 @@
   "cosmo.ui.closeChat": "Close the chat",
   "cosmo.ui.question": "Question for Cosmo",
   "cosmo.ui.close": "Close",
-  "cosmo.ui.ask": "Ask Cosmo"
+  "cosmo.ui.ask": "Ask Cosmo",
+  "current.title": "What do you grow now?",
+  "current.hint": "Choose the crops of your current rotation, year by year. Travertine scores it with the same model and shows every alternative's difference from it.",
+  "current.none": "—",
+  "current.clear": "Clear current rotation",
+  "current.yours": "Your current rotation (baseline)",
+  "current.violations": "Rotation rules this sequence breaks",
+  "current.noViolations": "This sequence breaks none of the rotation rules.",
+  "current.deltaNote": "Differences from your current rotation, on the same past years. Not predicted gains.",
+  "current.unavailable": "The engine did not return a baseline for this request (demo data or an older engine)."
 }

@@ -476,5 +476,14 @@
   "cosmo.ui.closeChat": "Sohbeti kapat",
   "cosmo.ui.question": "Cosmo'ya soru",
   "cosmo.ui.close": "Kapat",
-  "cosmo.ui.ask": "Cosmo'ya sor"
+  "cosmo.ui.ask": "Cosmo'ya sor",
+  "current.title": "Şu anda ne ekiyorsun?",
+  "current.hint": "Mevcut nöbetinin ürünlerini yıl yıl seç. Travertine onu aynı modelle puanlar ve her alternatifin ondan farkını gösterir.",
+  "current.none": "—",
+  "current.clear": "Mevcut nöbeti temizle",
+  "current.yours": "Mevcut nöbetin (temel)",
+  "current.violations": "Bu dizinin bozduğu nöbet kuralları",
+  "current.noViolations": "Bu dizi nöbet kurallarının hiçbirini bozmuyor.",
+  "current.deltaNote": "Mevcut nöbetine göre farklar, aynı geçmiş yıllar üzerinde. Tahmini kazanç değildir.",
+  "current.unavailable": "Motor bu istek için bir temel döndürmedi (demo verisi ya da eski motor sürümü)."
 }

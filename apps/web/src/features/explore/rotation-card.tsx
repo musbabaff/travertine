@@ -19,6 +19,9 @@ export function RotationCard({
   selected,
   selectDisabled,
   onToggleSelect,
+  delta,
+  isBaseline = false,
+  violations,
 }: {
   rotation: Rotation;
   rank: number;
@@ -27,6 +30,9 @@ export function RotationCard({
   selected: boolean;
   selectDisabled: boolean;
   onToggleSelect: () => void;
+  delta?: Rotation["vs_baseline"];
+  isBaseline?: boolean;
+  violations?: { rule: string; year_index?: number; message: string }[];
 }) {
   const { t, n, locale } = useI18n();
   const [showWater, setShowWater] = useState(false);
@@ -62,7 +68,19 @@ export function RotationCard({
       </div>
 
       <div className="mt-4">
-        <ScoreBars scores={rotation.scores} />
+        <ScoreBars scores={rotation.scores} delta={delta} />
+        {delta && <p className="mt-1 text-xs text-ink-muted">{t("current.deltaNote")}</p>}
+        {isBaseline && violations && violations.length > 0 && (
+          <div className="mt-3 rounded-md border border-warning/30 bg-warning-bg p-3" data-testid="rule-violations">
+            <p className="text-xs font-semibold text-warning">{t("current.violations")}</p>
+            <ul className="mt-1 space-y-1 text-sm text-ink-2">
+              {violations.map((v) => (
+                <li key={`${v.rule}-${v.year_index ?? 0}`}>{v.message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {isBaseline && violations && violations.length === 0 && <p className="mt-2 text-xs text-ink-muted">{t("current.noViolations")}</p>}
       </div>
 
       {/* P10/P50/P90 range display slots in here once the contract carries percentile outcomes. */}
