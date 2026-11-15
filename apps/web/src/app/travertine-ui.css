@@ -222,3 +222,55 @@ button { cursor: pointer; }
 
 /* Map zoom buttons sit under the Map/Satellite toggle so the Cosmo guide (bottom right) never covers them. */
 .maplibregl-ctrl-top-right { top: 64px; }
+
+/* Landing: the dashboard's dark field band, cards and type scale */
+.tv-landing-hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: center; padding: 40px; border-radius: 18px; background: #213320; color: #fff; }
+.tv-landing-hero-copy { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.tv-landing-hero-copy p { color: #e4eedf; }
+.tv-landing-hero-copy .tv-banner-eyebrow { color: #d6efc1; }
+.tv-landing-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 1px solid #ffffff88; border-radius: 40px; color: #fff; font-size: 14px; font-weight: 500; text-decoration: none; }
+.tv-landing-btn:hover { background: #ffffff1a; }
+.tv-landing-btn.is-primary { border-color: #fff; background: #fff; color: #17251c; }
+.tv-landing-btn.is-primary:hover { background: #e9f0e4; }
+.tv-landing-supports { font-size: 13px; }
+.tv-landing-demo { min-width: 0; padding: 22px; border-radius: 16px; background: #fff; color: #17251c; }
+.tv-landing-highlight { margin-top: 20px; margin-bottom: 8px; padding: 24px; border-radius: 16px; background: #213320; color: #fff; }
+.tv-landing-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.tv-landing-stats > div { padding: 14px; border: 1px solid #ffffff3d; border-radius: 12px; }
+.tv-landing-stats dt { color: #c8e8bd; font-size: 12px; }
+.tv-landing-stats dd { margin-top: 4px; font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tv-landing-stats .tv-landing-ci { font-size: 12px; font-weight: 400; color: #e4eedf; }
+.tv-landing-verdict { margin-top: 14px; font-size: 16px; font-weight: 600; }
+.tv-landing-note { margin-top: 6px; font-size: 13px; color: #e4eedf; }
+@media (max-width: 900px) {
+  .tv-landing-hero { grid-template-columns: 1fr; padding: 24px 18px; }
+  .tv-landing-stats { grid-template-columns: 1fr; }
+}
+
+/* Language switch in the header */
+.tv-lang { display: inline-flex; align-items: center; gap: 2px; margin-left: 8px; padding: 3px; border: 1px solid #e2e9df; border-radius: 40px; background: #fff; }
+.tv-lang button { min-width: 40px; height: 38px; padding: 0 10px; border-radius: 40px; color: #526d55; font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+.tv-lang button:hover { color: #17251c; }
+.tv-lang button[aria-checked="true"] { background: #286c40; color: #fff; }
+.tv-lang button:focus-visible { outline: 2px solid #286c40; outline-offset: 2px; }
+
+/* Room under the last buttons so the Cosmo button never sits on them */
+@media (max-width: 760px) { main { padding-bottom: 120px; } }
+
+/* Rotation plan: prints on one page and reads in black and white */
+.tv-print-only { display: none; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; color: #000 !important; }
+  .tv-header, .tv-rail, .tv-bottom-nav, .cosmo-dock, footer, .no-print, .tv-skip { display: none !important; }
+  .tv-content { margin: 0 !important; min-height: 0 !important; }
+  main { padding-bottom: 0 !important; }
+  .tv-plan { max-width: none; padding: 0 !important; font-size: 11px; }
+  .tv-plan .tv-page-banner { min-height: 0; padding: 0 0 8px; border-radius: 0; background: none !important; color: #000; border-bottom: 2px solid #000; }
+  .tv-plan .tv-page-banner * { color: #000 !important; }
+  .tv-plan .tv-plan-card { break-inside: avoid; border: 1px solid #000; box-shadow: none; padding: 8px; }
+  .tv-plan .text-warning, .tv-plan .text-ink-2, .tv-plan .text-ink-muted { color: #000 !important; }
+  .tv-plan details > summary { list-style: none; }
+  .tv-plan .grid { gap: 8px !important; }
+  .tv-print-only { display: block; }
+}

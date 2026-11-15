@@ -515,8 +515,8 @@
 
 @media (max-width: 760px) {
   .cosmo-dock { right: 10px; bottom: calc(78px + env(safe-area-inset-bottom)); }
-  .cosmo-fab { width: 94px; height: 140px; }
-  .cosmo-fab .cosmo { width: 94px; }
+  .cosmo-fab { width: 64px; height: 96px; }
+  .cosmo-fab .cosmo { width: 64px; }
   .cosmo-chat { max-height: calc(100dvh - 110px - env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) {

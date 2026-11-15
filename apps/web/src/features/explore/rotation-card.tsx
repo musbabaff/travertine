@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { CalendarRange, Check, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useId, useState } from "react";
 import { WaterYearsChart } from "@/components/charts/water-years-chart";
 import { useDataSource } from "@/lib/api/source";
@@ -39,6 +41,10 @@ export function RotationCard({
   const { t, n, locale } = useI18n();
   const source = useDataSource();
   const englishOnly = source !== "engine" && locale === "tr";
+  const query = new URLSearchParams(useSearchParams().toString());
+  query.delete("cur");
+  query.set("plan", rotation.sequence.join(","));
+  const planHref = `/app/plan?${query.toString()}`;
   const [showWater, setShowWater] = useState(false);
   const id = useId();
   const top = rank === 1;
@@ -130,6 +136,13 @@ export function RotationCard({
           </span>
           {t("explore.compare.select")}
         </button>
+        <Link
+          href={planHref}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border-strong bg-surface px-3 text-sm font-medium text-ink hover:bg-sunken"
+        >
+          <CalendarRange aria-hidden className="size-4" strokeWidth={1.5} />
+          {t("plan.open")}
+        </Link>
       </div>
 
       {showWater && (
