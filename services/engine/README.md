@@ -23,6 +23,8 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 | `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]`; `current_rotation` (1–5 crop ids, repeated to fill the horizon) is scored with the same model and returned as `baseline` with `rule_violations[]`, and every alternative carries `vs_baseline` |
 | `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md`; `?language=tr` for Turkish caveats |
 
+Every endpoint that returns `provenance[]` or notes takes `language` (`en` default, `tr`); see `docs/METHODOLOGY.md`, Language.
+
 Interactive docs are served at `/docs` when the engine runs.
 
 ## Setup

@@ -188,7 +188,7 @@ def test_explore_explanations_follow_language(settings: Settings, fake: FakeUpst
         }
         assert len(a["explanation"]) == len(b["explanation"])
         assert b["explanation"][0].startswith("Kayıttaki ")
-    assert en["provenance"] == tr["provenance"]
+    assert [p["access_url"] for p in en["provenance"]] == [p["access_url"] for p in tr["provenance"]]
 
 
 def test_health_version_carries_the_deployed_commit(

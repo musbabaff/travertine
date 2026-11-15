@@ -58,6 +58,7 @@ class FieldAnalyzeRequest(_Model):
     lon: Longitude
     geometry: PolygonGeometry | None = None
     irrigated: bool
+    language: Language = "en"
 
 
 class ClimateYear(_Model):

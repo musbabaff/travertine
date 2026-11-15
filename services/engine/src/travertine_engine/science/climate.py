@@ -22,8 +22,8 @@ class DailyClimate:
     elevation_m: float
     hargreaves_days: int
     missing_days: int
-    source_note: str = (
-        ""  # appended to the provenance note, e.g. when the record came from the bundled snapshot
+    snapshot: tuple[str, str] | None = (
+        None  # (fetch date, host) when the record came from the bundled snapshot
     )
 
 

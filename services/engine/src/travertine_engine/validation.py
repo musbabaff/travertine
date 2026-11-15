@@ -13,7 +13,7 @@ import numpy as np
 
 from travertine_engine import text
 from travertine_engine.errors import OutOfCoverage
-from travertine_engine.explore import FAO56_PROVENANCE, ExploreService
+from travertine_engine.explore import ExploreService, fao56_provenance
 from travertine_engine.models import BaselineValue, Validation, ValidationBaseline, ValidationYear
 from travertine_engine.science.crops import CropParams, crops_by_id
 from travertine_engine.science.et0 import FloatArray
@@ -169,7 +169,7 @@ class ValidationService:
 
     async def validate(self, lat: float, lon: float, language: Language = "en") -> Validation:
         (inputs, provenance, _), ndvi = await asyncio.gather(
-            self.explore.inputs(lat, lon), self.explore.fields.ndvi(lat, lon)
+            self.explore.inputs(lat, lon, language), self.explore.fields.ndvi(lat, lon, language)
         )
         result = await asyncio.to_thread(back_test, inputs, ndvi.by_year)
         s = result.stats
@@ -206,5 +206,5 @@ class ValidationService:
             verdict=verdict_code(s.ci_diff),
             method=METHOD,
             caveats=caveats,
-            provenance=[*provenance, ndvi.provenance, FAO56_PROVENANCE],
+            provenance=[*provenance, ndvi.provenance, fao56_provenance(language)],
         )

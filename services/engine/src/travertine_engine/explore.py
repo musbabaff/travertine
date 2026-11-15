@@ -11,7 +11,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from travertine_engine import reasoning, text
+from travertine_engine import prov_text, reasoning, text
 from travertine_engine.errors import InvalidRequest
 from travertine_engine.farmer import SoilChoice, choose_soil, crop_weights, other_records
 from travertine_engine.field import FieldService, parse_field_id, power_provenance, resolve_soil
@@ -47,7 +47,7 @@ from travertine_engine.science.rotations import (
 )
 from travertine_engine.science.soil import saxton_rawls_water_contents
 from travertine_engine.science.water import surface_layer
-from travertine_engine.text import crop_name
+from travertine_engine.text import Language, crop_name
 
 log = logging.getLogger(__name__)
 
@@ -55,61 +55,49 @@ TOP_N = 10
 TABLE_CACHE_SIZE = 16
 SCORE_CACHE_SIZE = 48
 
-FAO56_PROVENANCE = Provenance(
-    dataset="FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
-    provider="Food and Agriculture Organization of the United Nations",
-    spatial_resolution="Not spatial (method and crop coefficients)",
-    temporal_coverage="Published 1998",
-    access_url="https://www.fao.org/4/x0490e/x0490e00.htm",
-    note=(
-        "Crop coefficients (Table 12, adjusted for local wind and humidity with eqs. 62 and 65), stage lengths "
-        "(Table 11), rooting depth and depletion fraction (Table 22), daily root-zone water balance and water-stress "
-        "coefficient Ks (chapter 8, eqs. 84–85) and bare-soil evaporation between crops (chapter 7, eqs. 73–74, "
-        "Table 19). Runoff and capillary rise are not modelled."
-    ),
-)
-A3517_PROVENANCE = Provenance(
-    dataset="Using Legumes as a Nitrogen Source (UW-Extension A3517)",
-    provider="Bundy, Kelling & Ward Good, University of Wisconsin-Extension, 1997",
-    spatial_resolution="Not spatial (rotation-study averages, Midwest US)",
-    temporal_coverage="Published 1997",
-    access_url="https://ipcm.wisc.edu/wp-content/uploads/sites/54/2022/11/Usinglegumes.pdf",
-    note=(
-        "Legume nitrogen credits to the following crop (alfalfa fair stand 160 and 50 lb N/acre in the first and "
-        "second year, soybean 40, pea and dry bean 20, applied to lentil and faba bean as the closest category). Used "
-        "only as one of four relative soil-health indicators, not as a fertilizer recommendation for this field."
-    ),
-)
+
+def fao56_provenance(lang: Language = "en") -> Provenance:
+    return Provenance(
+        dataset="FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
+        provider="Food and Agriculture Organization of the United Nations",
+        spatial_resolution=prov_text.not_spatial(
+            lang, "method and crop coefficients", "yöntem ve ürün katsayıları"
+        ),
+        temporal_coverage=prov_text.published(lang, 1998),
+        access_url="https://www.fao.org/4/x0490e/x0490e00.htm",
+        note=prov_text.fao56_note(lang),
+    )
 
 
-BASELINE_NOTE = (
-    " The baseline is the rotation the user entered as their current one, repeated to fill the horizon if shorter. "
-    "It is simulated through the same windows with the same water balance; its soil indicators are divided by the "
-    "same candidate maxima (limited to 1) and its total uses the same priorities. It is scored even when it breaks "
-    "the rotation rules the candidates obey, and `rule_violations` lists every rule it breaks. `vs_baseline` is an "
-    "alternative's score minus the baseline's."
-)
+def a3517_provenance(lang: Language = "en") -> Provenance:
+    return Provenance(
+        dataset="Using Legumes as a Nitrogen Source (UW-Extension A3517)",
+        provider="Bundy, Kelling & Ward Good, University of Wisconsin-Extension, 1997",
+        spatial_resolution=prov_text.not_spatial(
+            lang, "rotation-study averages, Midwest US", "nöbet çalışması ortalamaları, ABD Ortabatı"
+        ),
+        temporal_coverage=prov_text.published(lang, 1997),
+        access_url="https://ipcm.wisc.edu/wp-content/uploads/sites/54/2022/11/Usinglegumes.pdf",
+        note=prov_text.a3517_note(lang),
+    )
+
+
+FAO56_PROVENANCE = fao56_provenance()
+A3517_PROVENANCE = a3517_provenance()
 
 
 def scoring_provenance(
-    n_windows: int, first: int, last: int, horizon: int, *, baseline: bool = False
+    n_windows: int, first: int, last: int, horizon: int, *, baseline: bool = False, lang: Language = "en"
 ) -> Provenance:
     return Provenance(
-        dataset="Travertine rotation back-cast and scoring",
-        provider="Travertine engine",
-        spatial_resolution="Field point (inputs at the resolutions listed above)",
-        temporal_coverage=f"{n_windows} overlapping {horizon}-year windows of agricultural years {first}–{last}",
-        access_url="https://github.com/musbabaff/travertine/blob/main/docs/METHODOLOGY.md",
-        note=(
-            "Each rotation is simulated through every historical window with soil water carried between crops. "
-            "Yearly figures are medians across windows. Scores are relative indices between 0 and 1 under the given "
-            "priorities, not forecasts. water = median share of crop water demand met by rain and stored soil water; "
-            "risk = 1 − (0.5 × 90th-percentile unmet share of a season + 0.5 × its 10th–90th percentile spread); "
-            "soil = mean of legume nitrogen credit, family diversity, rooting-depth range and share of the year under "
-            "a crop, each scaled to the candidates considered; income = mean water-limited relative "
-            "evapotranspiration with every crop valued equally — no price or market data is used."
-            + (BASELINE_NOTE if baseline else "")
+        dataset=prov_text.scoring_dataset(lang),
+        provider=prov_text.engine_provider(lang),
+        spatial_resolution=prov_text.field_point(lang),
+        temporal_coverage=prov_text.windows_coverage(
+            lang, n_windows=n_windows, horizon=horizon, first=first, last=last
         ),
+        access_url="https://github.com/musbabaff/travertine/blob/main/docs/METHODOLOGY.md",
+        note=prov_text.scoring_note(lang) + (prov_text.baseline_note(lang) if baseline else ""),
     )
 
 
@@ -135,8 +123,12 @@ class ExploreService:
         # scores side by side can run out of memory.
         self._heavy = asyncio.Semaphore(1)
 
-    async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
+    async def inputs(
+        self, lat: float, lon: float, lang: Language = "en"
+    ) -> tuple[FieldInputs, list[Provenance], str]:
         inputs, provenance, choice = await self.field_inputs(lat, lon, None)
+        if lang != "en":
+            provenance = await self.field_provenance(lat, lon, None, lang)
         return inputs, provenance, choice.texture
 
     async def field_inputs(
@@ -168,6 +160,22 @@ class ExploreService:
         if scenario is not None:
             provenance.append(scenario_provenance(*scenario))
         return inputs, provenance, choice
+
+    async def field_provenance(
+        self, lat: float, lon: float, scenario: tuple[float, float] | None, lang: Language
+    ) -> list[Provenance]:
+        """POWER, soil and scenario provenance in the request language. Both inputs come from memory or disk."""
+        (daily, api_version), soil = await asyncio.gather(
+            self.fields.daily_climate(lat, lon, scenario),
+            resolve_soil(self.fields.upstream, self.fields.cache, lat, lon, lang),
+        )
+        years, dropped = annual_summary(daily)
+        first = years[0].year if years else self.fields.settings.first_year
+        last = years[-1].year if years else self.fields.settings.last_year
+        out = [power_provenance(daily, first, last, api_version, dropped, lang), soil.provenance]
+        if scenario is not None:
+            out.append(scenario_provenance(*scenario, lang=lang))
+        return out
 
     async def tables(
         self,
@@ -321,12 +329,19 @@ class ExploreService:
         if baseline is not None and baseline_facts is not None:
             baseline.reasoning = reasoning.build(ctx, baseline_facts, baseline.scores)
         n_windows = len(tables.years) - req.horizon_years + 1
+        if req.language != "en":
+            provenance = await self.field_provenance(lat, lon, scenario_of(req), req.language)
         provenance = [
             *provenance,
-            FAO56_PROVENANCE,
-            A3517_PROVENANCE,
+            fao56_provenance(req.language),
+            a3517_provenance(req.language),
             scoring_provenance(
-                n_windows, tables.years[0], tables.years[-1], req.horizon_years, baseline=baseline is not None
+                n_windows,
+                tables.years[0],
+                tables.years[-1],
+                req.horizon_years,
+                baseline=baseline is not None,
+                lang=req.language,
             ),
         ]
         records = [*choice.records, *other_records(crops, req.crop_ids, farmer.crop_values, req.irrigated)]
@@ -418,20 +433,15 @@ def scenario_of(req: RotationExploreRequest) -> tuple[float, float] | None:
     return (round(s.precipitation_factor, 3), round(s.temperature_change_c, 2))
 
 
-def scenario_provenance(factor: float, delta: float) -> Provenance:
+def scenario_provenance(factor: float, delta: float, lang: Language = "en") -> Provenance:
+    resolution, coverage = prov_text.same_as_power(lang)
     return Provenance(
-        dataset="Sensitivity test on the NASA POWER record (not a forecast)",
-        provider="Travertine engine",
-        spatial_resolution="Same as NASA POWER",
-        temporal_coverage="Same years as the NASA POWER record",
+        dataset=prov_text.scenario_dataset(lang),
+        provider=prov_text.engine_provider(lang),
+        spatial_resolution=resolution,
+        temporal_coverage=coverage,
         access_url="https://github.com/musbabaff/travertine/blob/main/docs/METHODOLOGY.md",
-        note=(
-            f"Every day's precipitation was multiplied by {factor:g} and {delta:+g} °C was added to daily mean, "
-            "maximum, minimum and dew-point temperature; wind, radiation and pressure are as recorded. FAO-56 "
-            "Penman-Monteith ET0, the crop coefficients' climate adjustment and the soil water balance were then "
-            "recomputed. Results show how the past years would have scored under that change; they are not a "
-            "projection of future climate."
-        ),
+        note=prov_text.scenario_note(lang, factor, delta),
     )
 
 

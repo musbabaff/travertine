@@ -22,6 +22,9 @@ from typing import Any
 
 import httpx
 
+from travertine_engine.prov_text import snapshot_note
+from travertine_engine.text import Language
+
 log = logging.getLogger(__name__)
 
 _snapshot_reads: ContextVar[dict[str, dict[str, Any]] | None] = ContextVar("snapshot_reads", default=None)
@@ -41,14 +44,16 @@ class SnapshotReads:
     def __init__(self, reads: dict[str, dict[str, Any]]) -> None:
         self.reads = reads
 
-    def note(self, source: str) -> str:
+    def fetch(self, source: str) -> tuple[str, str] | None:
+        """(fetch date, host) of the snapshot entry this source was served from, or None."""
         meta = self.reads.get(source)
         if meta is None:
-            return ""
-        return (
-            f" Served from the engine's bundled snapshot of this source, fetched {meta['fetched_at'][:10]} from "
-            f"{httpx.URL(meta['url']).host}; no live request was made for it."
-        )
+            return None
+        return meta["fetched_at"][:10], httpx.URL(meta["url"]).host
+
+    def note(self, source: str, lang: Language = "en") -> str:
+        hit = self.fetch(source)
+        return snapshot_note(lang, *hit) if hit else ""
 
 
 @contextmanager
