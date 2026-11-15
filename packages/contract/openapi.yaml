@@ -546,6 +546,44 @@ components:
         vs_baseline:
           $ref: "#/components/schemas/ScoreDifference"
           description: "Optional. Present on every alternative when the request carried current_rotation."
+        reasoning:
+          $ref: "#/components/schemas/RotationReasoning"
+          description: "Optional. Structured reasoning built from this strategy's own numbers, in the request language."
+
+    EvidenceItem:
+      type: object
+      required: [statement, value, unit, dataset]
+      properties:
+        statement: { type: string, description: "What the value is, in the request language." }
+        value: { type: number, description: "The value itself, as computed by the engine." }
+        unit: { type: string, description: "Unit of value, e.g. mm, mm/m, kg N/ha, windows. Empty string if unitless." }
+        dataset: { type: string, description: "Dataset or published source the value rests on, English, as named in provenance[] or inputs[]." }
+
+    RotationReasoning:
+      type: object
+      description: "Five parts, each a list that may be empty: a part is left empty when the engine has nothing specific to this strategy to say. The UI renders the sentences verbatim. Decision support only; it does not replace the farmer's judgment or local expertise."
+      required: [why_suggested, evidence, benefits, information_gaps, local_review]
+      properties:
+        why_suggested:
+          type: array
+          description: "Why the engine ranked this strategy where it did. Empty for the baseline, which the engine did not suggest."
+          items: { type: string }
+        evidence:
+          type: array
+          description: "The values behind the scores, each with its dataset."
+          items: { $ref: "#/components/schemas/EvidenceItem" }
+        benefits:
+          type: array
+          description: "Benefits the strategy may offer, stated with the numbers they rest on."
+          items: { type: string }
+        information_gaps:
+          type: array
+          description: "What the engine did not know for this request and how it filled the gap."
+          items: { type: string }
+        local_review:
+          type: array
+          description: "Risks and assumptions that farmers or local agricultural experts should review."
+          items: { type: string }
 
     ScoreDifference:
       type: object
