@@ -254,5 +254,7 @@
   "evidence.verdict.no_detectable_difference": "Model ile temel çizgi arasında saptanabilir bir fark yok: farkın aralığı 0'ı içeriyor.",
   "evidence.axis.baseline": "Temel endeks",
   "evidence.axis.index": "Endeks (0–1)",
-  "evidence.legend.baseline": "Temel kuraklık endeksi"
+  "evidence.legend.baseline": "Temel kuraklık endeksi",
+  "field.imagery.esri": "Powered by Esri",
+  "field.imagery.s2": "Sentinel-2 görüntüsü, piksel başına 10 m. Görüntü esnetilmesin diye yakınlaştırma sınırlıdır."
 }
