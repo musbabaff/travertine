@@ -1,6 +1,8 @@
 "use client";
 
-import { ChartNoAxesCombined, ChevronDown, Database, Home, LayoutDashboard, Layers, Menu, Sprout, X } from "lucide-react";
+import { summonCosmo } from "@/components/cosmo/gaze";
+
+import { ChartNoAxesCombined, ChevronDown, Database, Home, LayoutDashboard, Layers, Menu, Sprout, X, MessageCircleQuestion } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -150,6 +152,10 @@ export function AppHeader() {
             <span>{t(key)}</span>
           </Link>
         ))}
+        <button type="button" className="tv-bottom-cosmo" onClick={() => summonCosmo()} aria-label={t("cosmo.ui.ask")}>
+          <MessageCircleQuestion aria-hidden />
+          <span>Cosmo</span>
+        </button>
       </nav>
     </>
   );

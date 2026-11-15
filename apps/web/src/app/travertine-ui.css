@@ -274,3 +274,16 @@ button { cursor: pointer; }
   .tv-plan .grid { gap: 8px !important; }
   .tv-print-only { display: block; }
 }
+
+/* Cosmo never sits on page buttons: on phones and tablets it is an item in the bottom bar, on desktop the
+   compare tray ends left of the floating button */
+.tv-bottom-cosmo { display: none; }
+@media (max-width: 900px) {
+  .tv-bottom-nav { grid-template-columns: repeat(5, 1fr); }
+  .tv-bottom-cosmo { min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 9px; color: #69796d; font-size: 10px; white-space: nowrap; }
+  .tv-bottom-cosmo svg { width: 20px; height: 20px; stroke-width: 1.8; }
+  .cosmo-fab, .cosmo-nudge { display: none !important; }
+}
+@media (min-width: 901px) {
+  .tv-compare-tray-inner { padding-right: 132px; }
+}

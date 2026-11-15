@@ -4,7 +4,11 @@ import { useEffect, useRef } from "react";
 
 export const COSMO_ASK = "cosmo:ask";
 
+/** Set when Cosmo is summoned before its code has loaded; the assistant opens itself when it mounts. */
+export const COSMO_PENDING = "__cosmoPending";
+
 export function summonCosmo(question?: string) {
+  (window as unknown as Record<string, unknown>)[COSMO_PENDING] = question ?? true;
   window.dispatchEvent(new CustomEvent(COSMO_ASK, { detail: question }));
 }
 
