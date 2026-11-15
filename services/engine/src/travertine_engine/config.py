@@ -31,6 +31,7 @@ class Settings:
     warm_fields: list[tuple[float, float]] = field(
         default_factory=list
     )  # explore caches filled after start-up  # bundled upstream responses copied into the cache at start-up
+    warm_showcase: bool = False  # also warm the showcase fields, 3-year horizon only
     first_year: int = 2001
     last_year: int = datetime.now(UTC).year - 1
     upstream_timeout_s: float = 90.0
@@ -46,6 +47,7 @@ class Settings:
             cors_origin_regex=os.environ.get("ENGINE_CORS_ORIGIN_REGEX") or None,
             cache_dir=Path(os.environ.get("ENGINE_CACHE_DIR", str(defaults.cache_dir))),
             warm_fields=_points(os.environ.get("ENGINE_WARM_FIELDS", "")),
+            warm_showcase=os.environ.get("ENGINE_WARM_SHOWCASE", "").lower() in {"1", "true", "yes"},
             snapshot_dir=Path(os.environ.get("ENGINE_SNAPSHOT_DIR", str(ENGINE_ROOT / "data" / "snapshot"))),
             first_year=int(os.environ.get("ENGINE_FIRST_YEAR", defaults.first_year)),
             last_year=int(os.environ.get("ENGINE_LAST_YEAR", defaults.last_year)),
