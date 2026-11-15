@@ -10,10 +10,10 @@ const PARTS = ["why_suggested", "evidence", "benefits", "information_gaps", "loc
  * The five labelled parts the challenge asks for on every strategy, exactly as the engine words them. A part the engine
  * leaves empty is shown as such, never filled in by the UI.
  */
-export function ReasoningParts({ reasoning }: { reasoning: Reasoning }) {
+export function ReasoningParts({ reasoning, open = false }: { reasoning: Reasoning; open?: boolean }) {
   const { t, n } = useI18n();
   return (
-    <details className="mt-4 rounded-md border border-border bg-surface" data-testid="reasoning">
+    <details className="mt-4 rounded-md border border-border bg-surface" data-testid="reasoning" open={open || undefined}>
       <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-ink">{t("reasoning.title")}</summary>
       <dl className="space-y-3 border-t border-border px-3 py-3">
         {PARTS.map((part) => {

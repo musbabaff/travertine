@@ -38,6 +38,11 @@ describe("contract fixtures validate against openapi.yaml", () => {
   it("field soil", () => expect(validate("FieldSoil", fixture("field-soil.json"))).toEqual([]));
   it("field vegetation", () => expect(validate("FieldVegetation", fixture("field-vegetation.json"))).toEqual([]));
   it("showcase", () => expect(validate("Showcase", fixture("showcase.json"))).toEqual([]));
+  it("field hazards", () => expect(validate("FieldHazards", fixture("field-hazards.json"))).toEqual([]));
+  it("field calendar request + response", () => {
+    expect(validate("FieldCalendarRequest", fixture("field-calendar.request.json"))).toEqual([]);
+    expect(validate("FieldCalendar", fixture("field-calendar.json"))).toEqual([]);
+  });
 });
 
 describe("fixture consistency", () => {

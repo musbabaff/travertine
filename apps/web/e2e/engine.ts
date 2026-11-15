@@ -16,6 +16,8 @@ const ROUTES: Record<string, string> = {
   "/v1/field/soil": "field-soil.json",
   "/v1/field/vegetation": "field-vegetation.json",
   "/v1/showcase": "showcase.json",
+  "/v1/field/hazards": "field-hazards.json",
+  "/v1/field/calendar": "field-calendar.json",
 };
 
 const cors = {

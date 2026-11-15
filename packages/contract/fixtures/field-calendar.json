@@ -1,0 +1,383 @@
+{
+  "seasons": [
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "sowing": "11-15",
+      "harvest": "07-12"
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "sowing": "11-01",
+      "harvest": "04-19"
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "sowing": "05-01",
+      "harvest": "09-07"
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "sowing": "11-15",
+      "harvest": "06-02"
+    }
+  ],
+  "bare_periods": [
+    {
+      "after_year_index": 1,
+      "start": "07-13",
+      "end": "10-31",
+      "days": 111
+    },
+    {
+      "after_year_index": 2,
+      "start": "04-20",
+      "end": "04-30",
+      "days": 376
+    },
+    {
+      "after_year_index": 3,
+      "start": "09-08",
+      "end": "11-14",
+      "days": 68
+    },
+    {
+      "after_year_index": 4,
+      "start": "06-03",
+      "end": "11-14",
+      "days": 165
+    }
+  ],
+  "months": [
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 11,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.19,
+      "warm_day_share": 0.008
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 12,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.376,
+      "warm_day_share": 0.103
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 1,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.524,
+      "warm_day_share": 0.099
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 2,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.441,
+      "warm_day_share": 0.1
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 3,
+      "water_deficit_share": 0.128,
+      "frost_day_share": 0.267,
+      "warm_day_share": 0.087
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 4,
+      "water_deficit_share": 0.535,
+      "frost_day_share": 0.058,
+      "warm_day_share": 0.1
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 5,
+      "water_deficit_share": 0.727,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.101
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 6,
+      "water_deficit_share": 0.888,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.097
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "month": 7,
+      "water_deficit_share": 0.97,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.043
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "month": 11,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.128,
+      "warm_day_share": 0.094
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "month": 12,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.376,
+      "warm_day_share": 0.103
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "month": 1,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.524,
+      "warm_day_share": 0.099
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "month": 2,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.441,
+      "warm_day_share": 0.1
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "month": 3,
+      "water_deficit_share": 0.055,
+      "frost_day_share": 0.267,
+      "warm_day_share": 0.087
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "month": 4,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.076,
+      "warm_day_share": 0.062
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "month": 5,
+      "water_deficit_share": 0.092,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.101
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "month": 6,
+      "water_deficit_share": 0.896,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.099
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "month": 7,
+      "water_deficit_share": 0.97,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.101
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "month": 8,
+      "water_deficit_share": 0.968,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.099
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "month": 9,
+      "water_deficit_share": 0.987,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.234
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 11,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.19,
+      "warm_day_share": 0.008
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 12,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.376,
+      "warm_day_share": 0.103
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 1,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.524,
+      "warm_day_share": 0.099
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 2,
+      "water_deficit_share": 0.0,
+      "frost_day_share": 0.441,
+      "warm_day_share": 0.1
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 3,
+      "water_deficit_share": 0.241,
+      "frost_day_share": 0.267,
+      "warm_day_share": 0.087
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 4,
+      "water_deficit_share": 0.548,
+      "frost_day_share": 0.058,
+      "warm_day_share": 0.1
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 5,
+      "water_deficit_share": 0.486,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.101
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "month": 6,
+      "water_deficit_share": 0.841,
+      "frost_day_share": 0.0,
+      "warm_day_share": 0.0
+    }
+  ],
+  "most_vulnerable": [
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "hazard": "water_deficit",
+      "month": 7,
+      "share": 0.97
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "hazard": "frost",
+      "month": 1,
+      "share": 0.524
+    },
+    {
+      "year_index": 1,
+      "crop_id": "winter_wheat",
+      "hazard": "warm_days",
+      "month": 12,
+      "share": 0.103
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "hazard": "water_deficit",
+      "month": 3,
+      "share": 0.055
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "hazard": "frost",
+      "month": 1,
+      "share": 0.524
+    },
+    {
+      "year_index": 2,
+      "crop_id": "lentil",
+      "hazard": "warm_days",
+      "month": 12,
+      "share": 0.103
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "hazard": "water_deficit",
+      "month": 9,
+      "share": 0.987
+    },
+    {
+      "year_index": 3,
+      "crop_id": "sunflower",
+      "hazard": "warm_days",
+      "month": 9,
+      "share": 0.234
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "hazard": "water_deficit",
+      "month": 6,
+      "share": 0.841
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "hazard": "frost",
+      "month": 1,
+      "share": 0.524
+    },
+    {
+      "year_index": 4,
+      "crop_id": "barley",
+      "hazard": "warm_days",
+      "month": 12,
+      "share": 0.103
+    }
+  ],
+  "caveats": [
+    "Shares are computed from the 2001–2025 NASA POWER record; they are past frequencies, not a forecast.",
+    "The water deficit is climatic only (precipitation against table Kc × ET0); soil water is not counted, so on deep soils the actual stress can be lower.",
+    "Sowing dates are FAO-56 Table 11 dates; if local sowing differs, the months shift.",
+    "The warm-day threshold is the record's own monthly 90th percentile, not a crop-specific heat-stress threshold."
+  ],
+  "provenance": [
+    {
+      "dataset": "NASA POWER daily point data, Agroclimatology community (API v2.10.3)",
+      "provider": "NASA Langley Research Center, POWER Project",
+      "spatial_resolution": "0.5° × 0.625° (meteorology), 1° × 1° (solar radiation)",
+      "temporal_coverage": "2001–2025, daily",
+      "access_url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "note": "Gridded, model-based reanalysis values for the grid cell containing the field, not field measurements: MERRA-2 meteorology (0.5° × 0.625°) and CERES SYN1deg solar radiation (1° × 1°). Parameters T2M, T2M_MAX, T2M_MIN, T2MDEW, WS2M, PS, ALLSKY_SFC_SW_DWN, PRECTOTCORR, GWETROOT. Daily reference evapotranspiration is FAO-56 Penman-Monteith (eq. 6) with actual vapour pressure from the dew point (eq. 14) and net radiation from eqs. 37–40 using the POWER grid-cell elevation (676 m); annual ET0 is the sum of daily values. Hargreaves (eq. 52) was used on 0 day(s) where Penman-Monteith inputs were missing. Root-zone wetness is the GWETROOT fraction of saturation from the MERRA-2 land model, not a measured soil moisture. Served from the engine's bundled snapshot of this source, fetched 2026-11-14 from power.larc.nasa.gov; no live request was made for it."
+    },
+    {
+      "dataset": "ETCCDI climate change indices (definitions)",
+      "provider": "Expert Team on Climate Change Detection and Indices (WMO CCl / WCRP / JCOMM)",
+      "spatial_resolution": "Not spatial (index definitions)",
+      "temporal_coverage": "Definitions published 2011",
+      "access_url": "https://etccdi.pacificclimate.org/list_27_indices.shtml",
+      "note": "FD, SU, TXx, R10mm, R20mm, Rx1day and CDD as defined by ETCCDI (Zhang et al. 2011, doi:10.1002/wcc.147), computed on NASA POWER grid-cell daily values. Warm days are a simplified TX90p: threshold = 90th percentile of daily maximum temperature per calendar month over this record. CDD is counted within each calendar year."
+    }
+  ]
+}
