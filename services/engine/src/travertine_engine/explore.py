@@ -109,6 +109,9 @@ class ExploreService:
         self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
         self._scores: OrderedDict[tuple[object, ...], CandidateScores] = OrderedDict()
         self._score_locks: dict[tuple[object, ...], asyncio.Lock] = {}
+        # One heavy computation at a time: on a 512 MB instance a background warm-up and a user request building
+        # scores side by side can run out of memory.
+        self._heavy = asyncio.Semaphore(1)
 
     async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
         (daily, api_version), soil = await asyncio.gather(
@@ -154,7 +157,8 @@ class ExploreService:
             cached = self._tables.get(key)
             if cached is None:
                 started = time.perf_counter()
-                tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
+                async with self._heavy:
+                    tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
                 log.info(
                     "rotation tables built",
                     extra={"elapsed_ms": round((time.perf_counter() - started) * 1000)},
@@ -178,7 +182,8 @@ class ExploreService:
                 cached = self._scores.get(key)
                 if cached is None:
                     started = time.perf_counter()
-                    cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
+                    async with self._heavy:
+                        cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
                     log.info(
                         "candidate scores built",
                         extra={
@@ -272,7 +277,7 @@ class Ranked:
     window_years: tuple[int, ...]  # first year of every window that is valid for at least one candidate
 
 
-CHUNK = 2048  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
+CHUNK = 1024  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
 
 
 def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
