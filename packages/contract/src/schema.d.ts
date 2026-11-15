@@ -38,6 +38,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/field/climate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Climate history for a field, as soon as NASA POWER answers
+         * @description The climate part of /v1/field/analyze on its own (a few seconds for a new location). Calling it also starts fetching soil and vegetation in the background, so /v1/field/soil and /v1/field/vegetation called right after it are usually ready sooner. Each section can have its own loading state.
+         */
+        get: operations["getFieldClimate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/field/soil": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Soil of a field (SoilGrids 2.0)
+         * @description The soil part of /v1/field/analyze. SoilGrids can take 20 s or more for a new location. When SoilGrids has no prediction or does not answer, the response is the labelled default soil, as in /v1/field/analyze.
+         */
+        get: operations["getFieldSoil"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/field/vegetation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Growing-season MODIS NDVI history of a field
+         * @description The ndvi_history part of /v1/field/analyze. Returns 502 when MODIS cannot be read, so the rest of the field view does not depend on it.
+         */
+        get: operations["getFieldVegetation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/showcase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Showcase fields and their multi-site back-test results
+         * @description The fixed multi-site validation locations (docs/VALIDATION.md section 4) with the results exactly as computed by scripts/validate_sites.py. Their data are bundled with the engine, so they open without waiting on upstream services.
+         */
+        get: operations["getShowcase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/field/ndvi": {
         parameters: {
             query?: never;
@@ -215,6 +295,71 @@ export interface components {
             year: number;
             /** @description Growing-season (Apr–Sep) mean NDVI. */
             mean_ndvi: number;
+        };
+        FieldClimate: {
+            field_id: string;
+            climate: components["schemas"]["ClimateYear"][];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        FieldSoil: {
+            soil: components["schemas"]["Soil"];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        FieldVegetation: {
+            ndvi_history: components["schemas"]["NdviYear"][];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        /**
+         * @description Same rule as Validation.verdict, applied to difference_ci95. no_detectable_difference is worded "difference not established".
+         * @enum {string}
+         */
+        ShowcaseVerdict: "model_better" | "baseline_better" | "no_detectable_difference";
+        /** @description Back-test of one site. When status is not_computed only reason is present. */
+        ShowcaseValidation: {
+            /** @enum {string} */
+            status: "ok" | "not_computed";
+            /** @description Why the site could not be computed. */
+            reason?: string;
+            /** @description Years used. */
+            n?: number;
+            /** @description Pearson r of modelled stress with the NDVI anomaly. */
+            correlation?: number;
+            correlation_ci95?: components["schemas"]["CorrelationInterval"];
+            /** @description Same for the dryness-index baseline. */
+            baseline_correlation?: number;
+            baseline_correlation_ci95?: components["schemas"]["CorrelationInterval"];
+            /** @description correlation − baseline_correlation. */
+            difference?: number;
+            difference_ci95?: number[];
+            verdict?: components["schemas"]["ShowcaseVerdict"];
+        };
+        ShowcaseField: {
+            id: string;
+            /** @description Place, region, country. */
+            name: string;
+            lat: components["schemas"]["Latitude"];
+            lon: components["schemas"]["Longitude"];
+            /** @description Usable with /v1/rotations/explore. */
+            field_id: string;
+            validation: components["schemas"]["ShowcaseValidation"];
+        };
+        Showcase: {
+            fields: components["schemas"]["ShowcaseField"][];
+            /** @description Mean over the computed sites, with a bootstrap stratified by site. Omitted when fewer than two sites were computed. */
+            pooled?: {
+                sites: number;
+                mean_correlation: number;
+                mean_correlation_ci95: components["schemas"]["CorrelationInterval"];
+                mean_baseline_correlation: number;
+                mean_baseline_correlation_ci95: components["schemas"]["CorrelationInterval"];
+                mean_difference: number;
+                mean_difference_ci95: number[];
+                verdict: components["schemas"]["ShowcaseVerdict"];
+            };
+            /** @description Where the protocol is fixed. */
+            protocol: string;
+            /** Format: date-time */
+            computed_at: string;
         };
         FieldAnalysis: {
             /** @description Opaque id usable in /v1/rotations/explore. */
@@ -475,6 +620,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Crop"][];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldClimate: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Yearly climate summary and its provenance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldClimate"];
+                };
+            };
+            422: components["responses"]["Error"];
+            502: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldSoil: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Soil summary and its provenance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldSoil"];
+                };
+            };
+            422: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldVegetation: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Yearly growing-season NDVI and its provenance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldVegetation"];
+                };
+            };
+            422: components["responses"]["Error"];
+            502: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getShowcase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Showcase fields. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Showcase"];
                 };
             };
             default: components["responses"]["Error"];
