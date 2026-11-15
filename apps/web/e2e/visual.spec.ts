@@ -27,7 +27,7 @@ const ROUTES: Record<string, { path: string; settle: number; states: State[] }> 
     path: "/",
     settle: 300,
     states: [
-      { name: "default", mode: "ok", query: "", ready: (p) => expect(p.getByRole("heading", { name: "Çiftliğe genel bakış" })).toBeVisible() },
+      { name: "default", mode: "ok", query: "", ready: (p) => expect(p.getByRole("link", { name: "Open the demo field" }).first()).toBeVisible() },
       { name: "tr", mode: "ok", query: "", locale: "tr", ready: (p) => expect(p.getByText("Kaynak kodu")).toBeVisible() },
     ],
   },
