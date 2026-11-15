@@ -234,25 +234,27 @@ def add_science_routes(app: FastAPI) -> None:
     )
     async def analyze(body: FieldAnalyzeRequest, request: Request) -> FieldAnalysis:
         service: FieldService = request.app.state.fields
-        return await service.analyze(body.lat, body.lon)
+        return await service.analyze(body.lat, body.lon, body.language)
 
     @app.get("/v1/field/climate", response_model=FieldClimate, tags=["field"], responses=ERROR_RESPONSES)
     async def field_climate(
         request: Request,
         lat: Annotated[float, Query(ge=-90, le=90)],
         lon: Annotated[float, Query(ge=-180, le=180)],
+        language: Language = "en",
     ) -> FieldClimate:
         service: FieldService = request.app.state.fields
-        return await service.climate(lat, lon)
+        return await service.climate(lat, lon, language)
 
     @app.get("/v1/field/soil", response_model=FieldSoil, tags=["field"], responses=ERROR_RESPONSES)
     async def field_soil(
         request: Request,
         lat: Annotated[float, Query(ge=-90, le=90)],
         lon: Annotated[float, Query(ge=-180, le=180)],
+        language: Language = "en",
     ) -> FieldSoil:
         service: FieldService = request.app.state.fields
-        return await service.soil(lat, lon)
+        return await service.soil(lat, lon, language)
 
     @app.get(
         "/v1/field/vegetation", response_model=FieldVegetation, tags=["field"], responses=ERROR_RESPONSES
@@ -261,9 +263,10 @@ def add_science_routes(app: FastAPI) -> None:
         request: Request,
         lat: Annotated[float, Query(ge=-90, le=90)],
         lon: Annotated[float, Query(ge=-180, le=180)],
+        language: Language = "en",
     ) -> FieldVegetation:
         service: FieldService = request.app.state.fields
-        return await service.vegetation(lat, lon)
+        return await service.vegetation(lat, lon, language)
 
     @app.get(
         "/v1/showcase",
@@ -286,9 +289,10 @@ def add_science_routes(app: FastAPI) -> None:
         request: Request,
         lat: Annotated[float, Query(ge=-90, le=90)],
         lon: Annotated[float, Query(ge=-180, le=180)],
+        language: Language = "en",
     ) -> FieldNdvi:
         service: FieldNdviService = request.app.state.field_ndvi
-        return await service.history(lat, lon)
+        return await service.history(lat, lon, language)
 
     @app.get(
         "/v1/field/hazards",
@@ -301,9 +305,10 @@ def add_science_routes(app: FastAPI) -> None:
         request: Request,
         lat: Annotated[float, Query(ge=-90, le=90)],
         lon: Annotated[float, Query(ge=-180, le=180)],
+        language: Language = "en",
     ) -> FieldHazards:
         service: HazardService = request.app.state.hazards
-        return await service.hazards(lat, lon)
+        return await service.hazards(lat, lon, language)
 
     @app.post("/v1/field/calendar", response_model=FieldCalendar, tags=["field"], responses=ERROR_RESPONSES)
     async def field_calendar(body: FieldCalendarRequest, request: Request) -> FieldCalendar:

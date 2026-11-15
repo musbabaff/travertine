@@ -187,8 +187,15 @@ ratios matter; no prices, costs or yields are assumed. The allowed crops are `cr
 
 **Language.** `language` (`en`, the default, or `tr`) on the explore request and on `/v1/validation` sets the language
 of `explanation[]` and `caveats[]`. The numbers are computed once and only the sentence around them changes; Turkish
-text uses a decimal comma, a space between thousands and a leading percent sign (`%4`). Ids, units, `method` and
-`provenance[]` stay in English. All templates live in `src/travertine_engine/text.py`.
+text uses a decimal comma, a space between thousands and a leading percent sign (`%4`). Ids, units and `method` stay
+in English. All templates live in `src/travertine_engine/text.py`.
+
+Every endpoint that returns `provenance[]` or notes also takes `language` (query parameter on the GET field endpoints
+and `/v1/validation`, body field on `/v1/field/analyze`, explore and the calendar). In Turkish, each provenance item's
+`spatial_resolution`, `temporal_coverage` and `note`, the hazards and 30 m NDVI notes, and the names of Travertine's
+own datasets ("Travertine nöbet geriye dönük testi ve puanlaması") are written from Turkish templates with the same
+computed values (`src/travertine_engine/prov_text.py`). Names of external datasets, providers and publications stay as
+published. A test compares every number in each localized field between the two languages.
 
 **Limitations.** Runoff is ignored, so heavy-rain years overstate infiltration; deep-percolation losses are counted as
 lost to the crop. Stage lengths are generic Table 11 rows, not local observations. Overlapping windows are not

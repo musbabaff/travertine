@@ -8,6 +8,7 @@ import re
 from collections import OrderedDict
 from dataclasses import asdict, dataclass, replace
 
+from travertine_engine import prov_text
 from travertine_engine.cache import DiskCache, snapshot_reads
 from travertine_engine.config import Settings
 from travertine_engine.errors import InvalidRequest, UpstreamUnavailable
@@ -32,6 +33,7 @@ from travertine_engine.science.soil import (
 from travertine_engine.sources.modis import SEASON_COMPOSITES, fetch_ndvi_seasons
 from travertine_engine.sources.power import PowerDaily, fetch_power_daily
 from travertine_engine.sources.soilgrids import SoilGridsNoData, fetch_soilgrids
+from travertine_engine.text import Language
 from travertine_engine.upstream import Upstream
 
 log = logging.getLogger(__name__)
@@ -91,28 +93,18 @@ DEFAULT_LAYERS = [
 
 
 def power_provenance(
-    daily: DailyClimate, first: int, last: int, api_version: str, dropped: list[int]
+    daily: DailyClimate, first: int, last: int, api_version: str, dropped: list[int], lang: Language = "en"
 ) -> Provenance:
-    notes = [
-        "Gridded, model-based reanalysis values for the grid cell containing the field, not field measurements: "
-        "MERRA-2 meteorology (0.5° × 0.625°) and CERES SYN1deg solar radiation (1° × 1°).",
-        "Parameters T2M, T2M_MAX, T2M_MIN, T2MDEW, WS2M, PS, ALLSKY_SFC_SW_DWN, PRECTOTCORR, GWETROOT.",
-        "Daily reference evapotranspiration is FAO-56 Penman-Monteith (eq. 6) with actual vapour pressure from the "
-        "dew point (eq. 14) and net radiation from eqs. 37–40 using the POWER grid-cell elevation "
-        f"({daily.elevation_m:.0f} m); annual ET0 is the sum of daily values.",
-        f"Hargreaves (eq. 52) was used on {daily.hargreaves_days} day(s) where Penman-Monteith inputs were missing.",
-        "Root-zone wetness is the GWETROOT fraction of saturation from the MERRA-2 land model, not a measured soil "
-        "moisture.",
-    ]
-    if dropped:
-        notes.append(f"Years with incomplete daily records were left out: {', '.join(map(str, dropped))}.")
-    if daily.source_note:
-        notes.append(daily.source_note.strip())
+    notes = prov_text.power_note(
+        lang, elevation_m=daily.elevation_m, hargreaves_days=daily.hargreaves_days, dropped=dropped
+    )
+    if daily.snapshot:
+        notes.append(prov_text.snapshot_note(lang, *daily.snapshot).strip())
     return Provenance(
         dataset=f"NASA POWER daily point data, Agroclimatology community (API {api_version})",
         provider="NASA Langley Research Center, POWER Project",
-        spatial_resolution="0.5° × 0.625° (meteorology), 1° × 1° (solar radiation)",
-        temporal_coverage=f"{first}–{last}, daily",
+        spatial_resolution=prov_text.power_resolution(lang),
+        temporal_coverage=prov_text.daily_coverage(lang, first, last),
         access_url="https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
         note=" ".join(notes),
     )
@@ -131,36 +123,29 @@ def summarise_soil(layers: list[SoilLayer]) -> Soil:
     )
 
 
-SOIL_METHOD = (
-    "Texture class (USDA), organic carbon and pH are depth-weighted means of 0–30 cm. Available water capacity is "
-    "the 0–100 cm sum of field capacity (−33 kPa) minus wilting point (−1500 kPa) from the Saxton & Rawls (2006) "
-    "pedotransfer functions (Soil Sci. Soc. Am. J. 70:1569–1578), with organic matter = 1.724 × organic carbon; "
-    "gravel and salinity are not accounted for."
-)
+SOIL_METHOD = prov_text.soil_method("en")
 
 
-async def resolve_soil(upstream: Upstream, cache: DiskCache, lat: float, lon: float) -> SoilResult:
+async def resolve_soil(
+    upstream: Upstream, cache: DiskCache, lat: float, lon: float, lang: Language = "en"
+) -> SoilResult:
     try:
         with snapshot_reads() as reads:
             profile = await fetch_soilgrids(upstream, cache, lat, lon)
     except (UpstreamUnavailable, SoilGridsNoData) as exc:
         log.warning("soilgrids unavailable, using default soil", extra={"reason": str(exc)})
-        reason = "has no prediction at this point" if isinstance(exc, SoilGridsNoData) else "did not respond"
+        text = prov_text.default_soil(lang, no_prediction=isinstance(exc, SoilGridsNoData))
         return SoilResult(
             soil=summarise_soil(DEFAULT_LAYERS),
             layers=DEFAULT_LAYERS,
             is_default=True,
             provenance=Provenance(
-                dataset="DEFAULT SOIL — not measured (SoilGrids 2.0 unavailable)",
-                provider="Travertine engine default",
-                spatial_resolution="None (generic placeholder)",
-                temporal_coverage="Not applicable",
+                dataset=text["dataset"],
+                provider=text["provider"],
+                spatial_resolution=text["spatial_resolution"],
+                temporal_coverage=text["temporal_coverage"],
                 access_url="https://rest.isric.org/soilgrids/v2.0/docs",
-                note=(
-                    f"SoilGrids {reason}, so these soil values are a generic loam placeholder (40 % sand, 40 % silt, "
-                    "20 % clay, 10 g/kg organic carbon, pH 7.0), NOT data for this field. Water-balance results that "
-                    "depend on available water capacity are correspondingly uncertain. " + SOIL_METHOD
-                ),
+                note=text["note"],
             ),
         )
     mean = profile.mean
@@ -176,13 +161,12 @@ async def resolve_soil(upstream: Upstream, cache: DiskCache, lat: float, lon: fl
             dataset="SoilGrids 2.0 (clay, sand, silt, soc, phh2o; mean and 5th/95th percentiles)",
             provider="ISRIC — World Soil Information",
             spatial_resolution="250 m",
-            temporal_coverage="Static; predictions from soil profiles collected over several decades",
+            temporal_coverage=prov_text.soilgrids_coverage(lang),
             access_url="https://rest.isric.org/soilgrids/v2.0/docs",
             note=(
-                SOIL_METHOD
-                + f" SoilGrids 90 % prediction interval for 0–30 cm at this point: clay {clay_lo:.0f}–{clay_hi:.0f} %,"
-                f" organic carbon {soc_lo:.1f}–{soc_hi:.1f} g/kg; values derived from the mean prediction carry that"
-                " uncertainty." + reads.note("soilgrids")
+                prov_text.soil_method(lang)
+                + prov_text.soilgrids_note(lang, clay=(clay_lo, clay_hi), soc=(soc_lo, soc_hi))
+                + reads.note("soilgrids", lang)
             ),
         ),
     )
@@ -195,16 +179,15 @@ class NdviRecord:
     provenance: Provenance
 
 
-def modis_provenance(first: int, last: int, skipped: list[int], source_note: str = "") -> Provenance:
+def modis_provenance(
+    first: int, last: int, skipped: list[int], source_note: str = "", lang: Language = "en"
+) -> Provenance:
     note = (
-        "Single 250 m pixel containing the field centre; it may include neighbouring fields, roads or buildings. "
-        f"Growing-season value = mean NDVI of the {SEASON_COMPOSITES} composites starting day-of-year 97 to 241 "
-        "(early April to late September) whose pixel reliability is 0 (good) or 1 (marginal); snow, cloud and fill "
-        f"are dropped and a year needs at least {MIN_COMPOSITES} usable composites."
+        prov_text.modis_note(
+            lang, composites=SEASON_COMPOSITES, min_composites=MIN_COMPOSITES, skipped=skipped
+        )
+        + source_note
     )
-    if skipped:
-        note += f" Years without enough usable composites were left out: {', '.join(map(str, skipped))}."
-    note += source_note
     return Provenance(
         dataset="MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061), NDVI and pixel reliability",
         provider=(
@@ -212,7 +195,7 @@ def modis_provenance(first: int, last: int, skipped: list[int], source_note: str
             "ORNL DAAC MODIS web service"
         ),
         spatial_resolution="250 m",
-        temporal_coverage=f"{first}–{last}, 16-day composites, April–September",
+        temporal_coverage=prov_text.modis_coverage(lang, first, last),
         access_url="https://planetarycomputer.microsoft.com/dataset/modis-13Q1-061",
         note=note,
     )
@@ -245,13 +228,13 @@ class FieldService:
         if scenario is not None:
             power = apply_scenario(power, *scenario)
         daily = await asyncio.to_thread(compute_daily_et0, power)
-        result = replace(daily, source_note=reads.note("power_daily")), power.api_version
+        result = replace(daily, snapshot=reads.fetch("power_daily")), power.api_version
         self._climate[key] = result
         while len(self._climate) > CLIMATE_CACHE_SIZE:
             self._climate.popitem(last=False)
         return result
 
-    async def ndvi(self, lat: float, lon: float) -> NdviRecord:
+    async def ndvi(self, lat: float, lon: float, lang: Language = "en") -> NdviRecord:
         years = range(self.settings.first_year, self.settings.last_year + 1)
         with snapshot_reads() as reads:
             seasons = await fetch_ndvi_seasons(self.upstream, self.cache, lat, lon, years)
@@ -263,12 +246,12 @@ class FieldService:
                 skipped.append(year)
             else:
                 by_year[year] = value
-        provenance = modis_provenance(years[0], years[-1], skipped, reads.note("modis_mod13q1"))
+        provenance = modis_provenance(years[0], years[-1], skipped, reads.note("modis_mod13q1", lang), lang)
         return NdviRecord(by_year, skipped, provenance)
 
-    async def ndvi_or_none(self, lat: float, lon: float) -> NdviRecord | None:
+    async def ndvi_or_none(self, lat: float, lon: float, lang: Language = "en") -> NdviRecord | None:
         try:
-            return await self.ndvi(lat, lon)
+            return await self.ndvi(lat, lon, lang)
         except UpstreamUnavailable as exc:
             log.warning("modis unavailable, analysis returned without ndvi", extra={"reason": str(exc)})
             return None
@@ -288,7 +271,7 @@ class FieldService:
         self._prefetching.add(task)
         task.add_done_callback(self._prefetching.discard)
 
-    async def climate(self, lat: float, lon: float) -> FieldClimate:
+    async def climate(self, lat: float, lon: float, lang: Language = "en") -> FieldClimate:
         self.prefetch(lat, lon)
         daily, api_version = await self.daily_climate(lat, lon)
         years, dropped = annual_summary(daily)
@@ -297,25 +280,25 @@ class FieldService:
         return FieldClimate(
             field_id=make_field_id(lat, lon),
             climate=[ClimateYear(**asdict(y)) for y in years],
-            provenance=[power_provenance(daily, first, last, api_version, dropped)],
+            provenance=[power_provenance(daily, first, last, api_version, dropped, lang)],
         )
 
-    async def soil(self, lat: float, lon: float) -> FieldSoil:
-        result = await resolve_soil(self.upstream, self.cache, lat, lon)
+    async def soil(self, lat: float, lon: float, lang: Language = "en") -> FieldSoil:
+        result = await resolve_soil(self.upstream, self.cache, lat, lon, lang)
         return FieldSoil(soil=result.soil, provenance=[result.provenance])
 
-    async def vegetation(self, lat: float, lon: float) -> FieldVegetation:
-        ndvi = await self.ndvi(lat, lon)
+    async def vegetation(self, lat: float, lon: float, lang: Language = "en") -> FieldVegetation:
+        ndvi = await self.ndvi(lat, lon, lang)
         return FieldVegetation(
             ndvi_history=[NdviYear(year=y, mean_ndvi=round(v, 3)) for y, v in sorted(ndvi.by_year.items())],
             provenance=[ndvi.provenance],
         )
 
-    async def analyze(self, lat: float, lon: float) -> FieldAnalysis:
+    async def analyze(self, lat: float, lon: float, lang: Language = "en") -> FieldAnalysis:
         (daily, api_version), soil, ndvi = await asyncio.gather(
             self.daily_climate(lat, lon),
-            resolve_soil(self.upstream, self.cache, lat, lon),
-            self.ndvi_or_none(lat, lon),
+            resolve_soil(self.upstream, self.cache, lat, lon, lang),
+            self.ndvi_or_none(lat, lon, lang),
         )
         years, dropped = annual_summary(daily)
         first = years[0].year if years else self.settings.first_year
@@ -330,7 +313,7 @@ class FieldService:
                 else None
             ),
             provenance=[
-                power_provenance(daily, first, last, api_version, dropped),
+                power_provenance(daily, first, last, api_version, dropped, lang),
                 soil.provenance,
                 *([ndvi.provenance] if ndvi and ndvi.by_year else []),
             ],
