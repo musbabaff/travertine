@@ -311,7 +311,7 @@
   "landing.team.title": "Team",
   "landing.team.web": "Product and web lead",
   "landing.team.engine": "Science engine lead",
-  "landing.ai": "Built with Claude Code (Anthropic) coding agents under human review: one for the web app, one for the engine. Humans review every change before it is merged. The full statement is in docs/AI_USE.md.",
+  "landing.ai": "Built with AI coding tools under human review: Claude Code (Anthropic) agents for the engine, contract and web app, and OpenAI Codex, which a teammate used to build the current interface and the Cosmo guide. Humans review every change before it is merged. Cosmo itself uses no language model: every answer is a fixed, reviewed text. The full statement is in docs/AI_USE.md.",
   "landing.source": "Source code on GitHub",
   "nav.overview": "Overview",
   "nav.overview.desc": "Climate, soil, vegetation and water at a glance",
@@ -556,5 +556,13 @@
   "cosmo.f.needField": "Choose a field first; I answer from the engine's data for that field.",
   "cosmo.f.sources": "The numbers shown for this field come from these datasets, as listed in the engine's responses:",
   "cosmo.ui.micStart": "Ask by voice",
-  "cosmo.ui.micStop": "Stop listening"
+  "cosmo.ui.micStop": "Stop listening",
+  "landing.team.research": "Research support",
+  "landing.pooled.eyebrow": "Multi-site back-test · {sites} computed sites",
+  "landing.pooled.model": "Mean model r (water balance)",
+  "landing.pooled.baseline": "Mean baseline r (dryness index)",
+  "landing.pooled.diff": "Mean difference, model − baseline",
+  "landing.pooled.note": "Means over sites, with a bootstrap stratified by site (10,000 resamples). Site by site, the difference is established at {established} of the {sites} computed sites; every site is listed below.",
+  "landing.src.hls": "Field-scale (30 m) vegetation greenness since 2020 from Landsat 8/9 and Sentinel-2 (NASA LP DAAC).",
+  "landing.demo.score": "Total score {total} of 100 under these priorities"
 }

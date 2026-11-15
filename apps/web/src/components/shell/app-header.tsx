@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BrandLockup } from "@/components/brand/logo";
-import { Segmented } from "@/components/ui/segmented";
 import { useI18n, type MessageKey } from "@/i18n";
 import { SourceBadge } from "./source-badge";
 
@@ -88,17 +87,34 @@ export function AppHeader() {
         </nav>
         <div className="tv-header-actions">
           <SourceBadge />
-          <Segmented
-            label={t("lang.label")}
-            hideLabel
-            className="ml-2 w-[5.5rem]"
-            value={locale}
-            onChange={setLocale}
-            options={[
-              { value: "en", label: t("lang.en") },
-              { value: "tr", label: t("lang.tr") },
-            ]}
-          />
+          <div
+            role="radiogroup"
+            aria-label={t("lang.label")}
+            className="tv-lang"
+            onKeyDown={(e) => {
+              if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+                e.preventDefault();
+                const next = locale === "en" ? "tr" : "en";
+                setLocale(next);
+                e.currentTarget.querySelector<HTMLButtonElement>(`[data-lang="${next}"]`)?.focus();
+              }
+            }}
+          >
+            {(["en", "tr"] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                role="radio"
+                data-lang={l}
+                aria-checked={locale === l}
+                tabIndex={locale === l ? 0 : -1}
+                lang={l}
+                onClick={() => setLocale(l)}
+              >
+                {t(l === "en" ? "lang.en" : "lang.tr")}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             className="tv-menu-toggle ml-2"

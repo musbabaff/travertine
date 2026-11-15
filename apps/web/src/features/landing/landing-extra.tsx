@@ -44,22 +44,26 @@ export function LiveDemo({ demoHref }: { demoHref: string }) {
   const map = crops.data ? new Map<string, Crop>(crops.data.map((c) => [c.id, c])) : undefined;
   const top = rotations.data?.rotations[0];
   return (
-    <Section id="live-demo" title={t("landing.demo.title")}>
-      <p className="mt-2 max-w-[70ch] text-sm text-ink-2">{t("landing.demo.body")}</p>
-      <div className="tv-card mt-5 grid gap-5 rounded-md border border-border bg-surface p-5 shadow-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+    <div className="tv-landing-demo" aria-labelledby="live-demo">
+      <h2 id="live-demo" className="text-h3 font-semibold text-ink">
+        {t("landing.demo.title")}
+      </h2>
+      <p className="mt-1 text-sm text-ink-2">{t("landing.demo.body")}</p>
+      <div className="mt-4">
         <Slider label={t("explore.priority.water")} description={t("explore.priority.water.desc")} value={water} valueText={t("explore.priority.value", { value: Math.round(water * 100) })} onChange={setWater} color="var(--viz-water)" />
-        <div aria-live="polite">
-          <p className="text-xs text-ink-muted">{t("landing.demo.top")}</p>
-          <p className={`mt-1 text-h3 font-semibold ${rotations.isFetching ? "opacity-60" : ""}`} data-testid="demo-top">
-            {top ? top.sequence.map((c) => cropName(c, map)).join(" → ") : rotations.isError ? t("explore.error.title") : t("overview.loading")}
-          </p>
-          {source !== "engine" && <p className="mt-1 text-xs text-warning">{t("source.demo")}</p>}
-          <Link href={demoHref.replace("/app?", "/app/explore?")} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 underline-offset-2 hover:underline">
-            {t("landing.demo.more")} <ArrowRight aria-hidden className="size-4" />
-          </Link>
-        </div>
       </div>
-    </Section>
+      <div aria-live="polite" className="mt-4 rounded-md bg-sunken p-4">
+        <p className="text-xs text-ink-muted">{t("landing.demo.top")}</p>
+        <p className={`mt-1 text-h3 font-semibold text-ink ${rotations.isFetching ? "opacity-60" : ""}`} data-testid="demo-top">
+          {top ? top.sequence.map((c) => cropName(c, map, locale)).join(" → ") : rotations.isError ? t("explore.error.title") : t("overview.loading")}
+        </p>
+        {top && <p className="mt-1 text-xs tabular-nums text-ink-2">{t("landing.demo.score", { total: Math.round(top.scores.total * 100) })}</p>}
+        {source !== "engine" && <p className="mt-1 text-xs text-warning">{t("source.demo")}</p>}
+      </div>
+      <Link href={demoHref.replace("/app?", "/app/explore?")} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 underline-offset-2 hover:underline">
+        {t("landing.demo.more")} <ArrowRight aria-hidden className="size-4" />
+      </Link>
+    </div>
   );
 }
 

@@ -220,11 +220,13 @@ Yukarıdaki [Planlanan](#planlanan) bölümüne ve [değişiklik günlüğüne](
 |---|---|
 | Mustafa Babayev ([@musbabaff](https://github.com/musbabaff)) | Ürün ve Web Lideri |
 | Kemal Gencel ([@r0ine](https://github.com/r0ine)) | Bilim Motoru Lideri |
+| Azra Özkan | Araştırma desteği |
 
 ## Yapay zekâ kullanımı
 
 İki geliştirici de Claude Code (Anthropic) ajanlarıyla çalışıyor: biri web uygulamasından ve sözleşmeden, diğeri
-motordan sorumlu. Ajanlar kodu, testleri ve belge taslaklarını [`CLAUDE.md`](CLAUDE.md) ve
+motordan sorumluydu; son saatlerde tek bir ajan tüm depoyu devraldı. Bir ekip arkadaşı güncel arayüzü ve Cosmo
+rehberini OpenAI Codex ile kurdu. Ajanlar kodu, testleri ve belge taslaklarını [`CLAUDE.md`](CLAUDE.md) ve
 [`.claude/skills/`](.claude/skills) içindeki kurallara göre yazar; her değişiklik birleştirilmeden önce insanlar
 tarafından incelenir. Marka varlıkları için yapay zekâyla görsel üretimi kullanılmadı. Tam açıklama ve kayıt:
 [`docs/AI_USE.md`](docs/AI_USE.md).

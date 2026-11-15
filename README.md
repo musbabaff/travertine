@@ -230,11 +230,13 @@ See [Planned](#planned) above and the [changelog](CHANGELOG.md). Submission for 
 |---|---|
 | Mustafa Babayev ([@musbabaff](https://github.com/musbabaff)) | Product & Web Lead |
 | Kemal Gencel ([@r0ine](https://github.com/r0ine)) | Science Engine Lead |
+| Azra Özkan | Research support |
 
 ## Use of AI
 
-Both developers work with Claude Code (Anthropic) agents: one owns the web app and contract, the other the engine.
-The agents write code, tests and documentation drafts under rules in [`CLAUDE.md`](CLAUDE.md) and
+Both developers work with Claude Code (Anthropic) agents: one owned the web app and contract, the other the engine;
+in the final hours one agent took over the whole repository. A teammate built the current interface and the Cosmo
+guide with OpenAI Codex. The agents write code, tests and documentation drafts under rules in [`CLAUDE.md`](CLAUDE.md) and
 [`.claude/skills/`](.claude/skills); humans review every change before merge. No AI image generation is used for the
 brand assets. The full statement and log: [`docs/AI_USE.md`](docs/AI_USE.md).
 

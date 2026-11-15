@@ -9,7 +9,7 @@ export function SourceBadge() {
   const source = useDataSource();
   if (source === "engine") {
     return (
-      <span data-testid="live-badge" title={t("source.live.desc")} className="inline-flex h-7 items-center gap-1.5 rounded-full border border-border px-2.5 text-xs font-medium text-ink-2">
+      <span data-testid="live-badge" title={t("source.live.desc")} className="inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2.5 text-xs font-medium text-ink-2">
         <span aria-hidden className="size-1.5 rounded-full bg-teal-700" />
         {t("source.live")}
         <span className="sr-only">. {t("source.live.desc")}</span>

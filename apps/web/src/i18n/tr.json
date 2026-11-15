@@ -311,7 +311,7 @@
   "landing.team.title": "Ekip",
   "landing.team.web": "Ürün ve web lideri",
   "landing.team.engine": "Bilim motoru lideri",
-  "landing.ai": "İnsan denetiminde Claude Code (Anthropic) kodlama ajanlarıyla geliştirildi: biri web uygulaması, biri motor için. Her değişiklik birleştirilmeden önce insanlar tarafından incelenir. Tam açıklama docs/AI_USE.md dosyasındadır.",
+  "landing.ai": "İnsan denetiminde yapay zekâ kodlama araçlarıyla geliştirildi: motor, sözleşme ve web uygulaması için Claude Code (Anthropic) ajanları; bir ekip arkadaşının güncel arayüzü ve Cosmo rehberini kurarken kullandığı OpenAI Codex. Her değişiklik birleştirilmeden önce insanlar tarafından incelenir. Cosmo'nun kendisi dil modeli kullanmaz: her yanıt sabit, incelenmiş bir metindir. Tam açıklama docs/AI_USE.md içinde.",
   "landing.source": "GitHub'da kaynak kodu",
   "nav.overview": "Genel bakış",
   "nav.overview.desc": "İklim, toprak, bitki örtüsü ve su bir bakışta",
@@ -556,5 +556,13 @@
   "cosmo.f.needField": "Önce bir tarla seç; o tarla için motorun verisinden yanıt veriyorum.",
   "cosmo.f.sources": "Bu tarla için gösterilen sayılar, motorun yanıtlarında listelenen şu veri setlerinden geliyor:",
   "cosmo.ui.micStart": "Sesle sor",
-  "cosmo.ui.micStop": "Dinlemeyi durdur"
+  "cosmo.ui.micStop": "Dinlemeyi durdur",
+  "landing.team.research": "Araştırma desteği",
+  "landing.pooled.eyebrow": "Çok noktalı geriye dönük test · hesaplanan {sites} nokta",
+  "landing.pooled.model": "Ortalama model r (su dengesi)",
+  "landing.pooled.baseline": "Ortalama karşılaştırma ölçütü r (kuraklık endeksi)",
+  "landing.pooled.diff": "Ortalama fark, model − ölçüt",
+  "landing.pooled.note": "Noktalara göre katmanlanmış bootstrap ile noktalar üzerinden ortalamalar (10.000 yeniden örnekleme). Nokta nokta bakıldığında fark, hesaplanan {sites} noktanın {established} tanesinde ortaya konmuş durumda; tüm noktalar aşağıda listeleniyor.",
+  "landing.src.hls": "2020'den bu yana Landsat 8/9 ve Sentinel-2'den tarla ölçeğinde (30 m) bitki yeşilliği (NASA LP DAAC).",
+  "landing.demo.score": "Bu önceliklerle toplam puan 100 üzerinden {total}"
 }

@@ -13,6 +13,8 @@ authors:
   - family-names: Gencel
     given-names: Kemal
     alias: r0ine
+  - family-names: Özkan
+    given-names: Azra
 repository-code: "https://github.com/musbabaff/travertine"
 url: "https://travertinefields.com"
 license: MIT
