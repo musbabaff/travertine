@@ -245,6 +245,8 @@ export interface components {
             crop_ids?: string[];
             /** @description Language of rotations[].explanation[]. Default en. */
             language?: components["schemas"]["Language"];
+            /** @description Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`. */
+            current_rotation?: string[];
         } | unknown | unknown;
         /** @description All scores 0–1, higher is better. `risk` is high when risk is LOW. */
         RotationScores: {
@@ -271,9 +273,38 @@ export interface components {
             yearly: components["schemas"]["RotationYear"][];
             /** @description Plain-language English sentences explaining the score. */
             explanation: string[];
+            /** @description Optional. Present on every alternative when the request carried current_rotation. */
+            vs_baseline?: components["schemas"]["ScoreDifference"];
+        };
+        /** @description Score of an alternative minus the same score of the baseline (the current rotation), unitless, −1 to 1. Positive means the alternative scores higher. Differences between relative indices on past years, not predicted gains. */
+        ScoreDifference: {
+            water: number;
+            income: number;
+            soil: number;
+            risk: number;
+            total: number;
+        };
+        RuleViolation: {
+            /**
+             * @description The rotation rule the current rotation breaks (docs/METHODOLOGY.md, section 7).
+             * @enum {string}
+             */
+            rule: "same_family_in_consecutive_years" | "no_legume_in_cycle" | "perennial_single_year";
+            /** @description 1-based rotation year the violation falls in. Omitted for rules about the whole sequence (no_legume_in_cycle). */
+            year_index?: number;
+            /** @description Which crops and why, in the request language. The UI renders it verbatim. */
+            message: string;
+        };
+        /** @description The current rotation, expanded to horizon_years and scored like a candidate. It never carries vs_baseline. */
+        BaselineRotation: components["schemas"]["Rotation"] & {
+            /** @description Every rotation rule the sequence breaks, in year order. Empty when it breaks none. */
+            rule_violations: components["schemas"]["RuleViolation"][];
         };
         RotationExploreResponse: {
+            /** @description Sorted by scores.total, highest first. When the request carried current_rotation, that sequence is left out of this list and returned as `baseline`. */
             rotations: components["schemas"]["Rotation"][];
+            /** @description Optional. Present when the request carried current_rotation. */
+            baseline?: components["schemas"]["BaselineRotation"];
             provenance: components["schemas"]["Provenance"][];
         };
         ValidationYear: {
