@@ -138,3 +138,17 @@ def test_validation_caveats_in_turkish_keep_every_number(settings: Settings) -> 
     r = f"{en['correlation']:+.2f}".replace(".", ",")
     assert f"r = {r}" in tr["caveats"][0]
     assert tr["caveats"][-1].endswith("2007.")
+
+
+def test_validation_carries_the_structured_baseline_comparison(settings: Settings) -> None:
+    cfg = Settings(cache_dir=settings.cache_dir, **LONG)
+    with make_client(cfg, FakeUpstream(varying_rain=True, cloudy_year=2007)) as c:
+        body = c.get("/v1/validation", params={"lat": 37.89, "lon": 28.98}).json()
+    lo, hi = body["difference_ci95"]
+    expected = "model_better" if hi < 0 else "baseline_better" if lo > 0 else "no_detectable_difference"
+    assert body["verdict"] == expected
+    assert body["correlation_ci95"][0] <= body["correlation"] <= body["correlation_ci95"][1]
+    baseline = body["baseline"]
+    assert [v["year"] for v in baseline["values"]] == [y["year"] for y in body["years"]]
+    assert baseline["correlation_ci95"][0] <= baseline["correlation"] <= baseline["correlation_ci95"][1]
+    assert f"{baseline['correlation']:+.2f}" in body["caveats"][0]
