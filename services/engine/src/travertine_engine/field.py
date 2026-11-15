@@ -11,7 +11,16 @@ from dataclasses import asdict, dataclass, replace
 from travertine_engine.cache import DiskCache, snapshot_reads
 from travertine_engine.config import Settings
 from travertine_engine.errors import InvalidRequest, UpstreamUnavailable
-from travertine_engine.models import ClimateYear, FieldAnalysis, NdviYear, Provenance, Soil
+from travertine_engine.models import (
+    ClimateYear,
+    FieldAnalysis,
+    FieldClimate,
+    FieldSoil,
+    FieldVegetation,
+    NdviYear,
+    Provenance,
+    Soil,
+)
 from travertine_engine.science.climate import DailyClimate, annual_summary, compute_daily_et0
 from travertine_engine.science.ndvi import MIN_COMPOSITES, season_mean
 from travertine_engine.science.soil import (
@@ -201,6 +210,7 @@ class FieldService:
         # Parsing 25 years of daily POWER data and computing Penman-Monteith ET0 takes seconds on a small CPU share;
         # the result for a location never changes while the process runs.
         self._climate: OrderedDict[tuple[float, float], tuple[DailyClimate, str]] = OrderedDict()
+        self._prefetching: set[asyncio.Task[None]] = set()
 
     async def daily_climate(self, lat: float, lon: float) -> tuple[DailyClimate, str]:
         key = (round(lat, 3), round(lon, 3))
@@ -240,6 +250,44 @@ class FieldService:
         except UpstreamUnavailable as exc:
             log.warning("modis unavailable, analysis returned without ndvi", extra={"reason": str(exc)})
             return None
+
+    def prefetch(self, lat: float, lon: float) -> None:
+        """Start fetching soil and vegetation in the background, so their own requests find them cached."""
+
+        async def run() -> None:
+            try:
+                await asyncio.gather(
+                    resolve_soil(self.upstream, self.cache, lat, lon), self.ndvi_or_none(lat, lon)
+                )
+            except Exception:
+                log.exception("prefetch failed", extra={"lat": lat, "lon": lon})
+
+        task = asyncio.create_task(run())
+        self._prefetching.add(task)
+        task.add_done_callback(self._prefetching.discard)
+
+    async def climate(self, lat: float, lon: float) -> FieldClimate:
+        self.prefetch(lat, lon)
+        daily, api_version = await self.daily_climate(lat, lon)
+        years, dropped = annual_summary(daily)
+        first = years[0].year if years else self.settings.first_year
+        last = years[-1].year if years else self.settings.last_year
+        return FieldClimate(
+            field_id=make_field_id(lat, lon),
+            climate=[ClimateYear(**asdict(y)) for y in years],
+            provenance=[power_provenance(daily, first, last, api_version, dropped)],
+        )
+
+    async def soil(self, lat: float, lon: float) -> FieldSoil:
+        result = await resolve_soil(self.upstream, self.cache, lat, lon)
+        return FieldSoil(soil=result.soil, provenance=[result.provenance])
+
+    async def vegetation(self, lat: float, lon: float) -> FieldVegetation:
+        ndvi = await self.ndvi(lat, lon)
+        return FieldVegetation(
+            ndvi_history=[NdviYear(year=y, mean_ndvi=round(v, 3)) for y, v in sorted(ndvi.by_year.items())],
+            provenance=[ndvi.provenance],
+        )
 
     async def analyze(self, lat: float, lon: float) -> FieldAnalysis:
         (daily, api_version), soil, ndvi = await asyncio.gather(

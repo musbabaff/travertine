@@ -13,7 +13,7 @@ COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY src ./src
-COPY data/crops.yaml ./data/crops.yaml
+COPY data/crops.yaml data/multisite.json ./data/
 COPY data/snapshot ./data/snapshot
 COPY scripts ./scripts
 RUN uv sync --frozen --no-dev && rm -rf /tmp/uv-build-cache

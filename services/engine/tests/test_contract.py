@@ -129,3 +129,18 @@ def test_field_ndvi(settings: Settings) -> None:
         r = c.get("/v1/field/ndvi", params={"lat": 37.89, "lon": 28.98})
     assert r.status_code == 200, r.text
     assert errors("FieldNdvi", r.json()) == []
+
+
+def test_field_sections_and_showcase(client: TestClient) -> None:
+    q = {"lat": 37.89, "lon": 28.98}
+    for path, schema in [
+        ("/v1/field/climate", "FieldClimate"),
+        ("/v1/field/soil", "FieldSoil"),
+        ("/v1/field/vegetation", "FieldVegetation"),
+    ]:
+        r = client.get(path, params=q)
+        assert r.status_code == 200, r.text
+        assert errors(schema, r.json()) == []
+    r = client.get("/v1/showcase")
+    assert r.status_code == 200
+    assert errors("Showcase", r.json()) == []

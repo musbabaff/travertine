@@ -80,6 +80,22 @@ class NdviYear(_Model):
     mean_ndvi: float = Field(ge=-1, le=1)
 
 
+class FieldClimate(_Model):
+    field_id: str
+    climate: list[ClimateYear]
+    provenance: list[Provenance]
+
+
+class FieldSoil(_Model):
+    soil: Soil
+    provenance: list[Provenance]
+
+
+class FieldVegetation(_Model):
+    ndvi_history: list[NdviYear]
+    provenance: list[Provenance]
+
+
 class FieldAnalysis(_Model):
     field_id: str
     climate: list[ClimateYear]
@@ -154,12 +170,30 @@ class ScoreDifference(_Model):
     total: float = Field(ge=-1, le=1)
 
 
+class EvidenceItem(_Model):
+    statement: str
+    value: float
+    unit: str
+    dataset: str
+
+
+class RotationReasoning(_Model):
+    """Each part may be empty: nothing generic is written to fill one."""
+
+    why_suggested: list[str]
+    evidence: list[EvidenceItem]
+    benefits: list[str]
+    information_gaps: list[str]
+    local_review: list[str]
+
+
 class Rotation(_Model):
     sequence: list[str]
     scores: RotationScores
     yearly: list[RotationYear]
     explanation: list[str]
     vs_baseline: ScoreDifference | None = None
+    reasoning: RotationReasoning | None = None
 
 
 class RuleViolation(_Model):
@@ -228,6 +262,46 @@ class Validation(_Model):
     method: str
     caveats: list[str]
     provenance: list[Provenance]
+
+
+class ShowcaseValidation(_Model):
+    status: Literal["ok", "not_computed"]
+    reason: str | None = None
+    n: int | None = Field(default=None, ge=0)
+    correlation: float | None = Field(default=None, ge=-1, le=1)
+    correlation_ci95: tuple[float, float] | None = None
+    baseline_correlation: float | None = Field(default=None, ge=-1, le=1)
+    baseline_correlation_ci95: tuple[float, float] | None = None
+    difference: float | None = None
+    difference_ci95: tuple[float, float] | None = None
+    verdict: Literal["model_better", "baseline_better", "no_detectable_difference"] | None = None
+
+
+class ShowcaseField(_Model):
+    id: str
+    name: str
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    field_id: str
+    validation: ShowcaseValidation
+
+
+class ShowcasePooled(_Model):
+    sites: int = Field(ge=0)
+    mean_correlation: float
+    mean_correlation_ci95: tuple[float, float]
+    mean_baseline_correlation: float
+    mean_baseline_correlation_ci95: tuple[float, float]
+    mean_difference: float
+    mean_difference_ci95: tuple[float, float]
+    verdict: Literal["model_better", "baseline_better", "no_detectable_difference"]
+
+
+class Showcase(_Model):
+    fields: list[ShowcaseField]
+    pooled: ShowcasePooled | None = None
+    protocol: str
+    computed_at: str
 
 
 class ErrorBody(_Model):

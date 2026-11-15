@@ -196,6 +196,19 @@ independent samples. POWER rain is a 0.5° grid-cell average, which smooths loca
 informative under irrigation, where every crop meets its demand. Fallow and cover-crop options are not yet in the crop
 table.
 
+### Structured reasoning per strategy
+
+Every rotation, and the baseline, carries `reasoning` with five parts in the request language: why it was suggested
+(rank among all rule-abiding candidates under the given priorities, the score in which it beats at least 75 % of them,
+and its total against the current rotation), evidence (median water demand, unmet demand or irrigation requirement,
+worst single season, available water capacity and legume nitrogen credit, each with its value, unit and dataset),
+benefits (nitrogen credit, lower deficit than the current rotation), information gaps (soil from SoilGrids or a
+default instead of a soil test, no crop values, borrowed pulse nitrogen credit, irrigation supply unknown) and points
+for local review (crops with a median unmet share of at least 50 % under rain-fed management, the worst season, the
+assumed FAO-56 sowing dates). Each sentence is built from that strategy's numbers; a part with nothing specific to
+say is left empty rather than filled with generic text. The reasoning supports the farmer's and local experts'
+judgment; it does not replace it.
+
 ## 8. Vegetation record and validation
 
 **NDVI history.** `/v1/field/analyze` returns `ndvi_history`: for each year, the mean MODIS/Terra MOD13Q1 v061 NDVI

@@ -175,8 +175,15 @@ def test_explore_explanations_follow_language(settings: Settings, fake: FakeUpst
         bad = c.post("/v1/rotations/explore", json={**body, "language": "de"})
     assert bad.status_code == 422
     for a, b in zip(en["rotations"], tr["rotations"], strict=True):
-        assert {k: v for k, v in a.items() if k != "explanation"} == {
-            k: v for k, v in b.items() if k != "explanation"
+        worded = ("explanation", "reasoning")
+        assert {k: v for k, v in a.items() if k not in worded} == {
+            k: v for k, v in b.items() if k not in worded
+        }
+        numbers_en = [(e["value"], e["unit"], e["dataset"]) for e in a["reasoning"]["evidence"]]
+        numbers_tr = [(e["value"], e["unit"], e["dataset"]) for e in b["reasoning"]["evidence"]]
+        assert numbers_en == numbers_tr
+        assert {k: len(v) for k, v in a["reasoning"].items()} == {
+            k: len(v) for k, v in b["reasoning"].items()
         }
         assert len(a["explanation"]) == len(b["explanation"])
         assert b["explanation"][0].startswith("Kayıttaki ")
