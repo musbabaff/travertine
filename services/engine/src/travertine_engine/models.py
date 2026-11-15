@@ -125,6 +125,7 @@ class RotationExploreRequest(_Model):
     crop_ids: list[str] | None = None
     language: Language = "en"
     farmer_inputs: FarmerInputs | None = None
+    current_rotation: list[str] | None = Field(default=None, min_length=1, max_length=5)
 
 
 class RotationScores(_Model):
@@ -143,15 +144,37 @@ class RotationYear(_Model):
     stress_index: Unit01
 
 
+class ScoreDifference(_Model):
+    """Score of an alternative minus the same score of the baseline (the farmer's current rotation)."""
+
+    water: float = Field(ge=-1, le=1)
+    income: float = Field(ge=-1, le=1)
+    soil: float = Field(ge=-1, le=1)
+    risk: float = Field(ge=-1, le=1)
+    total: float = Field(ge=-1, le=1)
+
+
 class Rotation(_Model):
     sequence: list[str]
     scores: RotationScores
     yearly: list[RotationYear]
     explanation: list[str]
+    vs_baseline: ScoreDifference | None = None
+
+
+class RuleViolation(_Model):
+    rule: Literal["same_family_in_consecutive_years", "no_legume_in_cycle", "perennial_single_year"]
+    year_index: int | None = Field(default=None, ge=1)
+    message: str
+
+
+class BaselineRotation(Rotation):
+    rule_violations: list[RuleViolation]
 
 
 class RotationExploreResponse(_Model):
     rotations: list[Rotation]
+    baseline: BaselineRotation | None = None
     inputs: list[InputSource]
     provenance: list[Provenance]
 

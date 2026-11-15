@@ -18,7 +18,7 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 | `GET /v1/crops` | implemented — 12 crops from `data/crops.yaml`, every value cited to an FAO table |
 | `POST /v1/field/analyze` | implemented — NASA POWER daily climate (2001 to the last full year), FAO-56 Penman-Monteith ET0, SoilGrids soil and available water capacity, MODIS growing-season NDVI history |
 | `GET /v1/field/ndvi` | implemented, pending contract #12 — 30 m HLS NDVI history since 2020 at the field centre |
-| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]` |
+| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]`; `current_rotation` (1–5 crop ids, repeated to fill the horizon) is scored with the same model and returned as `baseline` with `rule_violations[]`, and every alternative carries `vs_baseline` |
 | `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md`; `?language=tr` for Turkish caveats |
 
 Interactive docs are served at `/docs` when the engine runs.
