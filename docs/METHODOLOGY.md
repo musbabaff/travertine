@@ -161,6 +161,17 @@ The response returns the ten highest totals. Yearly figures are medians across w
 the same numbers (window count and period, median demand and deficit, the 90th-percentile unmet share and the most
 extreme season, the nitrogen credit, diversity and cover).
 
+**Farmer inputs.** `farmer_inputs` on the explore request carries the farmer's own numbers, and the response's
+`inputs[]` lists every input the scores rest on with its source (`farmer`, `dataset` or `default`) and, for farmer
+values, the estimate it replaced. A topsoil test (`sand_pct` and `clay_pct` together, `organic_carbon_pct`)
+replaces the SoilGrids 0–15 cm values used for the surface evaporation layer and the 0–30 cm texture class. A
+measured `available_water_mm_per_m` replaces the SoilGrids 0–100 cm available water; without it, a changed texture
+or organic carbon recomputes available water with Saxton & Rawls (2006) from the tested soil, as if that soil filled
+the root zone. `crop_values` weights the income score: each crop year counts its share of water demand met times its
+value divided by the largest value, so the index rises with the share of valuable crops that get their water. Only
+ratios matter; no prices, costs or yields are assumed. The allowed crops are `crop_ids` and irrigation is
+`irrigated`, both reported in `inputs[]`. Soil pH is not taken: no part of the model uses it.
+
 **Language.** `language` (`en`, the default, or `tr`) on the explore request and on `/v1/validation` sets the language
 of `explanation[]` and `caveats[]`. The numbers are computed once and only the sentence around them changes; Turkish
 text uses a decimal comma, a space between thousands and a leading percent sign (`%4`). Ids, units, `method` and
