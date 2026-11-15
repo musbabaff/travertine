@@ -89,8 +89,7 @@
   flex-direction: column;
   width: min(380px, calc(100vw - 32px));
   max-height: min(600px, calc(100dvh - 48px));
-  /* Dinlerken antenler panelin üstünden taşar; köşeleri başlık kendi yuvarlar. */
-  overflow: visible;
+  overflow: hidden;
   border-radius: 18px;
   background: #fff;
   color: #202720;
@@ -148,10 +147,13 @@
   position: relative;
   flex: none;
   height: 126px;
-  /* Yanlar ve alt kırpılır, üst açık kalır. */
-  clip-path: inset(-160px 0 0 0);
+  overflow: hidden;
   background: radial-gradient(circle at 50% 70%, #426a4b, #244330 54%, #203929 82%);
   border-bottom: 1px solid #dbe8d6;
+}
+.cosmo-presence.is-listening,
+.cosmo-presence.is-speaking {
+  height: 180px;
 }
 .cosmo-presence::before {
   content: "";
@@ -175,6 +177,12 @@
   width: 102px;
   transform: translateX(-50%);
   pointer-events: none;
+}
+.cosmo-presence.is-listening .cosmo-presence-mascot,
+.cosmo-presence.is-speaking .cosmo-presence-mascot {
+  top: 80px;
+  transform: translateX(-50%) scale(.72);
+  transform-origin: top center;
 }
 .cosmo-presence-waves {
   position: absolute;
@@ -273,7 +281,7 @@
 }
 .cosmo-log {
   flex: 1;
-  min-height: 150px;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
