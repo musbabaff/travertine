@@ -29,14 +29,19 @@ from travertine_engine.models import (
     ErrorBody,
     FieldAnalysis,
     FieldAnalyzeRequest,
+    FieldClimate,
     FieldNdvi,
+    FieldSoil,
+    FieldVegetation,
     Health,
     RotationExploreRequest,
     RotationExploreResponse,
+    Showcase,
     Validation,
 )
 from travertine_engine.ratelimit import RateLimiter
 from travertine_engine.science.crops import load_crops
+from travertine_engine.showcase import load_showcase
 from travertine_engine.text import Language
 from travertine_engine.upstream import Upstream
 from travertine_engine.validation import ValidationService
@@ -219,6 +224,45 @@ def add_science_routes(app: FastAPI) -> None:
     async def analyze(body: FieldAnalyzeRequest, request: Request) -> FieldAnalysis:
         service: FieldService = request.app.state.fields
         return await service.analyze(body.lat, body.lon)
+
+    @app.get("/v1/field/climate", response_model=FieldClimate, tags=["field"], responses=ERROR_RESPONSES)
+    async def field_climate(
+        request: Request,
+        lat: Annotated[float, Query(ge=-90, le=90)],
+        lon: Annotated[float, Query(ge=-180, le=180)],
+    ) -> FieldClimate:
+        service: FieldService = request.app.state.fields
+        return await service.climate(lat, lon)
+
+    @app.get("/v1/field/soil", response_model=FieldSoil, tags=["field"], responses=ERROR_RESPONSES)
+    async def field_soil(
+        request: Request,
+        lat: Annotated[float, Query(ge=-90, le=90)],
+        lon: Annotated[float, Query(ge=-180, le=180)],
+    ) -> FieldSoil:
+        service: FieldService = request.app.state.fields
+        return await service.soil(lat, lon)
+
+    @app.get(
+        "/v1/field/vegetation", response_model=FieldVegetation, tags=["field"], responses=ERROR_RESPONSES
+    )
+    async def field_vegetation(
+        request: Request,
+        lat: Annotated[float, Query(ge=-90, le=90)],
+        lon: Annotated[float, Query(ge=-180, le=180)],
+    ) -> FieldVegetation:
+        service: FieldService = request.app.state.fields
+        return await service.vegetation(lat, lon)
+
+    @app.get(
+        "/v1/showcase",
+        response_model=Showcase,
+        response_model_exclude_none=True,
+        tags=["validation"],
+        responses=ERROR_RESPONSES,
+    )
+    async def showcase() -> Showcase:
+        return load_showcase()
 
     @app.get(
         "/v1/field/ndvi",
