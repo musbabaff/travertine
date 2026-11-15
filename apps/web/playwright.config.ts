@@ -18,9 +18,11 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     channel: process.env.PW_CHANNEL || undefined,
+    // Entry animations fade text in; axe must measure the colours the text ends with, not a frame mid-fade.
+    reducedMotion: "reduce",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], channel: process.env.PW_CHANNEL || undefined } }],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], channel: process.env.PW_CHANNEL || undefined, reducedMotion: "reduce" } }],
   webServer: {
     command: `pnpm build && pnpm start -p ${PORT}`,
     port: PORT,

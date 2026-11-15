@@ -270,7 +270,7 @@ export interface components {
             temporal_coverage: string;
             /** Format: uri */
             access_url: string;
-            /** @description How it was used, derivations, limitations. Empty string if none. */
+            /** @description How it was used, derivations, limitations. Empty string if none. With language=tr, note, spatial_resolution and temporal_coverage are Turkish with the same values; dataset and provider stay as published, except Travertine's own. */
             note: string;
         };
         Crop: {
@@ -303,6 +303,8 @@ export interface components {
             lon: components["schemas"]["Longitude"];
             geometry?: components["schemas"]["PolygonGeometry"];
             irrigated: boolean;
+            /** @description Language of provenance spatial_resolution, temporal_coverage and note. Default en. */
+            language?: components["schemas"]["Language"];
         };
         ClimateYear: {
             year: number;
@@ -797,6 +799,8 @@ export interface operations {
             query: {
                 lat: components["schemas"]["Latitude"];
                 lon: components["schemas"]["Longitude"];
+                /** @description Language of provenance spatial_resolution, temporal_coverage and note, and of notes. Default en. */
+                language?: components["schemas"]["Language"];
             };
             header?: never;
             path?: never;
@@ -823,6 +827,8 @@ export interface operations {
             query: {
                 lat: components["schemas"]["Latitude"];
                 lon: components["schemas"]["Longitude"];
+                /** @description Language of provenance spatial_resolution, temporal_coverage and note, and of notes. Default en. */
+                language?: components["schemas"]["Language"];
             };
             header?: never;
             path?: never;
@@ -848,6 +854,8 @@ export interface operations {
             query: {
                 lat: components["schemas"]["Latitude"];
                 lon: components["schemas"]["Longitude"];
+                /** @description Language of provenance spatial_resolution, temporal_coverage and note, and of notes. Default en. */
+                language?: components["schemas"]["Language"];
             };
             header?: never;
             path?: never;
@@ -895,6 +903,8 @@ export interface operations {
             query: {
                 lat: components["schemas"]["Latitude"];
                 lon: components["schemas"]["Longitude"];
+                /** @description Language of provenance spatial_resolution, temporal_coverage and note, and of notes. Default en. */
+                language?: components["schemas"]["Language"];
             };
             header?: never;
             path?: never;
@@ -921,6 +931,8 @@ export interface operations {
             query: {
                 lat: components["schemas"]["Latitude"];
                 lon: components["schemas"]["Longitude"];
+                /** @description Language of provenance spatial_resolution, temporal_coverage and note, and of notes. Default en. */
+                language?: components["schemas"]["Language"];
             };
             header?: never;
             path?: never;

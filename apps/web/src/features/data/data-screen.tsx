@@ -83,7 +83,7 @@ function DatasetCard({ p, screens }: { p: Provenance; screens: Screen[] }) {
         {p.note && (
           <>
             <dt className="text-xs text-ink-muted sm:pt-0.5">{t("provenance.note")}</dt>
-            <dd lang="en" className="text-xs leading-5 text-ink-2" data-engine-text>
+            <dd className="text-xs leading-5 text-ink-2" data-engine-text>
               {p.note}
             </dd>
           </>
@@ -177,7 +177,6 @@ export function DataScreen() {
               {t("data.datasets", { count: datasets.size })}
             </h2>
             <p className="mt-1 text-xs text-ink-muted">{t("data.datasets.hint")}</p>
-            {locale !== "en" && <p className="mt-1 text-xs text-ink-muted">{t("data.language")}</p>}
             <div className="mt-3 grid gap-4">
               {[...datasets.values()].map(({ p, screens }) => (
                 <DatasetCard key={p.dataset} p={p} screens={[...screens]} />
