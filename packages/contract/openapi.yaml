@@ -290,9 +290,47 @@ components:
         language:
           $ref: "#/components/schemas/Language"
           description: "Language of rotations[].explanation[]. Default en."
+        farmer_inputs:
+          $ref: "#/components/schemas/FarmerInputs"
+          description: "Optional. The farmer's own soil test and crop values; each one replaces the dataset estimate it names in the response's inputs[]. The allowed crops are crop_ids and irrigation is irrigated."
       anyOf:
         - required: [field_id]
         - required: [lat, lon]
+
+    FarmerInputs:
+      type: object
+      additionalProperties: false
+      properties:
+        soil: { $ref: "#/components/schemas/FarmerSoil" }
+        crop_values:
+          type: object
+          description: "Value per crop id for the income score, in any one unit (e.g. revenue per hectare at full yield). Only ratios matter: each crop year is weighted by its value divided by the largest. Must name every candidate crop (crop_ids, or all crops) and no others; at least one value above 0. Other inputs return 422."
+          additionalProperties: { type: number, minimum: 0 }
+
+    FarmerSoil:
+      type: object
+      additionalProperties: false
+      description: "Topsoil test. sand_pct and clay_pct come together (silt = 100 − sand − clay) and set the texture class. If texture or organic carbon is given without available_water_mm_per_m, available water is recomputed from them with Saxton & Rawls (2006) as if the tested soil filled the root zone."
+      properties:
+        sand_pct: { type: number, minimum: 0, maximum: 100, description: "Sand, % of fine earth." }
+        clay_pct: { type: number, minimum: 0, maximum: 100, description: "Clay, % of fine earth. sand_pct + clay_pct ≤ 100." }
+        organic_carbon_pct: { type: number, minimum: 0, maximum: 20, description: "Soil organic carbon, % by mass (not organic matter)." }
+        available_water_mm_per_m: { type: number, minimum: 20, maximum: 400, description: "Measured plant-available water (field capacity − wilting point), mm per metre of soil." }
+
+    InputSource:
+      type: object
+      required: [name, value, unit, source, replaces]
+      properties:
+        name:
+          type: string
+          description: "soil.sand_pct, soil.clay_pct, soil.organic_carbon_pct, soil.texture_class, soil.available_water_mm_per_m, allowed_crops, irrigated, crop_values (default) or crop_value.<crop_id> (farmer)."
+        value: { type: [number, string], description: Value the engine used. }
+        unit: { type: string, description: "%, mm/m, relative, or empty." }
+        source:
+          type: string
+          enum: [farmer, dataset, default]
+          description: "farmer = given in this request (or computed from the farmer's soil test); dataset = SoilGrids 2.0; default = engine default (no measurement)."
+        replaces: { type: string, description: "When source is farmer, the estimate it replaced, e.g. \"SoilGrids 2.0, 0–100 cm: 139 mm/m\". Empty otherwise." }
 
     RotationScores:
       type: object
@@ -342,6 +380,10 @@ components:
         rotations:
           type: array
           items: { $ref: "#/components/schemas/Rotation" }
+        inputs:
+          type: array
+          description: "Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default."
+          items: { $ref: "#/components/schemas/InputSource" }
         provenance:
           type: array
           items: { $ref: "#/components/schemas/Provenance" }

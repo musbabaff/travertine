@@ -251,6 +251,64 @@
       ]
     }
   ],
+  "inputs": [
+    {
+      "name": "soil.sand_pct",
+      "value": 29.3,
+      "unit": "%",
+      "source": "dataset",
+      "replaces": ""
+    },
+    {
+      "name": "soil.clay_pct",
+      "value": 33.2,
+      "unit": "%",
+      "source": "dataset",
+      "replaces": ""
+    },
+    {
+      "name": "soil.organic_carbon_pct",
+      "value": 2.22,
+      "unit": "%",
+      "source": "dataset",
+      "replaces": ""
+    },
+    {
+      "name": "soil.texture_class",
+      "value": "clay loam",
+      "unit": "",
+      "source": "dataset",
+      "replaces": ""
+    },
+    {
+      "name": "soil.available_water_mm_per_m",
+      "value": 139.0,
+      "unit": "mm/m",
+      "source": "dataset",
+      "replaces": ""
+    },
+    {
+      "name": "allowed_crops",
+      "value": "winter_wheat, barley, lentil, faba_bean, maize, sorghum, cotton, sunflower, sugar_beet, tomato, soybean, alfalfa",
+      "unit": "",
+      "source": "default",
+      "replaces": ""
+    },
+    {
+      "name": "irrigated",
+      "value": "rain-fed",
+      "unit": "",
+      "source": "farmer",
+      "replaces": ""
+    },
+    {
+      "name": "crop_values",
+      "value": "equal for every crop",
+      "unit": "",
+      "source": "default",
+      "replaces": ""
+    }
+  ],
   "provenance": [
     {
       "dataset": "NASA POWER daily point data, Agroclimatology community (API v2.10.3)",
