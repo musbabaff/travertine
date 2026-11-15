@@ -44,6 +44,12 @@ counts as established only if the 95 % interval of r_model − r_baseline lies e
 interval contains zero the result is reported as "difference not established". (Wording edited on 14 November 2026;
 the rule itself is unchanged.)
 
+**In the API.** `/v1/validation` returns these numbers as fields as well as in the first caveat: `correlation` and
+`correlation_ci95` for the model, `baseline` (name, correlation, interval and the yearly index values),
+`difference_ci95`, and `verdict`, which follows the rule above: `model_better` only if the interval of the
+difference lies entirely below 0, `baseline_better` only if entirely above 0, otherwise `no_detectable_difference`
+(worded "difference not established" in the caveat).
+
 **Not done here.** No parameter is tuned to improve agreement. No years are dropped after seeing results.
 
 ## 3. Results — demo field
