@@ -155,6 +155,67 @@ def income_note(lang: Language, *, weighted: bool = False) -> str:
     )
 
 
+# The farmer's current rotation as the baseline (POST /v1/rotations/explore, `current_rotation`)
+
+
+def baseline_intro(lang: Language, *, entered: int, years: int) -> str:
+    if lang == "tr":
+        fill = (
+            f" Girdiğiniz {entered} yıllık sıra, {years} yılı dolduracak şekilde tekrarlandı."
+            if entered < years
+            else ""
+        )
+        return (
+            "Bu, girdiğiniz mevcut rotasyondur; seçeneklerle aynı su dengesi ve aynı göstergelerle, aynı geçmiş "
+            "yıllar üzerinde puanlandı." + fill
+        )
+    fill = (
+        f" The {entered}-year sequence you entered was repeated to fill {years} years."
+        if entered < years
+        else ""
+    )
+    return (
+        "This is the current rotation you entered, scored with the same water balance and the same indicators as "
+        "the alternatives, over the same historical years." + fill
+    )
+
+
+def same_family(lang: Language, *, year: int, crop: str, previous: str, family: str) -> str:
+    if lang == "tr":
+        return (
+            f"{year}. yıl: {crop}, {previous} ürününün ardından geliyor ve ikisi de {family} familyasından. Motorun "
+            "önerdiği rotasyonlarda aynı botanik familya art arda iki yıl yer almaz; bu sıra yine de puanlandı."
+        )
+    return (
+        f"Year {year}: {crop} follows {previous} and both are {family}. The rotations the engine proposes never "
+        "place the same botanical family in two consecutive years; this sequence was scored anyway."
+    )
+
+
+def no_legume(lang: Language) -> str:
+    if lang == "tr":
+        return (
+            "Sırada baklagil yok. Motorun önerdiği her rotasyonda en az bir baklagil bulunur; bu sıra için "
+            "baklagil azot katkısı 0 olarak sayıldı."
+        )
+    return (
+        "The sequence has no legume. Every rotation the engine proposes includes at least one; the legume "
+        "nitrogen credit of this sequence is counted as 0."
+    )
+
+
+def perennial_single_year(lang: Language, *, year: int, crop: str) -> str:
+    if lang == "tr":
+        return (
+            f"{year}. yıl: {crop} yalnızca bir yıl yer alıyor. Motorun önerdiği rotasyonlarda çok yıllık bir "
+            "bitki en az iki yıl üst üste tarlada kalır; bu sıra yine de puanlandı."
+        )
+    return (
+        f"Year {year}: {crop} is grown for a single year. In the rotations the engine proposes a perennial stand "
+        "stays for at least two consecutive years; this sequence was scored anyway."
+    )
+
+
 # Validation caveats (GET /v1/validation)
 
 

@@ -109,6 +109,36 @@ def valid_sequence(seq: Sequence[CropParams]) -> bool:
     return True
 
 
+@dataclass(frozen=True, slots=True)
+class Violation:
+    rule: str  # same_family_in_consecutive_years | no_legume_in_cycle | perennial_single_year
+    year_index: int | None  # 1-based rotation year the violation falls in; None for whole-sequence rules
+    crop: CropParams | None = None
+    previous: CropParams | None = None
+
+
+def rule_violations(seq: Sequence[CropParams]) -> list[Violation]:
+    """Which of the rules behind `valid_sequence` a sequence breaks, in rotation-year order. Empty exactly when the
+    sequence is valid: no pair of crops in the table has overlapping seasons, so timing is not a separate case
+    (asserted in the tests)."""
+    out: list[Violation] = []
+    for k, (prev, crop) in enumerate(pairwise(seq), start=2):
+        continuing_stand = prev.id == crop.id and crop.season == "perennial"
+        if prev.family == crop.family and not continuing_stand:
+            out.append(Violation("same_family_in_consecutive_years", k, crop, prev))
+    for i, crop in enumerate(seq):
+        if crop.season != "perennial":
+            continue
+        before = i > 0 and seq[i - 1].id == crop.id
+        after = i + 1 < len(seq) and seq[i + 1].id == crop.id
+        if not before and not after:
+            out.append(Violation("perennial_single_year", i + 1, crop))
+    out.sort(key=lambda v: v.year_index or 0)
+    if not any(c.is_legume for c in seq):
+        out.append(Violation("no_legume_in_cycle", None))
+    return out
+
+
 def enumerate_rotations(crops: Sequence[CropParams], horizon: int) -> list[tuple[int, ...]]:
     """All crop-index sequences of length `horizon` satisfying the rules (one crop per agricultural year, at least
     one legume per cycle)."""
@@ -162,9 +192,20 @@ def agricultural_years(inputs: FieldInputs, crops: Sequence[CropParams]) -> list
     return years
 
 
-def build_tables(inputs: FieldInputs, crops: Sequence[CropParams], *, irrigated: bool) -> RotationTables:
+def build_tables(
+    inputs: FieldInputs,
+    crops: Sequence[CropParams],
+    *,
+    irrigated: bool,
+    enforce_rules: bool = True,
+    years: Sequence[int] | None = None,
+) -> RotationTables:
+    """`enforce_rules=False` also simulates crop pairs the rotation rules exclude (same family back to back), so a
+    sequence the farmer already grows can be scored with the same water balance; a pair is then left out only when
+    the next crop would be sown before the previous one is harvested. `years` fixes the agricultural years, so such a
+    table covers the same years as the candidates' table."""
     crops = tuple(crops)
-    years = agricultural_years(inputs, crops)
+    years = list(years) if years is not None else agricultural_years(inputs, crops)
     nc, ny, ng = len(crops), len(years), DEPLETION_GRID.shape[0]
     kc_table = build_kc_table(inputs, crops, years).reshape(nc * ny, -1)
     taw = np.array([inputs.awc_mm_per_m * c.root_depth_m for c in crops])
@@ -201,7 +242,7 @@ def build_tables(inputs: FieldInputs, crops: Sequence[CropParams], *, irrigated:
     keys: list[tuple[int, int, int]] = []
     for pi, prev in enumerate(crops):
         for ci, crop in enumerate(crops):
-            if not compatible(prev, crop):
+            if enforce_rules and not compatible(prev, crop):
                 continue
             for yi, year in enumerate(years):
                 start = inputs.index(harvest_date(prev, year - 1)) + 1

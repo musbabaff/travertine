@@ -238,6 +238,7 @@ def add_science_routes(app: FastAPI) -> None:
     @app.post(
         "/v1/rotations/explore",
         response_model=RotationExploreResponse,
+        response_model_exclude_none=True,
         tags=["rotations"],
         responses={"404": {"model": ErrorBody}, **ERROR_RESPONSES},
     )
