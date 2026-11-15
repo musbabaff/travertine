@@ -1,0 +1,101 @@
+{
+ "computed_at": "2026-11-14T19:08:00+00:00",
+ "protocol": "docs/VALIDATION.md section 4",
+ "record_years": [
+  2001,
+  2025
+ ],
+ "resamples": 10000,
+ "seed": 2026,
+ "sites": [
+  {
+   "id": "tr-saraykoy",
+   "name": "Sarayköy, Denizli, Türkiye",
+   "lat": 37.89,
+   "lon": 28.98,
+   "status": "ok",
+   "n": 24,
+   "years": [
+    2002,
+    2025
+   ],
+   "soil_texture": "clay loam",
+   "awc_mm": 139.0,
+   "mean_ndvi": 0.281,
+   "ndvi_seasons_skipped": [],
+   "model_r": -0.665,
+   "model_ci95": [
+    -0.845,
+    -0.428
+   ],
+   "baseline_r": -0.526,
+   "baseline_ci95": [
+    -0.74,
+    -0.257
+   ],
+   "difference": -0.138,
+   "difference_ci95": [
+    -0.337,
+    0.028
+   ],
+   "verdict": "A difference between the model and the baseline is not established: the interval of the difference includes 0."
+  },
+  {
+   "id": "tr-cihanbeyli",
+   "name": "Cihanbeyli, Konya, Türkiye",
+   "lat": 38.65,
+   "lon": 32.93,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  },
+  {
+   "id": "tr-polatli",
+   "name": "Polatlı, Ankara, Türkiye",
+   "lat": 39.58,
+   "lon": 32.15,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  },
+  {
+   "id": "ma-settat",
+   "name": "Settat, Chaouia, Morocco",
+   "lat": 33.0,
+   "lon": -7.62,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  },
+  {
+   "id": "es-tierra-de-campos",
+   "name": "Tierra de Campos, Valladolid, Spain",
+   "lat": 41.95,
+   "lon": -4.95,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  },
+  {
+   "id": "ro-baragan",
+   "name": "Bărăgan plain, Călărași, Romania",
+   "lat": 44.35,
+   "lon": 27.2,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  },
+  {
+   "id": "us-kansas",
+   "name": "Great Bend, Kansas, USA",
+   "lat": 38.36,
+   "lon": -98.76,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  },
+  {
+   "id": "fr-beauce",
+   "name": "Beauce, Eure-et-Loir, France",
+   "lat": 48.25,
+   "lon": 1.75,
+   "status": "upstream_unavailable",
+   "message": "MODIS (ORNL DAAC) did not return data."
+  }
+ ],
+ "pooled": null
+}
