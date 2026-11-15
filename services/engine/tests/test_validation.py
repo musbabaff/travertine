@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -110,3 +111,14 @@ def test_pooled_bootstrap_averages_sites() -> None:
     assert p.ci_diff[1] < 0
     assert "established" in verdict(p.ci_diff)
     assert "not established" in verdict((-0.1, 0.1))
+
+
+def test_modis_from_planetary_computer_matches_ornl(settings: Settings, tmp_path: Path) -> None:
+    with make_client(settings, FakeUpstream(cloudy_year=2003)) as c:
+        ornl = c.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False}).json()
+    other = replace(settings, cache_dir=tmp_path / "pc-cache")
+    fake = FakeUpstream(cloudy_year=2003, modis_fails=True, pc_modis=True)
+    with make_client(other, fake) as c:
+        pc = c.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False}).json()
+    assert pc["ndvi_history"] == ornl["ndvi_history"]
+    assert "MODIS (ORNL DAAC)" not in fake.calls

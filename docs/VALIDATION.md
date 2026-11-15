@@ -135,11 +135,60 @@ is used for model and baseline, and the mean difference across sites is recomput
 the baseline get intervals the same way. The difference counts as established only if its pooled interval lies
 entirely on one side of zero.
 
+**Data access (added 14 November 2026, before any multi-site number existed).** The ORNL DAAC MODIS web service
+answered 502/503 for hours, and the first two multi-site runs computed no site other than the demo field. The engine
+now reads the same MOD13Q1 v061 granules from Microsoft Planetary Computer first and falls back to ORNL. For the demo
+pixel, all 20 composites checked (2005 and 2023, days 97–241) gave identical NDVI and pixel reliability from both
+services, so the observed series does not depend on the route. The demo-field result in section 3 was computed from
+ORNL data and is unchanged.
+
 **Fixed in advance.** No site is added, removed or moved after results are seen; no parameter is changed; sites
 where the model or the baseline does poorly are reported like the others. The run is `scripts/validate_sites.py`,
 which writes `docs/validation/multisite.json`.
 
-## 5. Not yet done
+## 5. Results — multi-site
+
+Computed on 15 November 2026 by `scripts/validate_sites.py` (raw output: `docs/validation/multisite.json`), NASA
+POWER daily data 2001–2025, SoilGrids 2.0, MOD13Q1 v061. 95 % intervals are paired percentile bootstraps
+(10,000 resamples, seed 2026). "Difference" is r_model − r_baseline; negative means the model's correlation with
+greenness is the stronger one.
+
+| Site | n | Mean NDVI | Model r (95 %) | Baseline r (95 %) | Difference (95 %) | Difference established? |
+|---|---|---|---|---|---|---|
+| tr-saraykoy | 24 | 0.281 | −0.665 (−0.845 to −0.428) | −0.526 (−0.740 to −0.257) | −0.138 (−0.337 to +0.028) | no |
+| tr-cihanbeyli | 24 | 0.215 | −0.856 (−0.948 to −0.638) | −0.656 (−0.856 to −0.331) | −0.201 (−0.467 to +0.001) | no |
+| tr-polatli | 24 | 0.231 | −0.490 (−0.711 to −0.179) | −0.566 (−0.782 to −0.239) | +0.076 (−0.146 to +0.249) | no |
+| ma-settat | — | — | not computed | not computed | — | — |
+| es-tierra-de-campos | 24 | 0.378 | −0.691 (−0.837 to −0.514) | −0.653 (−0.881 to −0.429) | −0.037 (−0.208 to +0.172) | no |
+| ro-baragan | 24 | 0.546 | −0.417 (−0.783 to −0.025) | −0.196 (−0.647 to +0.182) | −0.220 (−0.339 to −0.020) | yes, model stronger |
+| us-kansas | — | — | not computed | not computed | — | — |
+| fr-beauce | 23 | 0.542 | −0.493 (−0.706 to −0.239) | −0.344 (−0.617 to −0.027) | −0.148 (−0.503 to +0.147) | no |
+
+**Sites not computed.** At ma-settat and us-kansas SoilGrids returns no complete prediction (the mean and the 5th and
+95th percentiles that the engine requires). The engine would fall back to its placeholder loam, which is not the
+protocol's model, so these two sites have no result. They were not moved or replaced. fr-beauce has 23 years: the
+2025 MODIS season had too few cloud-free composites.
+
+**Pooled over the six computed sites.**
+
+| | Mean r | 95 % interval |
+|---|---|---|
+| Model | −0.602 | −0.700 to −0.498 |
+| Baseline | −0.490 | −0.612 to −0.371 |
+| Difference | −0.112 | −0.203 to −0.021 |
+
+**Reading.** At every computed site the model's correlation with greenness is negative and its interval excludes
+zero. The baseline's interval includes zero at ro-baragan. Site by site, a difference between model and baseline is
+established only at ro-baragan; at tr-polatli the baseline's correlation is the stronger one, without an established
+difference. Pooled over the six sites, the difference (−0.112, interval −0.203 to −0.021) lies below zero, so under
+the pre-registered rule the model's stronger association is established at the pooled level — for these six sites,
+with the model crop and calendar applied unchanged everywhere. With the two missing sites the pooled result could
+differ; it has not been computed for eight.
+
+**What this does and does not show.** Like the demo field, this checks a dryness signal against 250 m greenness at
+pixels whose land use is not verified. It does not validate crop-specific deficits, yields or the rotation ranking.
+
+## 6. Not yet done
 
 - Field-scale (30 m) back-test: the anonymous HLS record starts in 2020, six seasons, too few for a correlation; the
   full HLS archive from 2013 needs a NASA Earthdata login.

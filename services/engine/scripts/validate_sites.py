@@ -16,7 +16,7 @@ from typing import Any
 
 from travertine_engine.cache import DiskCache
 from travertine_engine.config import ENGINE_ROOT, Settings
-from travertine_engine.errors import EngineError, UpstreamUnavailable
+from travertine_engine.errors import EngineError, OutOfCoverage, UpstreamUnavailable
 from travertine_engine.explore import ExploreService
 from travertine_engine.field import FieldService
 from travertine_engine.logs import configure_logging
@@ -51,8 +51,13 @@ async def run_site(explore: ExploreService, lat: float, lon: float) -> tuple[Bac
     (inputs, provenance, texture), ndvi = await asyncio.gather(
         explore.inputs(lat, lon), explore.fields.ndvi(lat, lon)
     )
-    if any(p.dataset.startswith("DEFAULT") for p in provenance):
-        # A site run on the placeholder soil is not the protocol's model; it is retried, not reported as a result.
+    soil_note = next((p.note for p in provenance if p.dataset.startswith("DEFAULT")), None)
+    if soil_note is not None:
+        # A site run on the placeholder soil is not the protocol's model, so it gets no result.
+        if "has no prediction" in soil_note:
+            raise OutOfCoverage(
+                "SoilGrids has no complete prediction (mean and 5th/95th percentiles) at this point."
+            )
         raise UpstreamUnavailable("SoilGrids did not answer; the site needs its real soil.")
     result = back_test(inputs, ndvi.by_year)
     s = result.stats

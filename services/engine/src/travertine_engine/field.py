@@ -180,10 +180,13 @@ def modis_provenance(first: int, last: int, skipped: list[int], source_note: str
     note += source_note
     return Provenance(
         dataset="MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061), NDVI and pixel reliability",
-        provider="NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by the ORNL DAAC MODIS web service",
+        provider=(
+            "NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by Microsoft Planetary Computer or the "
+            "ORNL DAAC MODIS web service"
+        ),
         spatial_resolution="250 m",
         temporal_coverage=f"{first}–{last}, 16-day composites, April–September",
-        access_url="https://modis.ornl.gov/data/modis_webservice.html",
+        access_url="https://planetarycomputer.microsoft.com/dataset/modis-13Q1-061",
         note=note,
     )
 

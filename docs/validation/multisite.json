@@ -1,5 +1,5 @@
 {
- "computed_at": "2026-11-14T19:08:00+00:00",
+ "computed_at": "2026-11-15T06:22:43+00:00",
  "protocol": "docs/VALIDATION.md section 4",
  "record_years": [
   2001,
@@ -45,57 +45,197 @@
    "name": "Cihanbeyli, Konya, Türkiye",
    "lat": 38.65,
    "lon": 32.93,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "ok",
+   "n": 24,
+   "years": [
+    2002,
+    2025
+   ],
+   "soil_texture": "clay loam",
+   "awc_mm": 152.0,
+   "mean_ndvi": 0.215,
+   "ndvi_seasons_skipped": [],
+   "model_r": -0.856,
+   "model_ci95": [
+    -0.948,
+    -0.638
+   ],
+   "baseline_r": -0.656,
+   "baseline_ci95": [
+    -0.856,
+    -0.331
+   ],
+   "difference": -0.201,
+   "difference_ci95": [
+    -0.467,
+    0.001
+   ],
+   "verdict": "A difference between the model and the baseline is not established: the interval of the difference includes 0."
   },
   {
    "id": "tr-polatli",
    "name": "Polatlı, Ankara, Türkiye",
    "lat": 39.58,
    "lon": 32.15,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "ok",
+   "n": 24,
+   "years": [
+    2002,
+    2025
+   ],
+   "soil_texture": "clay loam",
+   "awc_mm": 136.0,
+   "mean_ndvi": 0.231,
+   "ndvi_seasons_skipped": [],
+   "model_r": -0.49,
+   "model_ci95": [
+    -0.711,
+    -0.179
+   ],
+   "baseline_r": -0.566,
+   "baseline_ci95": [
+    -0.782,
+    -0.239
+   ],
+   "difference": 0.076,
+   "difference_ci95": [
+    -0.146,
+    0.249
+   ],
+   "verdict": "A difference between the model and the baseline is not established: the interval of the difference includes 0."
   },
   {
    "id": "ma-settat",
    "name": "Settat, Chaouia, Morocco",
    "lat": 33.0,
    "lon": -7.62,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "out_of_coverage",
+   "message": "SoilGrids has no complete prediction (mean and 5th/95th percentiles) at this point."
   },
   {
    "id": "es-tierra-de-campos",
    "name": "Tierra de Campos, Valladolid, Spain",
    "lat": 41.95,
    "lon": -4.95,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "ok",
+   "n": 24,
+   "years": [
+    2002,
+    2025
+   ],
+   "soil_texture": "loam",
+   "awc_mm": 146.0,
+   "mean_ndvi": 0.378,
+   "ndvi_seasons_skipped": [],
+   "model_r": -0.691,
+   "model_ci95": [
+    -0.837,
+    -0.514
+   ],
+   "baseline_r": -0.653,
+   "baseline_ci95": [
+    -0.881,
+    -0.429
+   ],
+   "difference": -0.037,
+   "difference_ci95": [
+    -0.208,
+    0.172
+   ],
+   "verdict": "A difference between the model and the baseline is not established: the interval of the difference includes 0."
   },
   {
    "id": "ro-baragan",
    "name": "Bărăgan plain, Călărași, Romania",
    "lat": 44.35,
    "lon": 27.2,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "ok",
+   "n": 24,
+   "years": [
+    2002,
+    2025
+   ],
+   "soil_texture": "silty clay",
+   "awc_mm": 145.0,
+   "mean_ndvi": 0.546,
+   "ndvi_seasons_skipped": [],
+   "model_r": -0.417,
+   "model_ci95": [
+    -0.783,
+    -0.025
+   ],
+   "baseline_r": -0.196,
+   "baseline_ci95": [
+    -0.647,
+    0.182
+   ],
+   "difference": -0.22,
+   "difference_ci95": [
+    -0.339,
+    -0.02
+   ],
+   "verdict": "The model's correlation is more negative than the baseline's, and the difference is established: its interval lies below 0."
   },
   {
    "id": "us-kansas",
    "name": "Great Bend, Kansas, USA",
    "lat": 38.36,
    "lon": -98.76,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "out_of_coverage",
+   "message": "SoilGrids has no complete prediction (mean and 5th/95th percentiles) at this point."
   },
   {
    "id": "fr-beauce",
    "name": "Beauce, Eure-et-Loir, France",
    "lat": 48.25,
    "lon": 1.75,
-   "status": "upstream_unavailable",
-   "message": "MODIS (ORNL DAAC) did not return data."
+   "status": "ok",
+   "n": 23,
+   "years": [
+    2002,
+    2024
+   ],
+   "soil_texture": "silty clay loam",
+   "awc_mm": 178.0,
+   "mean_ndvi": 0.542,
+   "ndvi_seasons_skipped": [
+    2025
+   ],
+   "model_r": -0.493,
+   "model_ci95": [
+    -0.706,
+    -0.239
+   ],
+   "baseline_r": -0.344,
+   "baseline_ci95": [
+    -0.617,
+    -0.027
+   ],
+   "difference": -0.148,
+   "difference_ci95": [
+    -0.503,
+    0.147
+   ],
+   "verdict": "A difference between the model and the baseline is not established: the interval of the difference includes 0."
   }
  ],
- "pooled": null
+ "pooled": {
+  "sites": 6,
+  "mean_model_r": -0.602,
+  "mean_model_r_ci95": [
+   -0.7,
+   -0.498
+  ],
+  "mean_baseline_r": -0.49,
+  "mean_baseline_r_ci95": [
+   -0.612,
+   -0.371
+  ],
+  "mean_difference": -0.112,
+  "mean_difference_ci95": [
+   -0.203,
+   -0.021
+  ],
+  "verdict": "The model's correlation is more negative than the baseline's, and the difference is established: its interval lies below 0."
+ }
 }
