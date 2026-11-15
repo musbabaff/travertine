@@ -530,3 +530,27 @@ def skipped_years(lang: Language, years: list[int]) -> str:
     if lang == "tr":
         return f"Bulutsuz NDVI kompoziti az olduğu için dışarıda bırakılan yıllar: {listed}."
     return f"Years left out for too few cloud-free NDVI composites: {listed}."
+
+
+# Crop calendar caveats (POST /v1/field/calendar)
+
+
+def calendar_caveats(lang: Language, *, first: int, last: int) -> list[str]:
+    if lang == "tr":
+        return [
+            f"Paylar {first}–{last} NASA POWER kaydından hesaplandı; bunlar geçmiş yılların sıklıklarıdır, tahmin "
+            "değildir.",
+            "Su açığı yalnızca iklime dayalıdır (yağış ile tablo Kc × ET0 karşılaştırması); topraktaki su dikkate "
+            "alınmaz, bu yüzden derin topraklarda gerçek stres daha düşük olabilir.",
+            "Ekim tarihleri FAO-56 Tablo 11'den alındı; yerel ekim tarihleri farklıysa aylar kayar.",
+            "Sıcak gün eşiği kaydın kendi aylık 90. yüzdelik değeridir; ürüne özgü bir sıcaklık stresi eşiği "
+            "değildir.",
+        ]
+    return [
+        f"Shares are computed from the {first}–{last} NASA POWER record; they are past frequencies, not a forecast.",
+        "The water deficit is climatic only (precipitation against table Kc × ET0); soil water is not counted, so "
+        "on deep soils the actual stress can be lower.",
+        "Sowing dates are FAO-56 Table 11 dates; if local sowing differs, the months shift.",
+        "The warm-day threshold is the record's own monthly 90th percentile, not a crop-specific heat-stress "
+        "threshold.",
+    ]

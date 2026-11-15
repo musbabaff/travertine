@@ -308,3 +308,72 @@ class ErrorBody(_Model):
     code: str
     message: str
     details: dict[str, object] | None = None
+
+
+class HazardYear(_Model):
+    year: int
+    frost_days: int = Field(ge=0)
+    last_spring_frost: str | None = None
+    first_autumn_frost: str | None = None
+    frost_free_days: int | None = Field(default=None, ge=0)
+    summer_days: int = Field(ge=0)
+    warm_days: int = Field(ge=0)
+    txx_c: float
+    r10mm_days: int = Field(ge=0)
+    r20mm_days: int = Field(ge=0)
+    rx1day_mm: float = Field(ge=0)
+    cdd_days: int = Field(ge=0)
+
+
+class FieldHazards(_Model):
+    years: list[HazardYear]
+    median: dict[str, float]
+    caveats: list[str]
+    provenance: list[Provenance]
+
+
+class FieldCalendarRequest(_Model):
+    lat: Latitude
+    lon: Longitude
+    sequence: list[str] = Field(min_length=1, max_length=5)
+    language: Language = "en"
+
+
+class CalendarSeason(_Model):
+    year_index: int = Field(ge=1)
+    crop_id: str
+    sowing: str
+    harvest: str
+
+
+class BarePeriod(_Model):
+    after_year_index: int = Field(ge=1)
+    start: str
+    end: str
+    days: int = Field(ge=0)
+
+
+class CalendarMonth(_Model):
+    year_index: int = Field(ge=1)
+    crop_id: str
+    month: int = Field(ge=1, le=12)
+    water_deficit_share: Unit01
+    frost_day_share: Unit01
+    warm_day_share: Unit01
+
+
+class MostVulnerable(_Model):
+    year_index: int = Field(ge=1)
+    crop_id: str
+    hazard: Literal["water_deficit", "frost", "warm_days"]
+    month: int = Field(ge=1, le=12)
+    share: Unit01
+
+
+class FieldCalendar(_Model):
+    seasons: list[CalendarSeason]
+    bare_periods: list[BarePeriod]
+    months: list[CalendarMonth]
+    most_vulnerable: list[MostVulnerable]
+    caveats: list[str]
+    provenance: list[Provenance]

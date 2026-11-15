@@ -26,3 +26,7 @@ Responses are cached under `services/engine/data/cache/` (git-ignored), each wit
 exception to "no raw downloads in the repo" is `services/engine/data/snapshot/`: the demo field's responses (about
 450 KB gzipped) with a manifest of fetch times, URLs and checksums, so the demo works when an upstream is down.
 Responses served from it say so in their provenance note.
+
+## ETCCDI index definitions
+
+Used for `/v1/field/hazards` and `/v1/field/calendar`: Zhang, X. et al. (2011). Indices for monitoring changes in extremes based on daily temperature and precipitation data. *WIREs Climate Change* 2:851–870, doi:10.1002/wcc.147; list at https://etccdi.pacificclimate.org/list_27_indices.shtml. Computed on NASA POWER grid-cell daily values, not station data.

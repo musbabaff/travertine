@@ -209,6 +209,21 @@ assumed FAO-56 sowing dates). Each sentence is built from that strategy's number
 say is left empty rather than filled with generic text. The reasoning supports the farmer's and local experts'
 judgment; it does not replace it.
 
+## 7b. Climate hazards and the crop calendar
+
+**Hazards** (`GET /v1/field/hazards`) are ETCCDI indices (Zhang et al. 2011, doi:10.1002/wcc.147) computed per
+calendar year on the NASA POWER grid-cell daily series: frost days FD (Tmin < 0 °C), summer days SU (Tmax > 25 °C),
+TXx, R10mm, R20mm, Rx1day and CDD (longest run of days with < 1 mm, within the year). Warm days are a simplified TX90p:
+Tmax above the record's 90th percentile for that calendar month. Last spring frost is the last day before 1 August with
+Tmin < 0 °C, first autumn frost the first from 1 August, frost-free days the days between them (northern hemisphere
+only). Crop-specific heat-stress thresholds are not used because no verified published threshold is in the crop table.
+
+**Calendar** (`POST /v1/field/calendar`): sowing and harvest from the crop table (FAO-56 Table 11), bare-field periods
+between one harvest and the next sowing (the last crop wraps to the first, as the cycle repeats), and for every month a
+crop is in the field: the median over years of the climatic deficit max(0, 1 − P/ETc) with ETc = table Kc × ET0 (no
+soil water), and the share of the crop's days with frost or warm days. The most vulnerable month per hazard is the one
+with the highest share. These are past frequencies, not forecasts.
+
 ## 8. Vegetation record and validation
 
 **NDVI history.** `/v1/field/analyze` returns `ndvi_history`: for each year, the mean MODIS/Terra MOD13Q1 v061 NDVI

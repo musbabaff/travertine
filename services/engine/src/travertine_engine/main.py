@@ -23,13 +23,17 @@ from travertine_engine.errors import EngineError, RateLimited
 from travertine_engine.explore import ExploreService
 from travertine_engine.field import FieldService
 from travertine_engine.field_ndvi import FieldNdviService
+from travertine_engine.hazards import HazardService
 from travertine_engine.logs import configure_logging, request_id_var
 from travertine_engine.models import (
     Crop,
     ErrorBody,
     FieldAnalysis,
     FieldAnalyzeRequest,
+    FieldCalendar,
+    FieldCalendarRequest,
     FieldClimate,
+    FieldHazards,
     FieldNdvi,
     FieldSoil,
     FieldVegetation,
@@ -85,6 +89,7 @@ def attach_services(app: FastAPI, settings: Settings, client: Upstream) -> int:
     app.state.explore = ExploreService(app.state.fields)
     app.state.validation = ValidationService(app.state.explore)
     app.state.field_ndvi = FieldNdviService(app.state.fields)
+    app.state.hazards = HazardService(app.state.fields)
     load_crops()
     return loaded
 
@@ -284,6 +289,26 @@ def add_science_routes(app: FastAPI) -> None:
     ) -> FieldNdvi:
         service: FieldNdviService = request.app.state.field_ndvi
         return await service.history(lat, lon)
+
+    @app.get(
+        "/v1/field/hazards",
+        response_model=FieldHazards,
+        response_model_exclude_none=True,
+        tags=["field"],
+        responses=ERROR_RESPONSES,
+    )
+    async def field_hazards(
+        request: Request,
+        lat: Annotated[float, Query(ge=-90, le=90)],
+        lon: Annotated[float, Query(ge=-180, le=180)],
+    ) -> FieldHazards:
+        service: HazardService = request.app.state.hazards
+        return await service.hazards(lat, lon)
+
+    @app.post("/v1/field/calendar", response_model=FieldCalendar, tags=["field"], responses=ERROR_RESPONSES)
+    async def field_calendar(body: FieldCalendarRequest, request: Request) -> FieldCalendar:
+        service: HazardService = request.app.state.hazards
+        return await service.calendar(body)
 
     @app.post(
         "/v1/rotations/explore",
