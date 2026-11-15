@@ -311,7 +311,7 @@
   "landing.team.title": "Ekip",
   "landing.team.web": "Ürün ve web lideri",
   "landing.team.engine": "Bilim motoru lideri",
-  "landing.ai": "İnsan denetiminde yapay zekâ kodlama araçlarıyla geliştirildi: motor, sözleşme ve web uygulaması için Claude Code (Anthropic) ajanları; bir ekip arkadaşının güncel arayüzü ve Cosmo rehberini kurarken kullandığı OpenAI Codex. Her değişiklik birleştirilmeden önce insanlar tarafından incelenir. Cosmo'nun kendisi dil modeli kullanmaz: her yanıt sabit, incelenmiş bir metindir. Tam açıklama docs/AI_USE.md içinde.",
+  "landing.ai": "İnsan denetiminde yapay zekâ kodlama araçlarıyla geliştirildi: motor, sözleşme ve web uygulaması için Claude Code (Anthropic) ajanları; bir ekip arkadaşının güncel arayüzü ve Cosmo rehberini kurarken kullandığı OpenAI Codex. Her değişiklik birleştirilmeden önce insanlar tarafından incelenir. Cosmo soruları Google Gemini (gemini-3.5-flash-lite) ile yanıtlar ve yalnızca seçili tarla için motorun verisini kullanması istenir; bu yanıtlar etiketlidir, Gemini yoksa Cosmo sabit, incelenmiş metinlere döner. Tam açıklama docs/AI_USE.md içinde.",
   "landing.source": "GitHub'da kaynak kodu",
   "nav.overview": "Genel bakış",
   "nav.overview.desc": "İklim, toprak, bitki örtüsü ve su bir bakışta",
@@ -640,5 +640,6 @@
   "hazards.englishOnly": "Motor bu notları yalnızca İngilizce yazıyor.",
   "scenario.reset": "Sıfırla",
   "data.eyebrow": "Travertine / Veri",
-  "data.req.hazards": "İklim tehlikeleri"
+  "data.req.hazards": "İklim tehlikeleri",
+  "cosmo.ui.generated": "Bu tarla için motorun verisinden Gemini yazdı; sayıları sayfada kontrol et."
 }
