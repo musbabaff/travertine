@@ -10,6 +10,7 @@ from datetime import date
 
 import numpy as np
 
+from travertine_engine import text
 from travertine_engine.errors import OutOfCoverage
 from travertine_engine.explore import FAO56_PROVENANCE, ExploreService
 from travertine_engine.models import Validation, ValidationYear
@@ -24,6 +25,7 @@ from travertine_engine.science.rotations import (
 )
 from travertine_engine.science.season import harvest_date, sowing_date
 from travertine_engine.science.water import Elements, bare_soil_depletion, simulate
+from travertine_engine.text import Language
 
 MODEL_CROP = "winter_wheat"
 WINDOW_START = (4, 1)
@@ -132,25 +134,6 @@ def back_test(inputs: FieldInputs, ndvi_by_year: dict[int, float]) -> BackTest:
     return BackTest(years, m, b, v, z, paired_bootstrap(m, b, z, resamples=RESAMPLES, seed=SEED))
 
 
-def verdict(ci_diff: tuple[float, float]) -> str:
-    lo, hi = ci_diff
-    if hi < 0:
-        return (
-            "The model's correlation is more negative than the baseline's, and the difference is established: "
-            "its interval lies below 0."
-        )
-    if lo > 0:
-        return (
-            "The baseline's correlation is more negative than the model's, and the difference is established: "
-            "its interval lies above 0."
-        )
-    return "A difference between the model and the baseline is not established: the interval of the difference includes 0."
-
-
-def _ci(ci: tuple[float, float]) -> str:
-    return f"{ci[0]:+.2f} to {ci[1]:+.2f}"
-
-
 METHOD = (
     "Pearson correlation, one value per year, between modelled water stress and the standardised anomaly (z-score, "
     "sample standard deviation) of growing-season MODIS NDVI at the field-centre pixel. Modelled stress is "
@@ -166,7 +149,7 @@ class ValidationService:
     def __init__(self, explore: ExploreService) -> None:
         self.explore = explore
 
-    async def validate(self, lat: float, lon: float) -> Validation:
+    async def validate(self, lat: float, lon: float, language: Language = "en") -> Validation:
         (inputs, provenance, _), ndvi = await asyncio.gather(
             self.explore.inputs(lat, lon), self.explore.fields.ndvi(lat, lon)
         )
@@ -174,21 +157,14 @@ class ValidationService:
         s = result.stats
         n = len(result.years)
         caveats = [
-            f"Model (winter-wheat water balance): r = {s.r_a:+.2f}, 95 % interval {_ci(s.ci_a)}. "
-            f"Baseline (April–September 1 − P/ET0): r = {s.r_b:+.2f}, 95 % interval {_ci(s.ci_b)}. "
-            f"Difference model − baseline: {s.r_a - s.r_b:+.2f}, 95 % interval {_ci(s.ci_diff)}. {verdict(s.ci_diff)}",
-            "The land use of the pixel is not known. The model assumes rain-fed winter wheat; if the pixel holds an "
-            "irrigated or summer crop, orchard, pasture or a mix, its greenness follows other drivers.",
-            "Irrigation is not represented: irrigated fields can stay green in dry years, which weakens the relationship.",
-            "NDVI is a single 250 m pixel; it may mix several fields and land uses.",
-            f"{n} years is a small sample; the correlation is uncertain and shows association, not causation.",
+            text.correlations(
+                language, r_model=s.r_a, ci_model=s.ci_a, r_base=s.r_b, ci_base=s.ci_b, ci_diff=s.ci_diff
+            ),
+            *text.VALIDATION_FIXED[language],
+            text.small_sample(language, n),
         ]
         if ndvi.skipped:
-            caveats.append(
-                "Years left out for too few cloud-free NDVI composites: "
-                + ", ".join(map(str, ndvi.skipped))
-                + "."
-            )
+            caveats.append(text.skipped_years(language, ndvi.skipped))
         return Validation(
             years=[
                 ValidationYear(

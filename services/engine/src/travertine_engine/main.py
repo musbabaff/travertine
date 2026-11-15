@@ -35,6 +35,7 @@ from travertine_engine.models import (
 )
 from travertine_engine.ratelimit import RateLimiter
 from travertine_engine.science.crops import load_crops
+from travertine_engine.text import Language
 from travertine_engine.upstream import Upstream
 from travertine_engine.validation import ValidationService
 
@@ -223,9 +224,10 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
         request: Request,
         lat: Annotated[float, Query(ge=-90, le=90)],
         lon: Annotated[float, Query(ge=-180, le=180)],
+        language: Language = "en",
     ) -> Validation:
         service: ValidationService = request.app.state.validation
-        return await service.validate(lat, lon)
+        return await service.validate(lat, lon, language)
 
     return app
 
