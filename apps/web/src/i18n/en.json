@@ -311,7 +311,7 @@
   "landing.team.title": "Team",
   "landing.team.web": "Product and web lead",
   "landing.team.engine": "Science engine lead",
-  "landing.ai": "Built with AI coding tools under human review: Claude Code (Anthropic) agents for the engine, contract and web app, and OpenAI Codex, which a teammate used to build the current interface and the Cosmo guide. Humans review every change before it is merged. Cosmo itself uses no language model: every answer is a fixed, reviewed text. The full statement is in docs/AI_USE.md.",
+  "landing.ai": "Built with AI coding tools under human review: Claude Code (Anthropic) agents for the engine, contract and web app, and OpenAI Codex, which a teammate used to build the current interface and the Cosmo guide. Humans review every change before it is merged. Cosmo answers questions with Google Gemini (gemini-3.5-flash-lite), told to use only the engine's data for the selected field; each such answer is labelled, and without Gemini Cosmo falls back to fixed, reviewed texts. The full statement is in docs/AI_USE.md.",
   "landing.source": "Source code on GitHub",
   "nav.overview": "Overview",
   "nav.overview.desc": "Climate, soil, vegetation and water at a glance",
@@ -640,5 +640,6 @@
   "hazards.englishOnly": "The engine writes these notes in English only.",
   "scenario.reset": "Reset",
   "data.eyebrow": "Travertine / Data",
-  "data.req.hazards": "Climate hazards"
+  "data.req.hazards": "Climate hazards",
+  "cosmo.ui.generated": "Written by Gemini from the engine's data for this field; check the numbers on the page."
 }

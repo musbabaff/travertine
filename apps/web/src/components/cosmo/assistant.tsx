@@ -12,18 +12,33 @@ import { cropLabel } from "@/lib/localize-engine";
 import { parseField } from "@/lib/url-state";
 import { useHazards } from "@/features/field/use-hazards";
 import { askField, fieldStarters, type FieldContext } from "./field-answers";
+
+/** The engine responses Cosmo may quote, trimmed to what an answer needs. */
+function compactContext(ctx: FieldContext | null) {
+  if (!ctx) return {};
+  const r = ctx.rotations;
+  return {
+    rotations: r?.rotations.slice(0, 3).map((x) => ({ sequence: x.sequence, scores: x.scores, yearly: x.yearly, explanation: x.explanation, reasoning: x.reasoning, vs_baseline: x.vs_baseline })),
+    current_rotation: r?.baseline ? { sequence: r.baseline.sequence, scores: r.baseline.scores, yearly: r.baseline.yearly, rule_violations: r.baseline.rule_violations } : undefined,
+    scenario: r?.scenario,
+    validation: ctx.validation
+      ? { correlation: ctx.validation.correlation, correlation_ci95: ctx.validation.correlation_ci95, n: ctx.validation.n, baseline: ctx.validation.baseline && { name: ctx.validation.baseline.name, correlation: ctx.validation.baseline.correlation, correlation_ci95: ctx.validation.baseline.correlation_ci95 }, difference_ci95: ctx.validation.difference_ci95, verdict: ctx.validation.verdict, caveats: ctx.validation.caveats }
+      : undefined,
+    hazards: ctx.hazards ? { median: ctx.hazards.median, years: ctx.hazards.years.length, caveats: ctx.hazards.caveats } : undefined,
+    datasets: [...new Set((ctx.provenance ?? []).map((p) => p.dataset))],
+  };
+}
 import { askCosmo, GREETING, startersFor, type CosmoLink } from "./brain";
 import { COSMO_ASK, COSMO_PENDING, useGaze } from "./gaze";
 import { useCosmoSpeech } from "./speech";
 import CosmoStage from "./stage";
-import CosmoMascot from "./mascot";
 import { COSMO_INTRO } from "./intro";
 
 /**
  * Cosmo messages hold a locale key with its values (shown in the current language) and, for answers about the field,
  * the engine's own sentences; user messages hold the typed text.
  */
-type Message = { id: number; from: "cosmo" | "user"; text: string; vars?: Vars; lines?: string[]; links?: CosmoLink[] };
+type Message = { id: number; from: "cosmo" | "user"; text: string; vars?: Vars; lines?: string[]; links?: CosmoLink[]; generated?: boolean };
 type Delivery = { id: number; words: string[] };
 
 const NUDGE_SEEN = "cosmo-nudge-seen";
@@ -88,12 +103,12 @@ export default function CosmoAssistant() {
   }
 
   // Olay dinleyicisi bir kez bağlanıyor; güncel yol ve durum buradan okunur.
-  const live = useRef({ pathname, thinking, fieldContext });
+  const live = useRef({ pathname, thinking, fieldContext, locale });
   const speech = useCosmoSpeech(send);
 
   useLayoutEffect(() => {
     openRef.current = open;
-    live.current = { pathname, thinking, fieldContext };
+    live.current = { pathname, thinking, fieldContext, locale };
   });
 
   function strike(next: CosmoPose, holdMs?: number) {
@@ -124,14 +139,19 @@ export default function CosmoAssistant() {
     strike("think");
 
     const ctx = live.current.fieldContext();
-    const reply: { text: MessageKey; vars?: Vars; lines?: string[]; links?: CosmoLink[]; pose?: CosmoPose } =
+    const fixed: { text: MessageKey; vars?: Vars; lines?: string[]; links?: CosmoLink[]; pose?: CosmoPose } =
       (ctx && askField(question, ctx)) ?? askCosmo(question, live.current.pathname);
-    replyTimer.current = setTimeout(
-      () => {
+    const deliver = (generated: string | null) => {
         const answerId = nextId.current++;
         setThinking(false);
-        setMessages((list) => [...list, { id: answerId, from: "cosmo", text: reply.text, vars: reply.vars, lines: reply.lines, links: reply.links }]);
-        const said = [tRef.current(reply.text, reply.vars), ...(reply.lines ?? [])].join(" ");
+        const reply = generated ? { ...fixed, text: "cosmo.ui.generated" as MessageKey, vars: undefined, lines: undefined } : fixed;
+        setMessages((list) => [
+          ...list,
+          generated
+            ? { id: answerId, from: "cosmo", text: generated, links: fixed.links, generated: true }
+            : { id: answerId, from: "cosmo", text: reply.text, vars: reply.vars, lines: reply.lines, links: reply.links },
+        ]);
+        const said = generated ?? [tRef.current(reply.text, reply.vars), ...(reply.lines ?? [])].join(" ");
         setDelivery({ id: answerId, words: said.match(/\S+/g)?.slice(0, 5) ?? [] });
         clearTimeout(deliveryTimer.current);
         deliveryTimer.current = setTimeout(() => setDelivery(null), 1200);
@@ -139,9 +159,20 @@ export default function CosmoAssistant() {
         strike(reply.pose ?? "idle", reply.pose ? settle : undefined);
         if (openRef.current) speech.speak(said);
         speech.clearTranscript();
-      },
-      520 + Math.min(tRef.current(reply.text, reply.vars).length * 6, 700),
-    );
+    };
+    const started = Date.now();
+    fetch("/api/cosmo", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ question, language: live.current.locale, page: live.current.pathname, context: compactContext(ctx) }),
+      signal: AbortSignal.timeout(16_000),
+    })
+      .then((r) => (r.ok ? (r.json() as Promise<{ text?: string }>) : null))
+      .catch(() => null)
+      .then((d) => {
+        const wait = Math.max(0, 520 - (Date.now() - started));
+        replyTimer.current = setTimeout(() => deliver(d?.text ?? null), wait);
+      });
   }
 
   useEffect(() => {
@@ -254,7 +285,8 @@ export default function CosmoAssistant() {
           <div className="cosmo-log" ref={log} role="log" aria-live="polite">
             {messages.map((message) => (
               <div key={message.id} data-message-id={message.id} className={`cosmo-msg from-${message.from}${delivery?.id === message.id ? " is-arriving" : ""}`}>
-                <p>{message.from === "cosmo" ? t(message.text as MessageKey, message.vars) : message.text}</p>
+                <p>{message.from === "cosmo" && !message.generated ? t(message.text as MessageKey, message.vars) : message.text}</p>
+                {message.generated && <small className="cosmo-msg-generated">{t("cosmo.ui.generated")}</small>}
                 {message.lines && message.lines.length > 0 && (
                   <ul className="cosmo-msg-lines">
                     {message.lines.map((line) => (
@@ -355,7 +387,7 @@ export default function CosmoAssistant() {
         <button className="cosmo-fab" ref={fab} onClick={show}>
           <span className="sr-only">{t("cosmo.ui.ask")}</span>
           <span aria-hidden="true" className="contents [&_text]:hidden">
-            <CosmoMascot frame="full" pose={pose} talking={false} listening={false} label={null} />
+            <CosmoStage view="full" pose={pose} />
           </span>
         </button>
       )}
