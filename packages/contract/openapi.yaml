@@ -142,6 +142,42 @@ paths:
         "502": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
 
+  /v1/field/hazards:
+    get:
+      tags: [field]
+      operationId: getFieldHazards
+      summary: Frost, heat, heavy-rain and dry-spell indices per year from NASA POWER
+      parameters:
+        - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
+        - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+      responses:
+        "200":
+          description: One row per complete year of the record, ascending, with medians.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldHazards" }
+        "422": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/field/calendar:
+    post:
+      tags: [field]
+      operationId: getFieldCalendar
+      summary: Crop calendar of a sequence with bare-field periods and monthly vulnerability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FieldCalendarRequest" }
+      responses:
+        "200":
+          description: Calendar of the sequence over the historical record.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldCalendar" }
+        "422": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
   /v1/field/analyze:
     post:
       tags: [field]
@@ -455,6 +491,9 @@ components:
         language:
           $ref: "#/components/schemas/Language"
           description: "Language of rotations[].explanation[]. Default en."
+        scenario:
+          $ref: "#/components/schemas/Scenario"
+          description: "Optional. Sensitivity test: the historical daily series are changed by these amounts before ET0 and the water balance are recomputed. Not a forecast."
         current_rotation:
           type: array
           description: "Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`."
@@ -550,6 +589,140 @@ components:
           $ref: "#/components/schemas/RotationReasoning"
           description: "Optional. Structured reasoning built from this strategy's own numbers, in the request language."
 
+    Scenario:
+      type: object
+      required: [precipitation_factor, temperature_change_c]
+      properties:
+        precipitation_factor: { type: number, minimum: 0.5, maximum: 1.5, description: "Every day's precipitation is multiplied by this (unitless, 1 = unchanged)." }
+        temperature_change_c: { type: number, minimum: -3, maximum: 5, description: "Added to daily mean, maximum, minimum and dew-point temperature (°C, 0 = unchanged)." }
+
+    ScenarioApplied:
+      type: object
+      required: [precipitation_factor, temperature_change_c, label]
+      properties:
+        precipitation_factor: { type: number }
+        temperature_change_c: { type: number }
+        label: { type: string, description: "Says, in the request language, that the results are a sensitivity test on past years and not a forecast. The UI shows it next to every score." }
+
+    HazardYear:
+      type: object
+      required: [year, frost_days, summer_days, warm_days, txx_c, r10mm_days, r20mm_days, rx1day_mm, cdd_days]
+      properties:
+        year: { type: integer }
+        frost_days: { type: integer, minimum: 0, description: "Days with minimum temperature below 0 °C (ETCCDI FD)." }
+        last_spring_frost: { type: string, format: date, description: "Last day before 1 August with minimum temperature below 0 °C. Omitted when there was none or in the southern hemisphere." }
+        first_autumn_frost: { type: string, format: date, description: "First day from 1 August with minimum temperature below 0 °C. Omitted when there was none or in the southern hemisphere." }
+        frost_free_days: { type: integer, minimum: 0, description: "Days between last_spring_frost and first_autumn_frost, exclusive. Omitted when either is omitted." }
+        summer_days: { type: integer, minimum: 0, description: "Days with maximum temperature above 25 °C (ETCCDI SU)." }
+        warm_days: { type: integer, minimum: 0, description: "Days with maximum temperature above the record's 90th percentile for that calendar month (simplified ETCCDI TX90p)." }
+        txx_c: { type: number, description: "Highest daily maximum temperature of the year (°C, ETCCDI TXx)." }
+        r10mm_days: { type: integer, minimum: 0, description: "Days with at least 10 mm precipitation (ETCCDI R10mm)." }
+        r20mm_days: { type: integer, minimum: 0, description: "Days with at least 20 mm precipitation (ETCCDI R20mm)." }
+        rx1day_mm: { type: number, minimum: 0, description: "Highest one-day precipitation (mm, ETCCDI Rx1day)." }
+        cdd_days: { type: integer, minimum: 0, description: "Longest run of consecutive days with less than 1 mm precipitation within the year (ETCCDI CDD)." }
+
+    FieldHazards:
+      type: object
+      required: [years, median, caveats, provenance]
+      properties:
+        years:
+          type: array
+          items: { $ref: "#/components/schemas/HazardYear" }
+        median:
+          type: object
+          description: "Median over years of every numeric index, same names and units as HazardYear; frost dates as day of year (last_spring_frost_doy, first_autumn_frost_doy)."
+          additionalProperties: { type: number }
+        caveats:
+          type: array
+          description: Limitations. The UI renders these verbatim.
+          items: { type: string }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
+    FieldCalendarRequest:
+      type: object
+      required: [lat, lon, sequence]
+      properties:
+        lat: { $ref: "#/components/schemas/Latitude" }
+        lon: { $ref: "#/components/schemas/Longitude" }
+        sequence:
+          type: array
+          description: "crop_id per agricultural year (1 October to 30 September), any crops from /v1/crops."
+          minItems: 1
+          maxItems: 5
+          items: { type: string }
+        language: { $ref: "#/components/schemas/Language" }
+
+    CalendarSeason:
+      type: object
+      required: [year_index, crop_id, sowing, harvest]
+      properties:
+        year_index: { type: integer, minimum: 1 }
+        crop_id: { type: string }
+        sowing: { type: string, pattern: "^[0-9]{2}-[0-9]{2}$", description: "MM-DD (FAO-56 Table 11 planting month, crops.yaml)." }
+        harvest: { type: string, pattern: "^[0-9]{2}-[0-9]{2}$", description: "MM-DD, sowing + growing_days − 1." }
+
+    BarePeriod:
+      type: object
+      required: [after_year_index, start, end, days]
+      properties:
+        after_year_index: { type: integer, minimum: 1, description: "The field is bare after this year's harvest until the next crop is sown; after the last year, until the first crop of the repeated cycle." }
+        start: { type: string, pattern: "^[0-9]{2}-[0-9]{2}$" }
+        end: { type: string, pattern: "^[0-9]{2}-[0-9]{2}$" }
+        days: { type: integer, minimum: 0 }
+
+    CalendarMonth:
+      type: object
+      required: [year_index, crop_id, month, water_deficit_share, frost_day_share, warm_day_share]
+      properties:
+        year_index: { type: integer, minimum: 1 }
+        crop_id: { type: string }
+        month: { type: integer, minimum: 1, maximum: 12 }
+        water_deficit_share:
+          allOf: [{ $ref: "#/components/schemas/Unit01" }]
+          description: "Median over years of max(0, 1 − P/ETc) for the crop's days in that month: a climatic deficit from POWER precipitation and FAO-56 ETc (table Kc × ET0), without soil water."
+        frost_day_share:
+          allOf: [{ $ref: "#/components/schemas/Unit01" }]
+          description: "Share of the crop's days in that month, over all years, with minimum temperature below 0 °C."
+        warm_day_share:
+          allOf: [{ $ref: "#/components/schemas/Unit01" }]
+          description: "Share of the crop's days in that month, over all years, with maximum temperature above the month's 90th percentile of the record."
+
+    FieldCalendar:
+      type: object
+      required: [seasons, bare_periods, months, most_vulnerable, caveats, provenance]
+      properties:
+        seasons:
+          type: array
+          items: { $ref: "#/components/schemas/CalendarSeason" }
+        bare_periods:
+          type: array
+          items: { $ref: "#/components/schemas/BarePeriod" }
+        months:
+          type: array
+          description: "One item per crop year and calendar month the crop is in the field, in season order."
+          items: { $ref: "#/components/schemas/CalendarMonth" }
+        most_vulnerable:
+          type: array
+          description: "Per crop year and hazard, the month with the highest share; omitted for a hazard whose share is 0 in every month."
+          items:
+            type: object
+            required: [year_index, crop_id, hazard, month, share]
+            properties:
+              year_index: { type: integer, minimum: 1 }
+              crop_id: { type: string }
+              hazard: { type: string, enum: [water_deficit, frost, warm_days] }
+              month: { type: integer, minimum: 1, maximum: 12 }
+              share: { $ref: "#/components/schemas/Unit01" }
+        caveats:
+          type: array
+          description: Limitations, in the request language. The UI renders these verbatim.
+          items: { type: string }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
     EvidenceItem:
       type: object
       required: [statement, value, unit, dataset]
@@ -633,6 +806,9 @@ components:
         baseline:
           $ref: "#/components/schemas/BaselineRotation"
           description: "Optional. Present when the request carried current_rotation."
+        scenario:
+          $ref: "#/components/schemas/ScenarioApplied"
+          description: "Optional. Present when the request carried a scenario."
         inputs:
           type: array
           description: "Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default."
