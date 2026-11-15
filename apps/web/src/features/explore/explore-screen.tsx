@@ -1,5 +1,7 @@
 "use client";
 
+import { errorText } from "@/lib/api/errors";
+
 import { SlowHint } from "@/components/ui/slow-hint";
 import { Columns2, Loader2, MapPinned, RotateCcw } from "lucide-react";
 import Link from "next/link";
@@ -55,7 +57,7 @@ export function ExploreScreen() {
   const { priorities, debounced, horizon, setPriority, setAll, setHorizon } = useExploreParams();
   const demo = source !== "engine";
   const effectiveHorizon: Horizon = demo ? (FIXTURE_HORIZON as Horizon) : horizon;
-  const current = parseCurrent(new URLSearchParams(fieldQs.slice(1)));
+  const current = parseCurrent(new URLSearchParams(fieldQs.slice(1))).slice(0, effectiveHorizon);
   const [scenario, setScenario] = useState<ScenarioValue>(NO_SCENARIO);
   const [scenarioDebounced, setScenarioDebounced] = useState<ScenarioValue>(NO_SCENARIO);
   useEffect(() => {
@@ -209,7 +211,7 @@ export function ExploreScreen() {
               {scenarioLabel}
             </p>
           )}
-          {rotations.isError && farmer && <p className="mb-3 text-xs text-danger">{rotations.error.message}</p>}
+          {rotations.isError && farmer && <p className="mb-3 text-xs text-danger">{errorText(rotations.error, t)}</p>}
           {farmer && rotations.data?.inputs && <InputSources inputs={rotations.data.inputs} />}
           <p aria-live="polite" className="sr-only">
             {announce}
@@ -237,7 +239,7 @@ export function ExploreScreen() {
               <CardSkeleton />
             </div>
           ) : rotations.isError ? (
-            <ErrorState title={t("explore.error.title")} body={t("state.error.body", { message: rotations.error.message })} retryLabel={t("state.retry")} onRetry={() => rotations.refetch()} />
+            <ErrorState title={t("explore.error.title")} body={errorText(rotations.error, t)} retryLabel={t("state.retry")} onRetry={() => rotations.refetch()} />
           ) : !list || list.length === 0 ? (
             <div className="rounded-md border border-border bg-surface p-5">
               <EmptyState title={t("explore.empty.title")} body={t("explore.empty.body")} />

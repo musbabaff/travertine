@@ -1,5 +1,6 @@
 import type { MessageKey, Vars } from "@/i18n";
 import type { FieldHazards, Provenance, RotationExploreResponse, Validation } from "@/lib/api/types";
+import { foldKeyword, foldQuestion, hasAny } from "@/lib/fold";
 import type { CosmoLink } from "./brain";
 
 /**
@@ -28,7 +29,7 @@ const evidence: CosmoLink = { href: "/app/evidence", label: "nav.evidence" };
 const data: CosmoLink = { href: "/app/data", label: "nav.data" };
 const field: CosmoLink = { href: "/app", label: "nav.field" };
 
-const has = (q: string, words: string[]) => words.some((w) => q.includes(w));
+const has = hasAny;
 
 export const INTENTS = {
   top: ["first", "top", "best", "rank first", "why this", "which rotation", "ilk sıra", "birinci", "en üst", "neden bu", "hangi rotasyon", "hangi ekim"],
@@ -38,12 +39,15 @@ export const INTENTS = {
   sources: ["where does", "where do", "come from", "source of", "nereden", "kaynağı", "hangi veri"],
 } as const;
 
+// Fold every keyword once, when the module loads.
+Object.values(INTENTS).forEach((words) => words.forEach(foldKeyword));
+
 function seq(ids: string[], ctx: FieldContext) {
   return ids.map(ctx.cropName).join(" → ");
 }
 
 export function askField(question: string, ctx: FieldContext): FieldReply | null {
-  const q = ` ${question.toLocaleLowerCase("tr-TR").toLocaleLowerCase("en-GB")} `;
+  const q = foldQuestion(question);
   const top = ctx.rotations?.rotations[0];
 
   if (has(q, [...INTENTS.current])) {

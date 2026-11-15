@@ -1,5 +1,7 @@
 "use client";
 
+import { errorText } from "@/lib/api/errors";
+
 import { ProvenanceChips } from "@/components/ui/provenance-chip";
 import { SlowHint } from "@/components/ui/slow-hint";
 import { ErrorState, Skeleton } from "@/components/ui/states";
@@ -31,7 +33,7 @@ export function NdviCompare({ field, modis }: { field: FieldState; modis: NdviYe
   if (q.isError) {
     return (
       <div className="mt-4">
-        <ErrorState title={t("ndvi30.error")} body={t("state.error.body", { message: q.error.message })} retryLabel={t("state.retry")} onRetry={() => q.refetch()} />
+        <ErrorState title={t("ndvi30.error")} body={errorText(q.error, t)} retryLabel={t("state.retry")} onRetry={() => q.refetch()} />
       </div>
     );
   }

@@ -68,7 +68,7 @@ test.describe("Field screen", () => {
   test("shows an error with retry when the engine rejects the field", async ({ page }) => {
     await fakeEngine(page, "error");
     await page.goto(`/app?${DEMO_QUERY}`);
-    await expect(page.getByRole("complementary").getByRole("alert")).toContainText("No soil data for this location.");
+    await expect(page.getByRole("complementary").getByRole("alert")).toContainText("The data needed for this result are not available at this location.");
     await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
   });
 
