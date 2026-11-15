@@ -152,3 +152,11 @@ def test_candidate_scores_are_reused_across_priorities(
 def test_warm_fields_setting_parses_points(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENGINE_WARM_FIELDS", "37.89,28.98; 40.1,-88.2")
     assert Settings.from_env().warm_fields == [(37.89, 28.98), (40.1, -88.2)]
+
+
+def test_daily_climate_is_computed_once_per_location(settings: Settings, fake: FakeUpstream) -> None:
+    with make_client(settings, fake) as c:
+        service = c.app.state.fields  # type: ignore[attr-defined]
+        first = c.portal.call(service.daily_climate, 37.89, 28.98)  # type: ignore[union-attr]
+        again = c.portal.call(service.daily_climate, 37.8901, 28.9799)  # type: ignore[union-attr]
+    assert again[0] is first[0]

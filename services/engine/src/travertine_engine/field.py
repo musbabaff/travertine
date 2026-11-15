@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+from collections import OrderedDict
 from dataclasses import asdict, dataclass, replace
 
 from travertine_engine.cache import DiskCache, snapshot_reads
@@ -26,6 +27,7 @@ from travertine_engine.upstream import Upstream
 
 log = logging.getLogger(__name__)
 
+CLIMATE_CACHE_SIZE = 16
 _FIELD_ID = re.compile(r"^fld_(-?\d{1,2}\.\d{4})_(-?\d{1,3}\.\d{4})$")
 
 
@@ -196,13 +198,26 @@ class FieldService:
         self.settings = settings
         self.upstream = upstream
         self.cache = cache
+        # Parsing 25 years of daily POWER data and computing Penman-Monteith ET0 takes seconds on a small CPU share;
+        # the result for a location never changes while the process runs.
+        self._climate: OrderedDict[tuple[float, float], tuple[DailyClimate, str]] = OrderedDict()
 
     async def daily_climate(self, lat: float, lon: float) -> tuple[DailyClimate, str]:
+        key = (round(lat, 3), round(lon, 3))
+        hit = self._climate.get(key)
+        if hit is not None:
+            self._climate.move_to_end(key)
+            return hit
         with snapshot_reads() as reads:
             power = await fetch_power_daily(
                 self.upstream, self.cache, lat, lon, self.settings.first_year, self.settings.last_year
             )
-        return replace(compute_daily_et0(power), source_note=reads.note("power_daily")), power.api_version
+        daily = await asyncio.to_thread(compute_daily_et0, power)
+        result = replace(daily, source_note=reads.note("power_daily")), power.api_version
+        self._climate[key] = result
+        while len(self._climate) > CLIMATE_CACHE_SIZE:
+            self._climate.popitem(last=False)
+        return result
 
     async def ndvi(self, lat: float, lon: float) -> NdviRecord:
         years = range(self.settings.first_year, self.settings.last_year + 1)
