@@ -132,7 +132,11 @@ def test_validation_caveats_in_turkish_keep_every_number(settings: Settings) -> 
         bad = c.get("/v1/validation", params={"lat": 37.89, "lon": 28.98, "language": "de"})
     assert bad.status_code == 422
     assert bad.json()["code"] == "invalid_request"
-    assert {k: v for k, v in tr.items() if k != "caveats"} == {k: v for k, v in en.items() if k != "caveats"}
+    worded = ("caveats", "provenance")
+    assert {k: v for k, v in tr.items() if k not in worded} == {
+        k: v for k, v in en.items() if k not in worded
+    }
+    assert [p["access_url"] for p in tr["provenance"]] == [p["access_url"] for p in en["provenance"]]
     assert len(tr["caveats"]) == len(en["caveats"])
     assert tr["caveats"][0].startswith("Model (kışlık buğday su dengesi): r = ")
     r = f"{en['correlation']:+.2f}".replace(".", ",")

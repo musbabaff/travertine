@@ -15,7 +15,7 @@ from datetime import date, timedelta
 import numpy as np
 import pandas as pd
 
-from travertine_engine import text
+from travertine_engine import prov_text, text
 from travertine_engine.errors import InvalidRequest
 from travertine_engine.field import FieldService, power_provenance
 from travertine_engine.models import (
@@ -32,6 +32,7 @@ from travertine_engine.models import (
 from travertine_engine.science.climate import annual_summary
 from travertine_engine.science.crops import crops_by_id
 from travertine_engine.science.season import harvest_date, kc_curve, sowing_date
+from travertine_engine.text import Language
 
 FROST_C = 0.0  # ETCCDI FD: TN < 0 °C
 SUMMER_C = 25.0  # ETCCDI SU: TX > 25 °C
@@ -41,19 +42,19 @@ SPRING_END = (
     1,
 )  # last spring frost before 1 August, first autumn frost from 1 August (northern hemisphere)
 
-ETCCDI_PROVENANCE = Provenance(
-    dataset="ETCCDI climate change indices (definitions)",
-    provider="Expert Team on Climate Change Detection and Indices (WMO CCl / WCRP / JCOMM)",
-    spatial_resolution="Not spatial (index definitions)",
-    temporal_coverage="Definitions published 2011",
-    access_url="https://etccdi.pacificclimate.org/list_27_indices.shtml",
-    note=(
-        "FD, SU, TXx, R10mm, R20mm, Rx1day and CDD as defined by ETCCDI (Zhang et al. 2011, doi:10.1002/wcc.147), "
-        "computed on NASA POWER grid-cell daily values. Warm days are a simplified TX90p: threshold = 90th "
-        "percentile of daily maximum temperature per calendar month over this record. CDD is counted within each "
-        "calendar year."
-    ),
-)
+
+def etccdi_provenance(lang: Language = "en") -> Provenance:
+    return Provenance(
+        dataset="ETCCDI climate change indices (definitions)",
+        provider="Expert Team on Climate Change Detection and Indices (WMO CCl / WCRP / JCOMM)",
+        spatial_resolution=prov_text.not_spatial(lang, "index definitions", "endeks tanımları"),
+        temporal_coverage=prov_text.etccdi_coverage(lang),
+        access_url="https://etccdi.pacificclimate.org/list_27_indices.shtml",
+        note=prov_text.etccdi_note(lang),
+    )
+
+
+ETCCDI_PROVENANCE = etccdi_provenance()
 
 
 def _longest_run(mask: np.ndarray) -> int:
@@ -135,28 +136,25 @@ class HazardService:
     def __init__(self, fields: FieldService) -> None:
         self.fields = fields
 
-    async def _record(self, lat: float, lon: float) -> tuple[pd.DataFrame, list[int], list[Provenance]]:
+    async def _record(
+        self, lat: float, lon: float, lang: Language = "en"
+    ) -> tuple[pd.DataFrame, list[int], list[Provenance]]:
         daily, api_version = await self.fields.daily_climate(lat, lon)
         years, dropped = annual_summary(daily)
         if not years:
             raise InvalidRequest("The climate record has no complete year at this point.")
         complete = [y.year for y in years]
-        prov = power_provenance(daily, complete[0], complete[-1], api_version, dropped)
+        prov = power_provenance(daily, complete[0], complete[-1], api_version, dropped, lang)
         return daily.frame, complete, [prov]
 
-    async def hazards(self, lat: float, lon: float) -> FieldHazards:
-        df, years, provenance = await self._record(lat, lon)
+    async def hazards(self, lat: float, lon: float, lang: Language = "en") -> FieldHazards:
+        df, years, provenance = await self._record(lat, lon, lang)
         rows = hazard_years(df, years, northern=lat >= 0)
-        caveats = [
-            "Values are for the NASA POWER grid cell (about 50 km across), not the field: frost in a valley bottom "
-            "or heat on a south slope can differ from the cell average.",
-            "Crop-specific heat-stress thresholds are not used: no verified published threshold is in the engine's "
-            "crop table, so warm days are counted against the record's own 90th percentile.",
-        ]
-        if lat < 0:
-            caveats.append("Frost dates are only computed for the northern hemisphere.")
         return FieldHazards(
-            years=rows, median=medians(rows), caveats=caveats, provenance=[*provenance, ETCCDI_PROVENANCE]
+            years=rows,
+            median=medians(rows),
+            caveats=prov_text.hazard_caveats(lang, southern=lat < 0),
+            provenance=[*provenance, etccdi_provenance(lang)],
         )
 
     async def calendar(self, req: FieldCalendarRequest) -> FieldCalendar:
@@ -167,7 +165,7 @@ class HazardService:
                 "Unknown crop ids in sequence.", details={"unknown": unknown, "known": sorted(known)}
             )
         seq = [known[c] for c in req.sequence]
-        df, years, provenance = await self._record(req.lat, req.lon)
+        df, years, provenance = await self._record(req.lat, req.lon, req.language)
         warm = (df["T2M_MAX"] > _warm_threshold(df)).to_numpy()
         frost = (df["T2M_MIN"] < FROST_C).to_numpy()
         rain = df["PRECTOTCORR"].fillna(0.0).to_numpy()
@@ -248,5 +246,5 @@ class HazardService:
             months=months,
             most_vulnerable=worst,
             caveats=text.calendar_caveats(req.language, first=years[0], last=years[-1]),
-            provenance=[*provenance, ETCCDI_PROVENANCE],
+            provenance=[*provenance, etccdi_provenance(req.language)],
         )
