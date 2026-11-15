@@ -112,6 +112,10 @@ Live at `https://travertine-engine.onrender.com` (`https://api.travertinefields.
 The disk is not persistent. The demo field is served from the snapshot inside the image, so a restart loses
 nothing for it; other locations are fetched again after a restart.
 
+**Which commit is live.** `/v1/health` reports the version with the deployed commit as build metadata, for example
+`0.1.0+69b6d7b` (from Render's `RENDER_GIT_COMMIT`, or `ENGINE_COMMIT` elsewhere). After a merge, compare it with
+`git rev-parse --short=7 origin/main`; the old container keeps answering until the new one is up.
+
 **Sleep and warm-up.** A free instance spins down after 15 minutes without requests; the first request afterwards
 waits for the container to start. A scheduled workflow pings `/v1/health` every 10 minutes. Before a demo, wake it
 and fill the in-memory rotation tables by hand:

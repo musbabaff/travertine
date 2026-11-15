@@ -16,7 +16,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
-from travertine_engine import __version__
+from travertine_engine import __version__, build_version
 from travertine_engine.cache import DiskCache, load_snapshot
 from travertine_engine.config import Settings
 from travertine_engine.errors import EngineError, RateLimited
@@ -89,7 +89,7 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
         log.info(
             "engine started",
             extra={
-                "version": __version__,
+                "version": build_version(),
                 "cache_dir": str(settings.cache_dir),
                 "snapshot_entries_loaded": loaded,
             },
@@ -177,7 +177,7 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
 
     @app.get("/v1/health", response_model=Health, tags=["system"])
     async def health() -> Health:
-        return Health(status="ok", version=__version__)
+        return Health(status="ok", version=build_version())
 
     @app.get("/v1/crops", response_model=list[Crop], tags=["crops"], responses=ERROR_RESPONSES)
     async def crops() -> list[Crop]:
