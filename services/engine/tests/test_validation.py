@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import pytest
 
 from tests.conftest import FakeUpstream, make_client
 from travertine_engine.config import Settings
-from travertine_engine.science.ndvi import paired_bootstrap, pearson, season_mean, zscores
+from travertine_engine.science.ndvi import (
+    paired_bootstrap,
+    pearson,
+    pooled_paired_bootstrap,
+    season_mean,
+    zscores,
+)
 from travertine_engine.sources.modis import Composite
+from travertine_engine.text import verdict
 
 LONG = {"first_year": 2001, "last_year": 2012, "rate_limit_per_minute": 1000}
 
@@ -88,3 +96,45 @@ def test_analyze_carries_ndvi_history_and_survives_modis_outage(settings: Settin
         r = c.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False})
     assert r.status_code == 200
     assert "ndvi_history" not in r.json()
+
+
+def test_pooled_bootstrap_averages_sites() -> None:
+    rng = np.random.default_rng(7)
+    sites = []
+    for _ in range(4):
+        target = rng.normal(size=20)
+        sites.append((-target + 0.3 * rng.normal(size=20), -target + 2.0 * rng.normal(size=20), target))
+    p = pooled_paired_bootstrap(sites, resamples=2000, seed=1)
+    assert p.sites == 4
+    assert p.mean_r_a == pytest.approx(np.mean([pearson(a, t) for a, _, t in sites]))
+    assert p.ci_a[0] <= p.mean_r_a <= p.ci_a[1]
+    assert p.ci_diff[1] < 0
+    assert "established" in verdict(p.ci_diff)
+    assert "not established" in verdict((-0.1, 0.1))
+
+
+def test_modis_from_planetary_computer_matches_ornl(settings: Settings, tmp_path: Path) -> None:
+    with make_client(settings, FakeUpstream(cloudy_year=2003)) as c:
+        ornl = c.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False}).json()
+    other = replace(settings, cache_dir=tmp_path / "pc-cache")
+    fake = FakeUpstream(cloudy_year=2003, modis_fails=True, pc_modis=True)
+    with make_client(other, fake) as c:
+        pc = c.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False}).json()
+    assert pc["ndvi_history"] == ornl["ndvi_history"]
+    assert "MODIS (ORNL DAAC)" not in fake.calls
+
+
+def test_validation_caveats_in_turkish_keep_every_number(settings: Settings) -> None:
+    cfg = Settings(cache_dir=settings.cache_dir, **LONG)
+    with make_client(cfg, FakeUpstream(varying_rain=True, cloudy_year=2007)) as c:
+        en = c.get("/v1/validation", params={"lat": 37.89, "lon": 28.98}).json()
+        tr = c.get("/v1/validation", params={"lat": 37.89, "lon": 28.98, "language": "tr"}).json()
+        bad = c.get("/v1/validation", params={"lat": 37.89, "lon": 28.98, "language": "de"})
+    assert bad.status_code == 422
+    assert bad.json()["code"] == "invalid_request"
+    assert {k: v for k, v in tr.items() if k != "caveats"} == {k: v for k, v in en.items() if k != "caveats"}
+    assert len(tr["caveats"]) == len(en["caveats"])
+    assert tr["caveats"][0].startswith("Model (kışlık buğday su dengesi): r = ")
+    r = f"{en['correlation']:+.2f}".replace(".", ",")
+    assert f"r = {r}" in tr["caveats"][0]
+    assert tr["caveats"][-1].endswith("2007.")

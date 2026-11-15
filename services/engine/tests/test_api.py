@@ -152,3 +152,44 @@ def test_candidate_scores_are_reused_across_priorities(
 def test_warm_fields_setting_parses_points(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENGINE_WARM_FIELDS", "37.89,28.98; 40.1,-88.2")
     assert Settings.from_env().warm_fields == [(37.89, 28.98), (40.1, -88.2)]
+
+
+def test_daily_climate_is_computed_once_per_location(settings: Settings, fake: FakeUpstream) -> None:
+    with make_client(settings, fake) as c:
+        service = c.app.state.fields  # type: ignore[attr-defined]
+        first = c.portal.call(service.daily_climate, 37.89, 28.98)  # type: ignore[union-attr]
+        again = c.portal.call(service.daily_climate, 37.8901, 28.9799)  # type: ignore[union-attr]
+    assert again[0] is first[0]
+
+
+def test_explore_explanations_follow_language(settings: Settings, fake: FakeUpstream) -> None:
+    long = replace(settings, last_year=2008)
+    body = {
+        **DEMO,
+        "horizon_years": 3,
+        "priorities": {"water": 0.4, "income": 0.2, "soil": 0.2, "risk": 0.2},
+    }
+    with make_client(long, fake) as c:
+        en = c.post("/v1/rotations/explore", json=body).json()
+        tr = c.post("/v1/rotations/explore", json={**body, "language": "tr"}).json()
+        bad = c.post("/v1/rotations/explore", json={**body, "language": "de"})
+    assert bad.status_code == 422
+    for a, b in zip(en["rotations"], tr["rotations"], strict=True):
+        assert {k: v for k, v in a.items() if k != "explanation"} == {
+            k: v for k, v in b.items() if k != "explanation"
+        }
+        assert len(a["explanation"]) == len(b["explanation"])
+        assert b["explanation"][0].startswith("Kayıttaki ")
+    assert en["provenance"] == tr["provenance"]
+
+
+def test_health_version_carries_the_deployed_commit(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("ENGINE_COMMIT", raising=False)
+    monkeypatch.delenv("RENDER_GIT_COMMIT", raising=False)
+    assert client.get("/v1/health").json()["version"] == "0.1.0"
+    monkeypatch.setenv("RENDER_GIT_COMMIT", "69B6D7B0c1af4f6b325a97f9d6a5c1af4f6b325a")
+    assert client.get("/v1/health").json()["version"] == "0.1.0+69b6d7b"
+    monkeypatch.setenv("ENGINE_COMMIT", "not a commit")
+    assert client.get("/v1/health").json()["version"] == "0.1.0+69b6d7b"

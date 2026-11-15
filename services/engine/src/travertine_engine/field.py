@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+from collections import OrderedDict
 from dataclasses import asdict, dataclass, replace
 
 from travertine_engine.cache import DiskCache, snapshot_reads
@@ -26,6 +27,7 @@ from travertine_engine.upstream import Upstream
 
 log = logging.getLogger(__name__)
 
+CLIMATE_CACHE_SIZE = 16
 _FIELD_ID = re.compile(r"^fld_(-?\d{1,2}\.\d{4})_(-?\d{1,3}\.\d{4})$")
 
 
@@ -180,10 +182,13 @@ def modis_provenance(first: int, last: int, skipped: list[int], source_note: str
     note += source_note
     return Provenance(
         dataset="MODIS/Terra Vegetation Indices 16-Day L3 Global 250 m (MOD13Q1 v061), NDVI and pixel reliability",
-        provider="NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by the ORNL DAAC MODIS web service",
+        provider=(
+            "NASA LP DAAC (Didan 2021, doi:10.5067/MODIS/MOD13Q1.061), served by Microsoft Planetary Computer or the "
+            "ORNL DAAC MODIS web service"
+        ),
         spatial_resolution="250 m",
         temporal_coverage=f"{first}–{last}, 16-day composites, April–September",
-        access_url="https://modis.ornl.gov/data/modis_webservice.html",
+        access_url="https://planetarycomputer.microsoft.com/dataset/modis-13Q1-061",
         note=note,
     )
 
@@ -193,13 +198,26 @@ class FieldService:
         self.settings = settings
         self.upstream = upstream
         self.cache = cache
+        # Parsing 25 years of daily POWER data and computing Penman-Monteith ET0 takes seconds on a small CPU share;
+        # the result for a location never changes while the process runs.
+        self._climate: OrderedDict[tuple[float, float], tuple[DailyClimate, str]] = OrderedDict()
 
     async def daily_climate(self, lat: float, lon: float) -> tuple[DailyClimate, str]:
+        key = (round(lat, 3), round(lon, 3))
+        hit = self._climate.get(key)
+        if hit is not None:
+            self._climate.move_to_end(key)
+            return hit
         with snapshot_reads() as reads:
             power = await fetch_power_daily(
                 self.upstream, self.cache, lat, lon, self.settings.first_year, self.settings.last_year
             )
-        return replace(compute_daily_et0(power), source_note=reads.note("power_daily")), power.api_version
+        daily = await asyncio.to_thread(compute_daily_et0, power)
+        result = replace(daily, source_note=reads.note("power_daily")), power.api_version
+        self._climate[key] = result
+        while len(self._climate) > CLIMATE_CACHE_SIZE:
+            self._climate.popitem(last=False)
+        return result
 
     async def ndvi(self, lat: float, lon: float) -> NdviRecord:
         years = range(self.settings.first_year, self.settings.last_year + 1)

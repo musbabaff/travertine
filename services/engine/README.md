@@ -17,8 +17,8 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 | `GET /v1/health` | implemented |
 | `GET /v1/crops` | implemented — 12 crops from `data/crops.yaml`, every value cited to an FAO table |
 | `POST /v1/field/analyze` | implemented — NASA POWER daily climate (2001 to the last full year), FAO-56 Penman-Monteith ET0, SoilGrids soil and available water capacity, MODIS growing-season NDVI history |
-| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window |
-| `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md` |
+| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]` |
+| `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md`; `?language=tr` for Turkish caveats |
 
 Interactive docs are served at `/docs` when the engine runs.
 
@@ -111,6 +111,10 @@ Live at `https://travertine-engine.onrender.com` (`https://api.travertinefields.
 
 The disk is not persistent. The demo field is served from the snapshot inside the image, so a restart loses
 nothing for it; other locations are fetched again after a restart.
+
+**Which commit is live.** `/v1/health` reports the version with the deployed commit as build metadata, for example
+`0.1.0+69b6d7b` (from Render's `RENDER_GIT_COMMIT`, or `ENGINE_COMMIT` elsewhere). After a merge, compare it with
+`git rev-parse --short=7 origin/main`; the old container keeps answering until the new one is up.
 
 **Sleep and warm-up.** A free instance spins down after 15 minutes without requests; the first request afterwards
 waits for the container to start. A scheduled workflow pings `/v1/health` every 10 minutes. Before a demo, wake it

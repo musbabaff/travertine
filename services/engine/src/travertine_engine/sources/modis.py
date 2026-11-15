@@ -1,5 +1,7 @@
-"""MODIS/Terra MOD13Q1 v061 NDVI through the ORNL DAAC MODIS web service
-(https://modis.ornl.gov/data/modis_webservice.html). No account is needed."""
+"""MODIS/Terra MOD13Q1 v061 NDVI at one pixel, from Microsoft Planetary Computer (STAC catalogue and point-value
+API), falling back to the ORNL DAAC MODIS web service (https://modis.ornl.gov/data/modis_webservice.html). Both serve
+the same LP DAAC granules: for the demo pixel, 20 composites in 2005 and 2023 gave identical NDVI and reliability
+values from the two. No account is needed for either."""
 
 from __future__ import annotations
 
@@ -12,6 +14,10 @@ from travertine_engine.errors import UpstreamUnavailable
 from travertine_engine.upstream import Upstream
 
 SUBSET_URL = "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset"
+PC_SEARCH_URL = "https://planetarycomputer.microsoft.com/api/stac/v1/search"
+PC_POINT_URL = "https://planetarycomputer.microsoft.com/api/data/v1/item/point/{lon},{lat}"
+PC_COLLECTION = "modis-13Q1-061"
+PC_SOURCE = "MODIS (Planetary Computer)"
 NDVI_BAND = "250m_16_days_NDVI"
 RELIABILITY_BAND = "250m_16_days_pixel_reliability"
 NDVI_FILL = -3000
@@ -56,17 +62,62 @@ async def _band(upstream: Upstream, lat: float, lon: float, year: int, band: str
     return out
 
 
+async def _season_ornl(upstream: Upstream, lat: float, lon: float, year: int) -> tuple[list[list[int]], str]:
+    ndvi, rel = await asyncio.gather(
+        _band(upstream, lat, lon, year, NDVI_BAND), _band(upstream, lat, lon, year, RELIABILITY_BAND)
+    )
+    # The NDVI request stands for both: the reliability band is the same query with another band name.
+    url = request_url(SUBSET_URL, _params(lat, lon, year, NDVI_BAND))
+    return [[doy, ndvi[doy], rel.get(doy, -1)] for doy in sorted(ndvi)], url
+
+
+async def _season_pc(upstream: Upstream, lat: float, lon: float, year: int) -> tuple[list[list[int]], str]:
+    search = {
+        "collections": PC_COLLECTION,
+        "bbox": f"{lon:.5f},{lat:.5f},{lon:.5f},{lat:.5f}",
+        "datetime": f"{year}-03-15/{year}-10-15",
+        "limit": 100,
+    }
+    page = await upstream.get_json(PC_SOURCE, PC_SEARCH_URL, search)
+    if not isinstance(page, dict) or not isinstance(page.get("features"), list):
+        raise UpstreamUnavailable("Planetary Computer returned an unexpected MODIS search payload.")
+    items: dict[int, str] = {}
+    for feature in sorted(page["features"], key=lambda f: str(f["id"])):
+        ident = str(feature["id"])  # MOD13Q1.A<year><doy>.h20v05.061.<processing time>; MYD13Q1 is Aqua
+        if ident.startswith(f"MOD13Q1.A{year}"):
+            doy = int(ident[13:16])
+            if SEASON_FIRST_DOY <= doy <= SEASON_LAST_DOY:
+                items.setdefault(doy, ident)
+
+    async def point(doy: int, item: str) -> list[int]:
+        params = [
+            ("collection", PC_COLLECTION),
+            ("item", item),
+            ("assets", NDVI_BAND),
+            ("assets", RELIABILITY_BAND),
+        ]
+        raw = await upstream.get_json(
+            PC_SOURCE, PC_POINT_URL.format(lon=f"{lon:.5f}", lat=f"{lat:.5f}"), params
+        )
+        values = raw.get("values") if isinstance(raw, dict) else None
+        if not isinstance(values, list) or len(values) != 2 or values[0] is None:
+            return [doy, NDVI_FILL, -1]
+        return [doy, int(values[0]), int(values[1]) if values[1] is not None else -1]
+
+    rows = await asyncio.gather(*(point(d, i) for d, i in sorted(items.items())))
+    return list(rows), request_url(PC_SEARCH_URL, search)
+
+
 async def _season(upstream: Upstream, cache: DiskCache, lat: float, lon: float, year: int) -> list[Composite]:
     key = cache.key("modis_mod13q1", lat, lon, {"year": year, "doy": [SEASON_FIRST_DOY, SEASON_LAST_DOY]})
     raw: Any = cache.get(key)
     if raw is None:
-        ndvi, rel = await asyncio.gather(
-            _band(upstream, lat, lon, year, NDVI_BAND), _band(upstream, lat, lon, year, RELIABILITY_BAND)
-        )
-        raw = [[doy, ndvi[doy], rel.get(doy, -1)] for doy in sorted(ndvi)]
+        try:
+            raw, url = await _season_pc(upstream, lat, lon, year)
+        except UpstreamUnavailable:
+            raw, url = await _season_ornl(upstream, lat, lon, year)
         if len(raw) == SEASON_COMPOSITES:  # a season still being processed is fetched again next time
-            # The NDVI request stands for both: the reliability band is the same query with another band name.
-            cache.put(key, raw, url=request_url(SUBSET_URL, _params(lat, lon, year, NDVI_BAND)))
+            cache.put(key, raw, url=url)
     return [
         Composite(doy=int(d), ndvi=None if v == NDVI_FILL else v * NDVI_SCALE, reliability=int(r))
         for d, v, r in raw

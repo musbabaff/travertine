@@ -11,6 +11,7 @@ from functools import lru_cache
 
 import numpy as np
 
+from travertine_engine import text
 from travertine_engine.errors import InvalidRequest
 from travertine_engine.field import FieldService, parse_field_id, power_provenance, resolve_soil
 from travertine_engine.models import (
@@ -36,6 +37,7 @@ from travertine_engine.science.rotations import (
 )
 from travertine_engine.science.soil import OC_TO_OM, depth_weighted_mean, saxton_rawls_water_contents
 from travertine_engine.science.water import surface_layer
+from travertine_engine.text import crop_name
 
 log = logging.getLogger(__name__)
 
@@ -109,6 +111,9 @@ class ExploreService:
         self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
         self._scores: OrderedDict[tuple[object, ...], CandidateScores] = OrderedDict()
         self._score_locks: dict[tuple[object, ...], asyncio.Lock] = {}
+        # One heavy computation at a time: on a 512 MB instance a background warm-up and a user request building
+        # scores side by side can run out of memory.
+        self._heavy = asyncio.Semaphore(1)
 
     async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
         (daily, api_version), soil = await asyncio.gather(
@@ -154,7 +159,8 @@ class ExploreService:
             cached = self._tables.get(key)
             if cached is None:
                 started = time.perf_counter()
-                tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
+                async with self._heavy:
+                    tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
                 log.info(
                     "rotation tables built",
                     extra={"elapsed_ms": round((time.perf_counter() - started) * 1000)},
@@ -178,7 +184,8 @@ class ExploreService:
                 cached = self._scores.get(key)
                 if cached is None:
                     started = time.perf_counter()
-                    cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
+                    async with self._heavy:
+                        cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
                     log.info(
                         "candidate scores built",
                         extra={
@@ -272,7 +279,7 @@ class Ranked:
     window_years: tuple[int, ...]  # first year of every window that is valid for at least one candidate
 
 
-CHUNK = 2048  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
+CHUNK = 1024  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
 
 
 def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -372,10 +379,6 @@ def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorit
     return rank_scores(tables, score_candidates(tables, texture, horizon), priorities)
 
 
-def _pct(x: float) -> str:
-    return f"{100 * x:.0f} %"
-
-
 def describe(
     tables: RotationTables, ranked: Ranked, texture: str, req: RotationExploreRequest
 ) -> list[Rotation]:
@@ -403,51 +406,41 @@ def describe(
         total_deficit = np.median(deficit.sum(axis=1))
         windows = int(ok.sum())
         span = f"{first_years[0] - 1}/{first_years[0]}–{first_years[-1] + len(seq) - 2}/{first_years[-1] + len(seq) - 1}"
-        sentences = []
-        if req.irrigated:
-            sentences.append(
-                f"Across {windows} historical {len(seq)}-year windows (agricultural years {span}), the median crop "
-                f"water demand was {total_demand:.0f} mm, of which {total_deficit:.0f} mm "
-                f"({_pct(total_deficit / max(total_demand, 1e-9))}) had to come from irrigation."
-            )
-        else:
-            sentences.append(
-                f"Across {windows} historical {len(seq)}-year windows (agricultural years {span}), the median crop "
-                f"water demand was {total_demand:.0f} mm and rain plus stored soil water left {total_deficit:.0f} mm "
-                f"({_pct(total_deficit / max(total_demand, 1e-9))}) unmet under rain-fed management."
-            )
+        lang = req.language
         unmet = (deficit / np.maximum(etc, 1e-9)).ravel()
         worst = int(np.argmax(unmet))
         w_window, w_year = divmod(worst, len(seq))
         worst_ag_year = [y for y, keep in zip(cast.window_years, ok, strict=True) if keep][w_window] + w_year
-        what = "had to be irrigated" if req.irrigated else "went unmet"
-        sentences.append(
-            f"In the driest tenth of simulated seasons at least {_pct(float(np.percentile(unmet, 90)))} of crop water "
-            f"demand {what}; the most extreme season was {seq[w_year].name.lower()} in "
-            f"{worst_ag_year - 1}/{worst_ag_year} ({_pct(float(unmet[worst]))})."
-        )
         ind = s.indicators[r]
-        legumes = [c.name.lower() for c in seq if c.is_legume]
-        if ind.n_credit_kg_ha > 0:
-            sentences.append(
-                f"Legumes ({', '.join(dict.fromkeys(legumes))}) earn an estimated {ind.n_credit_kg_ha:.0f} kg N/ha of "
-                "nitrogen credit for the crops that follow them (UW-Extension A3517 values from Midwest US trials; "
-                "local responses may differ)."
-            )
-        else:
-            reason = " on this coarse-textured soil" if texture in {"sand", "loamy sand"} else ""
-            sentences.append(
-                f"The legume year ({', '.join(dict.fromkeys(legumes))}) is not followed by a non-legume crop within the "
-                f"horizon, or earns no credit{reason}, so no nitrogen credit is counted."
-            )
-        sentences.append(
-            f"The rotation uses {ind.families} botanical families, its rooting depths span {ind.root_range_m:.2f} m "
-            f"and a crop is in the field {_pct(ind.cover_fraction)} of the time."
-        )
-        sentences.append(
-            "The income index only reflects how much of each crop's water demand was met; it uses no prices, so "
-            "treat it as a water-limited production index, not a profit estimate."
-        )
+        legumes = list(dict.fromkeys(crop_name(c.id, c.name, lang) for c in seq if c.is_legume))
+        sentences = [
+            text.water_summary(
+                lang,
+                windows=windows,
+                years=len(seq),
+                span=span,
+                demand=float(total_demand),
+                deficit=float(total_deficit),
+                irrigated=req.irrigated,
+            ),
+            text.driest_seasons(
+                lang,
+                p90=float(np.percentile(unmet, 90)),
+                crop=crop_name(seq[w_year].id, seq[w_year].name, lang),
+                ag_year=worst_ag_year,
+                worst=float(unmet[worst]),
+                irrigated=req.irrigated,
+            ),
+            text.nitrogen_credit(lang, legumes=legumes, kg_ha=ind.n_credit_kg_ha)
+            if ind.n_credit_kg_ha > 0
+            else text.no_nitrogen_credit(
+                lang, legumes=legumes, coarse_soil=texture in {"sand", "loamy sand"}
+            ),
+            text.diversity(
+                lang, families=ind.families, root_range_m=ind.root_range_m, cover=ind.cover_fraction
+            ),
+            text.income_note(lang),
+        ]
         out.append(
             Rotation(
                 sequence=[c.id for c in seq],

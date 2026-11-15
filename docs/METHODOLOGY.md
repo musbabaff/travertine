@@ -161,6 +161,11 @@ The response returns the ten highest totals. Yearly figures are medians across w
 the same numbers (window count and period, median demand and deficit, the 90th-percentile unmet share and the most
 extreme season, the nitrogen credit, diversity and cover).
 
+**Language.** `language` (`en`, the default, or `tr`) on the explore request and on `/v1/validation` sets the language
+of `explanation[]` and `caveats[]`. The numbers are computed once and only the sentence around them changes; Turkish
+text uses a decimal comma, a space between thousands and a leading percent sign (`%4`). Ids, units, `method` and
+`provenance[]` stay in English. All templates live in `src/travertine_engine/text.py`.
+
 **Limitations.** Runoff is ignored, so heavy-rain years overstate infiltration; deep-percolation losses are counted as
 lost to the crop. Stage lengths are generic Table 11 rows, not local observations. Overlapping windows are not
 independent samples. POWER rain is a 0.5° grid-cell average, which smooths local storms. The income score is not
@@ -182,7 +187,10 @@ balance started on 1 October of Y−1; the observed series is the z-score of the
 Pearson r with a paired percentile bootstrap (10,000 resamples of years, seed 2026). The same statistic is computed for
 a baseline dryness index, 1 − ΣP/ΣET0 over April–September, so the response shows whether the water balance adds
 anything over climate alone. Both numbers, their intervals, the interval of their difference and a plain verdict are
-the first caveat in the response; results are in `docs/VALIDATION.md`.
+the first caveat in the response; results are in `docs/VALIDATION.md`. The same protocol was applied, unchanged, to eight sites
+in contrasting climates fixed in advance (`scripts/validate_sites.py`); six could be computed and all results are in
+`docs/VALIDATION.md`. The MODIS season is read from Microsoft Planetary Computer, or from the ORNL DAAC service when
+Planetary Computer does not answer; both serve the same granules.
 
 **Limitations.** The land use of the pixel is unknown, so the model crop is an assumption. A 250 m pixel can mix
 fields, roads and buildings. Irrigation is not represented in the back-test. Two dozen years give wide intervals.
@@ -191,7 +199,7 @@ Field-scale (30 m) NDVI from Harmonized Landsat Sentinel-2 is not yet included.
 ## 9. Not yet implemented
 
 Yield response with Ky (FAO-33 / FAO-66), trend tests (Mann-Kendall, Sen's slope), P10/P50/P90 outcomes and the
-Pareto set in the explore response, HLS 30 m NDVI, multi-site validation, and the GPM IMERG precipitation
+Pareto set in the explore response, HLS 30 m NDVI, and the GPM IMERG precipitation
 cross-check. Each will be documented here when it lands.
 
 ## References
