@@ -50,7 +50,8 @@ test.describe("Evidence screen", () => {
     await page.keyboard.press("Home");
     await expect(page.getByText(`${validation.years[0].year}: stress`)).toBeVisible();
     await page.getByRole("button", { name: "View as table" }).click();
-    await expect(page.getByRole("table").locator("tbody tr")).toHaveCount(validation.years.length);
+    const years = page.getByRole("table").filter({ hasText: String(validation.years[0].year) });
+    await expect(years.locator("tbody tr")).toHaveCount(validation.years.length);
   });
 
   test("shows an error with retry", async ({ page }) => {
