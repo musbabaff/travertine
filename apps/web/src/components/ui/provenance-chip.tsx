@@ -73,8 +73,8 @@ export function ProvenanceChip({ item }: { item: Provenance }) {
         onClick={() => setOpen((v) => !v)}
         className="inline-flex min-h-6 items-center gap-1 rounded-sm bg-sunken px-1.5 text-xs font-medium text-ink-muted hover:text-ink"
       >
-        <span className="truncate">{name}</span>
-        <span className="whitespace-nowrap text-ink-muted">· {item.spatial_resolution.split(" (")[0]}</span>
+        <span className="truncate" data-proper-name>{name}</span>
+        <span className="whitespace-nowrap text-ink-muted" data-engine-text>· {item.spatial_resolution.split(" (")[0]}</span>
         <span className="sr-only">, {t("provenance.label")}</span>
       </button>
       {open && (

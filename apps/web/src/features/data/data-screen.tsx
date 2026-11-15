@@ -1,5 +1,7 @@
 "use client";
 
+import { cropLabel } from "@/lib/localize-engine";
+
 import { CheckCircle2, ExternalLink, Loader2, MapPinned, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -28,9 +30,9 @@ interface RequestState {
 
 /** Map and search services drawn on screen. Attribution text matches the map's own attribution control. */
 const MAP_SOURCES = [
-  { name: "OpenFreeMap (Positron style), OpenMapTiles", data: "OpenStreetMap contributors", use: "data.map.vector", url: "https://openfreemap.org" },
-  { name: "Esri World Imagery (with an ArcGIS key) or EOxCloudless 2016 (without)", data: "Esri, Maxar, Earthstar Geographics; or EOX IT Services GmbH, contains modified Copernicus Sentinel data 2016 (CC BY 4.0)", use: "data.map.satellite", url: "https://cloudless.eox.at" },
-  { name: "Photon geocoder", data: "komoot; OpenStreetMap contributors", use: "data.map.search", url: "https://photon.komoot.io" },
+  { name: "data.map.src.vector", data: "OpenStreetMap contributors", use: "data.map.vector", url: "https://openfreemap.org" },
+  { name: "data.map.src.satellite", data: "Esri, Maxar, Earthstar Geographics; or EOX IT Services GmbH, contains modified Copernicus Sentinel data 2016 (CC BY 4.0)", use: "data.map.satellite", url: "https://cloudless.eox.at" },
+  { name: "data.map.src.search", data: "komoot; OpenStreetMap contributors", use: "data.map.search", url: "https://photon.komoot.io" },
 ] as const;
 
 function StatusRow({ r }: { r: RequestState }) {
@@ -61,15 +63,15 @@ function DatasetCard({ p, screens }: { p: Provenance; screens: Screen[] }) {
   const { t } = useI18n();
   return (
     <article className="rounded-md border border-border bg-surface p-4 shadow-1 md:p-5">
-      <p className="text-xs font-medium text-ink-muted">{shortName(p)}</p>
-      <h3 className="mt-0.5 text-sm font-semibold text-ink">{p.dataset}</h3>
+      <p className="text-xs font-medium text-ink-muted" data-proper-name>{shortName(p)}</p>
+      <h3 className="mt-0.5 text-sm font-semibold text-ink" data-proper-name>{p.dataset}</h3>
       <dl className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-[9rem_1fr]">
         <dt className="text-xs text-ink-muted sm:pt-0.5">{t("provenance.provider")}</dt>
-        <dd className="text-ink-2">{p.provider}</dd>
+        <dd className="text-ink-2" data-proper-name>{p.provider}</dd>
         <dt className="text-xs text-ink-muted sm:pt-0.5">{t("provenance.resolution")}</dt>
-        <dd className="text-ink-2">{p.spatial_resolution}</dd>
+        <dd className="text-ink-2" data-engine-text>{p.spatial_resolution}</dd>
         <dt className="text-xs text-ink-muted sm:pt-0.5">{t("provenance.coverage")}</dt>
-        <dd className="text-ink-2">{p.temporal_coverage}</dd>
+        <dd className="text-ink-2" data-engine-text>{p.temporal_coverage}</dd>
         <dt className="text-xs text-ink-muted sm:pt-0.5">{t("data.usedIn")}</dt>
         <dd className="flex flex-wrap gap-1.5">
           {screens.map((s) => (
@@ -81,7 +83,7 @@ function DatasetCard({ p, screens }: { p: Provenance; screens: Screen[] }) {
         {p.note && (
           <>
             <dt className="text-xs text-ink-muted sm:pt-0.5">{t("provenance.note")}</dt>
-            <dd lang="en" className="text-xs leading-5 text-ink-2">
+            <dd lang="en" className="text-xs leading-5 text-ink-2" data-engine-text>
               {p.note}
             </dd>
           </>
@@ -90,7 +92,7 @@ function DatasetCard({ p, screens }: { p: Provenance; screens: Screen[] }) {
       <a href={p.access_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-teal-700 underline-offset-2 hover:underline">
         {t("provenance.link")}
         <ExternalLink aria-hidden className="size-3.5" strokeWidth={1.5} />
-        <span className="sr-only">: {p.dataset}</span>
+        <span className="sr-only" data-proper-name>: {p.dataset}</span>
       </a>
     </article>
   );
@@ -208,7 +210,7 @@ export function DataScreen() {
               <tbody>
                 {crops.data.map((c) => (
                   <tr key={c.id} className="border-t border-border align-top">
-                    <th scope="row" className="whitespace-nowrap px-3 py-2 text-left font-medium text-ink">{c.name}</th>
+                    <th scope="row" className="whitespace-nowrap px-3 py-2 text-left font-medium text-ink">{cropLabel(c.id, c.name, locale)}</th>
                     <td lang="en" className="px-3 py-2 text-xs leading-5 text-ink-2">{c.source}</td>
                   </tr>
                 ))}
@@ -225,9 +227,9 @@ export function DataScreen() {
         <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-surface">
           {MAP_SOURCES.map((m) => (
             <li key={m.name} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
-              <span className="text-sm font-medium text-ink sm:w-72 sm:shrink-0">{m.name}</span>
+              <span className="text-sm font-medium text-ink sm:w-72 sm:shrink-0">{t(m.name as MessageKey)}</span>
               <span className="flex-1 text-xs text-ink-2">
-                {t(m.use as MessageKey)} · {m.data}
+                {t(m.use as MessageKey)} · <span data-proper-name>{m.data}</span>
               </span>
               <a href={m.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 underline-offset-2 hover:underline">
                 {m.url.replace("https://", "")}

@@ -517,7 +517,7 @@
   "landing.challenge.limits.q": "Show uncertainty and limits",
   "landing.challenge.limits.a": "A pre-registered back-test against satellite vegetation with confidence intervals, a simple baseline to beat, and caveats shown as returned.",
   "landing.cosmo.title": "Meet Cosmo, the guide",
-  "landing.cosmo.body": "Cosmo walks you through the screens and explains the terms Travertine uses. It answers only from fixed, reviewed text: no language model, no generated advice. Open it from the button at the bottom right.",
+  "landing.cosmo.body": "Cosmo walks you through the screens and explains the terms Travertine uses. It answers questions with Google Gemini, limited to the engine's data for the selected field; those answers are labelled. When Gemini is not available it falls back to fixed, reviewed texts. Open it from the button at the bottom right.",
   "landing.gloss.et": "Evapotranspiration",
   "landing.gloss.smAnomaly": "Soil-moisture anomaly",
   "landing.gloss.ndvi": "NDVI",
@@ -657,5 +657,16 @@
   "error.demoHorizon": "Demo data covers only one rotation length.",
   "error.rateLimited": "Too many requests in a short time. Please wait a minute and try again.",
   "error.upstream": "A data service the engine depends on did not answer. Please try again in a moment.",
-  "error.outOfCoverage": "The data needed for this result are not available at this location."
+  "error.outOfCoverage": "The data needed for this result are not available at this location.",
+  "title.home": "Travertine — crop-rotation decisions from Earth observation data",
+  "title.overview": "Field overview — Travertine",
+  "title.field": "Field — Travertine",
+  "title.explore": "Explore rotations — Travertine",
+  "title.plan": "Rotation plan — Travertine",
+  "title.evidence": "Evidence — Travertine",
+  "title.data": "Data sources — Travertine",
+  "title.notFound": "Page not found — Travertine",
+  "data.map.src.vector": "OpenFreeMap (Positron style), OpenMapTiles",
+  "data.map.src.satellite": "Esri World Imagery (with an ArcGIS key) or EOxCloudless 2016 (without)",
+  "data.map.src.search": "Photon geocoder"
 }

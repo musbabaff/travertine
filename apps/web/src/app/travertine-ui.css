@@ -285,5 +285,7 @@ button { cursor: pointer; }
   .cosmo-fab, .cosmo-nudge { display: none !important; }
 }
 @media (min-width: 901px) {
-  .tv-compare-tray-inner { padding-right: 132px; }
+  /* A gutter as wide as the floating Cosmo, so no card button or tray passes under it */
+  .tv-content { padding-right: 144px; }
+  .cosmo-nudge { max-width: 136px; }
 }

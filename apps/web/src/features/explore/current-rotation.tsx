@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/i18n";
 import type { Crop } from "@/lib/api/types";
+import { cropLabel } from "@/lib/localize-engine";
 
 /** Current rotation, one crop id per year, kept in the URL as `cur=a,b,c` so the comparison can be shared. */
 export function parseCurrent(params: URLSearchParams): string[] {
@@ -10,7 +11,7 @@ export function parseCurrent(params: URLSearchParams): string[] {
 }
 
 export function CurrentRotationPicker({ crops, horizon }: { crops: Crop[] | undefined; horizon: number }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -49,7 +50,7 @@ export function CurrentRotationPicker({ crops, horizon }: { crops: Crop[] | unde
               <option value="">{t("current.none")}</option>
               {crops?.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {cropLabel(c.id, c.name, locale)}
                 </option>
               ))}
             </select>

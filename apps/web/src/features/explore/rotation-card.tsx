@@ -86,7 +86,7 @@ export function RotationCard({
         {isBaseline && violations && violations.length > 0 && (
           <div className="mt-3 rounded-md border border-warning/30 bg-warning-bg p-3" data-testid="rule-violations">
             <p className="text-xs font-semibold text-warning">{t("current.violations")}</p>
-            <ul className="mt-1 space-y-1 text-sm text-ink-2">
+            <ul className="mt-1 space-y-1 text-sm text-ink-2" data-engine-text>
               {violations.map((v) => (
                 <li key={`${v.rule}-${v.year_index ?? 0}`}>{v.message}</li>
               ))}
@@ -103,7 +103,7 @@ export function RotationCard({
         <div className="mt-4">
           <h4 className="text-xs font-medium text-ink-2">{t("explore.why")}</h4>
           {englishOnly && <p className="mt-1 text-xs text-warning">{t("demo.englishOnly")}</p>}
-          <ul className="mt-1.5 space-y-1 text-sm text-ink-2" lang={englishOnly ? "en" : undefined}>
+          <ul className="mt-1.5 space-y-1 text-sm text-ink-2" lang={englishOnly ? "en" : undefined} data-engine-text>
             {rotation.explanation.map((e) => (
               <li key={e} className="flex gap-2">
                 <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-ink-muted" />

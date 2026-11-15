@@ -59,6 +59,8 @@ export function caveatText(line: string, ..._unused: unknown[]) {
   return line;
 }
 
+/** The validation baseline is labelled in English by the contract; the one the engine uses has a Turkish name. */
 export function baselineName(name: string, locale: Locale) {
-  return locale === "tr" && name.startsWith("Dryness index") ? "İklimsel kuraklık endeksi (1 − P/ET₀)" : name;
+  if (locale !== "tr") return name;
+  return /^(Climatic dryness index|Dryness index)/i.test(name) ? "İklimsel kuraklık endeksi, Nisan–Eylül 1 − ΣP/ΣET0" : name;
 }
