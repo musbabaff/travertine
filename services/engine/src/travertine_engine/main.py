@@ -22,12 +22,14 @@ from travertine_engine.config import Settings
 from travertine_engine.errors import EngineError, RateLimited
 from travertine_engine.explore import ExploreService
 from travertine_engine.field import FieldService
+from travertine_engine.field_ndvi import FieldNdviService
 from travertine_engine.logs import configure_logging, request_id_var
 from travertine_engine.models import (
     Crop,
     ErrorBody,
     FieldAnalysis,
     FieldAnalyzeRequest,
+    FieldNdvi,
     Health,
     RotationExploreRequest,
     RotationExploreResponse,
@@ -72,6 +74,7 @@ def attach_services(app: FastAPI, settings: Settings, client: Upstream) -> int:
     app.state.fields = FieldService(settings, client, cache)
     app.state.explore = ExploreService(app.state.fields)
     app.state.validation = ValidationService(app.state.explore)
+    app.state.field_ndvi = FieldNdviService(app.state.fields)
     load_crops()
     return loaded
 
@@ -198,6 +201,14 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
             for c in load_crops()
         ]
 
+    add_science_routes(app)
+
+    return app
+
+
+def add_science_routes(app: FastAPI) -> None:
+    """Field, rotation and validation endpoints; each delegates to a service built in the lifespan."""
+
     @app.post(
         "/v1/field/analyze",
         response_model=FieldAnalysis,
@@ -209,9 +220,25 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
         service: FieldService = request.app.state.fields
         return await service.analyze(body.lat, body.lon)
 
+    @app.get(
+        "/v1/field/ndvi",
+        response_model=FieldNdvi,
+        response_model_exclude_none=True,
+        tags=["field"],
+        responses=ERROR_RESPONSES,
+    )
+    async def field_ndvi(
+        request: Request,
+        lat: Annotated[float, Query(ge=-90, le=90)],
+        lon: Annotated[float, Query(ge=-180, le=180)],
+    ) -> FieldNdvi:
+        service: FieldNdviService = request.app.state.field_ndvi
+        return await service.history(lat, lon)
+
     @app.post(
         "/v1/rotations/explore",
         response_model=RotationExploreResponse,
+        response_model_exclude_none=True,
         tags=["rotations"],
         responses={"404": {"model": ErrorBody}, **ERROR_RESPONSES},
     )
@@ -228,8 +255,6 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
     ) -> Validation:
         service: ValidationService = request.app.state.validation
         return await service.validate(lat, lon, language)
-
-    return app
 
 
 app = create_app()

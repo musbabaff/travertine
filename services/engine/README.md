@@ -17,7 +17,8 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 | `GET /v1/health` | implemented |
 | `GET /v1/crops` | implemented — 12 crops from `data/crops.yaml`, every value cited to an FAO table |
 | `POST /v1/field/analyze` | implemented — NASA POWER daily climate (2001 to the last full year), FAO-56 Penman-Monteith ET0, SoilGrids soil and available water capacity, MODIS growing-season NDVI history |
-| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]` |
+| `GET /v1/field/ndvi` | implemented, pending contract #12 — 30 m HLS NDVI history since 2020 at the field centre |
+| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]`; `current_rotation` (1–5 crop ids, repeated to fill the horizon) is scored with the same model and returned as `baseline` with `rule_violations[]`, and every alternative carries `vs_baseline` |
 | `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md`; `?language=tr` for Turkish caveats |
 
 Interactive docs are served at `/docs` when the engine runs.
@@ -64,6 +65,16 @@ uv run python scripts/prewarm.py 40.10,-88.20                     # plus any ext
 The current snapshot (14 November 2026): POWER and SoilGrids fetched live; the 25 MODIS seasons come from a fetch
 earlier the same day because the ORNL service was answering 502 at the time, and the manifest marks them
 `seeded_from_earlier_fetch`.
+
+Since 15 November 2026 the snapshot also holds the eight multi-site validation locations (`scripts/validate_sites.py`):
+POWER, SoilGrids and every complete MODIS season, as fetched live for the multi-site run on 14 November. They open
+offline in about a second. At two of them (Settat, Great Bend) SoilGrids has no complete prediction, so their field
+analysis uses the labelled default soil, exactly as a live request would. To add them to a fresh snapshot:
+
+```bash
+uv run python scripts/validate_sites.py                     # fetches the sites live into data/cache
+uv run python scripts/add_sites_to_snapshot.py data/cache   # copies their responses into data/snapshot
+```
 
 ## Environment variables
 

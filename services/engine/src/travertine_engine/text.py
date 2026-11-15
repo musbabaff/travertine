@@ -15,7 +15,7 @@ CROP_NAMES_TR = {
     "barley": "arpa",
     "lentil": "mercimek",
     "faba_bean": "bakla (kuru tane)",
-    "maize": "mısır (dane)",
+    "maize": "dane mısır",
     "sorghum": "sorgum (dane)",
     "cotton": "pamuk",
     "sunflower": "ayçiçeği",
@@ -63,9 +63,7 @@ def water_summary(
         )
         if irrigated:
             return head + f"bunun {u} mm'sinin ({share}) sulamayla karşılanması gerekti."
-        return (
-            head + f"yağışa dayalı tarımda yağış ve topraktaki su bunun {u} mm'sini ({share}) karşılayamadı."
-        )
+        return head + f"kuru tarımda yağış ve topraktaki su bunun {u} mm'sini ({share}) karşılayamadı."
     head = (
         f"Across {windows} historical {years}-year windows (agricultural years {span}), the median crop water "
         f"demand was {d} mm"
@@ -133,7 +131,19 @@ def diversity(lang: Language, *, families: int, root_range_m: float, cover: floa
     )
 
 
-def income_note(lang: Language) -> str:
+def income_note(lang: Language, *, weighted: bool = False) -> str:
+    if weighted:
+        if lang == "tr":
+            return (
+                "Gelir endeksi her ürün yılını, o ürün için girdiğiniz değerin en yüksek değere oranıyla ve "
+                "ürünün su ihtiyacının karşılanan payıyla ağırlıklandırır; maliyet ve verim kullanmaz, bu yüzden "
+                "onu kâr tahmini olarak değil, değerle ağırlıklandırılmış bir üretim endeksi olarak okuyun."
+            )
+        return (
+            "The income index weights each crop year by the value you gave for that crop, relative to the highest "
+            "value, times the share of its water demand that was met; it uses no costs or yields, so treat it as a "
+            "value-weighted production index, not a profit estimate."
+        )
     if lang == "tr":
         return (
             "Gelir endeksi yalnızca her ürünün su ihtiyacının ne kadarının karşılandığını yansıtır; fiyat "
@@ -142,6 +152,67 @@ def income_note(lang: Language) -> str:
     return (
         "The income index only reflects how much of each crop's water demand was met; it uses no prices, so treat "
         "it as a water-limited production index, not a profit estimate."
+    )
+
+
+# The farmer's current rotation as the baseline (POST /v1/rotations/explore, `current_rotation`)
+
+
+def baseline_intro(lang: Language, *, entered: int, years: int) -> str:
+    if lang == "tr":
+        fill = (
+            f" Girdiğiniz {entered} yıllık sıra, {years} yılı dolduracak şekilde tekrarlandı."
+            if entered < years
+            else ""
+        )
+        return (
+            "Bu, girdiğiniz mevcut rotasyondur; seçeneklerle aynı su dengesi ve aynı göstergelerle, aynı geçmiş "
+            "yıllar üzerinde puanlandı." + fill
+        )
+    fill = (
+        f" The {entered}-year sequence you entered was repeated to fill {years} years."
+        if entered < years
+        else ""
+    )
+    return (
+        "This is the current rotation you entered, scored with the same water balance and the same indicators as "
+        "the alternatives, over the same historical years." + fill
+    )
+
+
+def same_family(lang: Language, *, year: int, crop: str, previous: str, family: str) -> str:
+    if lang == "tr":
+        return (
+            f"{year}. yıl: {crop}, {previous} ürününün ardından geliyor ve ikisi de {family} familyasından. Motorun "
+            "önerdiği rotasyonlarda aynı botanik familya art arda iki yıl yer almaz; bu sıra yine de puanlandı."
+        )
+    return (
+        f"Year {year}: {crop} follows {previous} and both are {family}. The rotations the engine proposes never "
+        "place the same botanical family in two consecutive years; this sequence was scored anyway."
+    )
+
+
+def no_legume(lang: Language) -> str:
+    if lang == "tr":
+        return (
+            "Sırada baklagil yok. Motorun önerdiği her rotasyonda en az bir baklagil bulunur; bu sıra için "
+            "baklagil azot katkısı 0 olarak sayıldı."
+        )
+    return (
+        "The sequence has no legume. Every rotation the engine proposes includes at least one; the legume "
+        "nitrogen credit of this sequence is counted as 0."
+    )
+
+
+def perennial_single_year(lang: Language, *, year: int, crop: str) -> str:
+    if lang == "tr":
+        return (
+            f"{year}. yıl: {crop} yalnızca bir yıl yer alıyor. Motorun önerdiği rotasyonlarda çok yıllık bir "
+            "bitki en az iki yıl üst üste tarlada kalır; bu sıra yine de puanlandı."
+        )
+    return (
+        f"Year {year}: {crop} is grown for a single year. In the rotations the engine proposes a perennial stand "
+        "stays for at least two consecutive years; this sequence was scored anyway."
     )
 
 
@@ -207,7 +278,7 @@ VALIDATION_FIXED: dict[Language, list[str]] = {
         "NDVI is a single 250 m pixel; it may mix several fields and land uses.",
     ],
     "tr": [
-        "Pikselin arazi kullanımı bilinmiyor. Model yağışa dayalı kışlık buğday varsayıyor; pikselde sulanan ya da "
+        "Pikselin arazi kullanımı bilinmiyor. Model kuru tarımda yetiştirilen kışlık buğday varsayıyor; pikselde sulanan ya da "
         "yazlık bir ürün, meyve bahçesi, mera veya bunların karışımı varsa yeşilliği başka etkenlere bağlıdır.",
         "Sulama modelde yer almıyor: sulanan tarlalar kurak yıllarda da yeşil kalabilir ve bu, ilişkiyi zayıflatır.",
         "NDVI tek bir 250 m pikseldir; birkaç tarlayı ve arazi kullanımını bir arada içerebilir.",

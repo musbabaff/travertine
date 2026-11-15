@@ -38,6 +38,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/field/climate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Climate history for a field, as soon as NASA POWER answers
+         * @description The climate part of /v1/field/analyze on its own (a few seconds for a new location). Calling it also starts fetching soil and vegetation in the background, so /v1/field/soil and /v1/field/vegetation called right after it are usually ready sooner. Each section can have its own loading state.
+         */
+        get: operations["getFieldClimate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/field/soil": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Soil of a field (SoilGrids 2.0)
+         * @description The soil part of /v1/field/analyze. SoilGrids can take 20 s or more for a new location. When SoilGrids has no prediction or does not answer, the response is the labelled default soil, as in /v1/field/analyze.
+         */
+        get: operations["getFieldSoil"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/field/vegetation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Growing-season MODIS NDVI history of a field
+         * @description The ndvi_history part of /v1/field/analyze. Returns 502 when MODIS cannot be read, so the rest of the field view does not depend on it.
+         */
+        get: operations["getFieldVegetation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/showcase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Showcase fields and their multi-site back-test results
+         * @description The fixed multi-site validation locations (docs/VALIDATION.md section 4) with the results exactly as computed by scripts/validate_sites.py. Their data are bundled with the engine, so they open without waiting on upstream services.
+         */
+        get: operations["getShowcase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/field/ndvi": {
         parameters: {
             query?: never;
@@ -216,6 +296,71 @@ export interface components {
             /** @description Growing-season (Apr–Sep) mean NDVI. */
             mean_ndvi: number;
         };
+        FieldClimate: {
+            field_id: string;
+            climate: components["schemas"]["ClimateYear"][];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        FieldSoil: {
+            soil: components["schemas"]["Soil"];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        FieldVegetation: {
+            ndvi_history: components["schemas"]["NdviYear"][];
+            provenance: components["schemas"]["Provenance"][];
+        };
+        /**
+         * @description Same rule as Validation.verdict, applied to difference_ci95. no_detectable_difference is worded "difference not established".
+         * @enum {string}
+         */
+        ShowcaseVerdict: "model_better" | "baseline_better" | "no_detectable_difference";
+        /** @description Back-test of one site. When status is not_computed only reason is present. */
+        ShowcaseValidation: {
+            /** @enum {string} */
+            status: "ok" | "not_computed";
+            /** @description Why the site could not be computed. */
+            reason?: string;
+            /** @description Years used. */
+            n?: number;
+            /** @description Pearson r of modelled stress with the NDVI anomaly. */
+            correlation?: number;
+            correlation_ci95?: components["schemas"]["CorrelationInterval"];
+            /** @description Same for the dryness-index baseline. */
+            baseline_correlation?: number;
+            baseline_correlation_ci95?: components["schemas"]["CorrelationInterval"];
+            /** @description correlation − baseline_correlation. */
+            difference?: number;
+            difference_ci95?: number[];
+            verdict?: components["schemas"]["ShowcaseVerdict"];
+        };
+        ShowcaseField: {
+            id: string;
+            /** @description Place, region, country. */
+            name: string;
+            lat: components["schemas"]["Latitude"];
+            lon: components["schemas"]["Longitude"];
+            /** @description Usable with /v1/rotations/explore. */
+            field_id: string;
+            validation: components["schemas"]["ShowcaseValidation"];
+        };
+        Showcase: {
+            fields: components["schemas"]["ShowcaseField"][];
+            /** @description Mean over the computed sites, with a bootstrap stratified by site. Omitted when fewer than two sites were computed. */
+            pooled?: {
+                sites: number;
+                mean_correlation: number;
+                mean_correlation_ci95: components["schemas"]["CorrelationInterval"];
+                mean_baseline_correlation: number;
+                mean_baseline_correlation_ci95: components["schemas"]["CorrelationInterval"];
+                mean_difference: number;
+                mean_difference_ci95: number[];
+                verdict: components["schemas"]["ShowcaseVerdict"];
+            };
+            /** @description Where the protocol is fixed. */
+            protocol: string;
+            /** Format: date-time */
+            computed_at: string;
+        };
         FieldAnalysis: {
             /** @description Opaque id usable in /v1/rotations/explore. */
             field_id: string;
@@ -245,7 +390,44 @@ export interface components {
             crop_ids?: string[];
             /** @description Language of rotations[].explanation[]. Default en. */
             language?: components["schemas"]["Language"];
+            /** @description Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`. */
+            current_rotation?: string[];
+            /** @description Optional. The farmer's own soil test and crop values; each one replaces the dataset estimate it names in the response's inputs[]. The allowed crops are crop_ids and irrigation is irrigated. */
+            farmer_inputs?: components["schemas"]["FarmerInputs"];
         } | unknown | unknown;
+        FarmerInputs: {
+            soil?: components["schemas"]["FarmerSoil"];
+            /** @description Value per crop id for the income score, in any one unit (e.g. revenue per hectare at full yield). Only ratios matter: each crop year is weighted by its value divided by the largest. Must name every candidate crop (crop_ids, or all crops) and no others; at least one value above 0. Other inputs return 422. */
+            crop_values?: {
+                [key: string]: number;
+            };
+        };
+        /** @description Topsoil test. sand_pct and clay_pct come together (silt = 100 − sand − clay) and set the texture class. If texture or organic carbon is given without available_water_mm_per_m, available water is recomputed from them with Saxton & Rawls (2006) as if the tested soil filled the root zone. */
+        FarmerSoil: {
+            /** @description Sand, % of fine earth. */
+            sand_pct?: number;
+            /** @description Clay, % of fine earth. sand_pct + clay_pct ≤ 100. */
+            clay_pct?: number;
+            /** @description Soil organic carbon, % by mass (not organic matter). */
+            organic_carbon_pct?: number;
+            /** @description Measured plant-available water (field capacity − wilting point), mm per metre of soil. */
+            available_water_mm_per_m?: number;
+        };
+        InputSource: {
+            /** @description soil.sand_pct, soil.clay_pct, soil.organic_carbon_pct, soil.texture_class, soil.available_water_mm_per_m, allowed_crops, irrigated, crop_values (default) or crop_value.<crop_id> (farmer). */
+            name: string;
+            /** @description Value the engine used. */
+            value: number | string;
+            /** @description %, mm/m, relative, or empty. */
+            unit: string;
+            /**
+             * @description farmer = given in this request (or computed from the farmer's soil test); dataset = SoilGrids 2.0; default = engine default (no measurement).
+             * @enum {string}
+             */
+            source: "farmer" | "dataset" | "default";
+            /** @description When source is farmer, the estimate it replaced, e.g. "SoilGrids 2.0, 0–100 cm: 139 mm/m". Empty otherwise. */
+            replaces: string;
+        };
         /** @description All scores 0–1, higher is better. `risk` is high when risk is LOW. */
         RotationScores: {
             water: components["schemas"]["Unit01"];
@@ -271,9 +453,40 @@ export interface components {
             yearly: components["schemas"]["RotationYear"][];
             /** @description Plain-language English sentences explaining the score. */
             explanation: string[];
+            /** @description Optional. Present on every alternative when the request carried current_rotation. */
+            vs_baseline?: components["schemas"]["ScoreDifference"];
+        };
+        /** @description Score of an alternative minus the same score of the baseline (the current rotation), unitless, −1 to 1. Positive means the alternative scores higher. Differences between relative indices on past years, not predicted gains. */
+        ScoreDifference: {
+            water: number;
+            income: number;
+            soil: number;
+            risk: number;
+            total: number;
+        };
+        RuleViolation: {
+            /**
+             * @description The rotation rule the current rotation breaks (docs/METHODOLOGY.md, section 7).
+             * @enum {string}
+             */
+            rule: "same_family_in_consecutive_years" | "no_legume_in_cycle" | "perennial_single_year";
+            /** @description 1-based rotation year the violation falls in. Omitted for rules about the whole sequence (no_legume_in_cycle). */
+            year_index?: number;
+            /** @description Which crops and why, in the request language. The UI renders it verbatim. */
+            message: string;
+        };
+        /** @description The current rotation, expanded to horizon_years and scored like a candidate. It never carries vs_baseline. */
+        BaselineRotation: components["schemas"]["Rotation"] & {
+            /** @description Every rotation rule the sequence breaks, in year order. Empty when it breaks none. */
+            rule_violations: components["schemas"]["RuleViolation"][];
         };
         RotationExploreResponse: {
+            /** @description Sorted by scores.total, highest first. When the request carried current_rotation, that sequence is left out of this list and returned as `baseline`. */
             rotations: components["schemas"]["Rotation"][];
+            /** @description Optional. Present when the request carried current_rotation. */
+            baseline?: components["schemas"]["BaselineRotation"];
+            /** @description Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default. */
+            inputs?: components["schemas"]["InputSource"][];
             provenance: components["schemas"]["Provenance"][];
         };
         ValidationYear: {
@@ -407,6 +620,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Crop"][];
+                };
+            };
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldClimate: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Yearly climate summary and its provenance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldClimate"];
+                };
+            };
+            422: components["responses"]["Error"];
+            502: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldSoil: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Soil summary and its provenance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldSoil"];
+                };
+            };
+            422: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldVegetation: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Yearly growing-season NDVI and its provenance. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldVegetation"];
+                };
+            };
+            422: components["responses"]["Error"];
+            502: components["responses"]["Error"];
+            default: components["responses"]["Error"];
+        };
+    };
+    getShowcase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Showcase fields. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Showcase"];
                 };
             };
             default: components["responses"]["Error"];

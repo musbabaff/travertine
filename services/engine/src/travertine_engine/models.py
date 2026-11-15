@@ -95,6 +95,26 @@ class Priorities(_Model):
     risk: Unit01
 
 
+class FarmerSoil(_Model):
+    sand_pct: float | None = Field(default=None, ge=0, le=100)
+    clay_pct: float | None = Field(default=None, ge=0, le=100)
+    organic_carbon_pct: float | None = Field(default=None, ge=0, le=20)
+    available_water_mm_per_m: float | None = Field(default=None, ge=20, le=400)
+
+
+class FarmerInputs(_Model):
+    soil: FarmerSoil | None = None
+    crop_values: dict[str, Annotated[float, Field(ge=0)]] | None = None
+
+
+class InputSource(_Model):
+    name: str
+    value: float | str
+    unit: str
+    source: Literal["farmer", "dataset", "default"]
+    replaces: str
+
+
 class RotationExploreRequest(_Model):
     field_id: str | None = None
     lat: Latitude | None = None
@@ -104,6 +124,8 @@ class RotationExploreRequest(_Model):
     irrigated: bool
     crop_ids: list[str] | None = None
     language: Language = "en"
+    farmer_inputs: FarmerInputs | None = None
+    current_rotation: list[str] | None = Field(default=None, min_length=1, max_length=5)
 
 
 class RotationScores(_Model):
@@ -122,15 +144,58 @@ class RotationYear(_Model):
     stress_index: Unit01
 
 
+class ScoreDifference(_Model):
+    """Score of an alternative minus the same score of the baseline (the farmer's current rotation)."""
+
+    water: float = Field(ge=-1, le=1)
+    income: float = Field(ge=-1, le=1)
+    soil: float = Field(ge=-1, le=1)
+    risk: float = Field(ge=-1, le=1)
+    total: float = Field(ge=-1, le=1)
+
+
 class Rotation(_Model):
     sequence: list[str]
     scores: RotationScores
     yearly: list[RotationYear]
     explanation: list[str]
+    vs_baseline: ScoreDifference | None = None
+
+
+class RuleViolation(_Model):
+    rule: Literal["same_family_in_consecutive_years", "no_legume_in_cycle", "perennial_single_year"]
+    year_index: int | None = Field(default=None, ge=1)
+    message: str
+
+
+class BaselineRotation(Rotation):
+    rule_violations: list[RuleViolation]
 
 
 class RotationExploreResponse(_Model):
     rotations: list[Rotation]
+    baseline: BaselineRotation | None = None
+    inputs: list[InputSource]
+    provenance: list[Provenance]
+
+
+class NdviObservation(_Model):
+    date: str
+    ndvi: float = Field(ge=-1, le=1)
+    sensor: Literal["L30", "S30"]
+
+
+class NdviSeason(_Model):
+    year: int
+    mean_ndvi: float | None = Field(default=None, ge=-1, le=1)
+    n_clear: int = Field(ge=0)
+    n_scenes: int = Field(ge=0)
+
+
+class FieldNdvi(_Model):
+    observations: list[NdviObservation]
+    seasons: list[NdviSeason]
+    caveats: list[str]
     provenance: list[Provenance]
 
 
@@ -140,10 +205,26 @@ class ValidationYear(_Model):
     observed_ndvi_anomaly: float
 
 
+class BaselineValue(_Model):
+    year: int
+    value: float
+
+
+class ValidationBaseline(_Model):
+    name: str
+    correlation: float = Field(ge=-1, le=1)
+    correlation_ci95: tuple[float, float]
+    values: list[BaselineValue]
+
+
 class Validation(_Model):
     years: list[ValidationYear]
     correlation: float = Field(ge=-1, le=1)
     n: int = Field(ge=0)
+    correlation_ci95: tuple[float, float] | None = None
+    baseline: ValidationBaseline | None = None
+    difference_ci95: tuple[float, float] | None = None
+    verdict: Literal["model_better", "baseline_better", "no_detectable_difference"] | None = None
     method: str
     caveats: list[str]
     provenance: list[Provenance]

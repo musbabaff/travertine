@@ -140,6 +140,19 @@ sowings belong to the year in which they are harvested.
 
 With all 12 crops this yields 545, 5,437 and 51,021 candidates for 3, 4 and 5 years.
 
+**The farmer's current rotation (baseline).** A request may carry `current_rotation`, the crops the field grows now,
+one per year. A sequence shorter than the horizon is repeated in order until it fills it (wheat, barley over four
+years becomes wheat, barley, wheat, barley). It is then scored exactly like a candidate: the same daily water balance,
+the same historical windows, the same percentiles, the same priorities, and soil indicators divided by the same
+candidate maxima (limited to 1 if the sequence exceeds one of them). Rules 1, 3 and 4 are *not* applied to it: a
+sequence that breaks them is still simulated, and the response lists each broken rule with the year it falls in
+(`same_family_in_consecutive_years`, `no_legume_in_cycle`, `perennial_single_year`). Rule 2 cannot be broken with the
+present crop table, because no crop is sown before any other crop's harvest date. Every alternative carries
+`vs_baseline`, its score minus the baseline's for water, income, soil, risk and total; the baseline sequence itself is
+left out of the alternatives, so a response holds the existing rotation plus the ranked alternatives (at least three
+strategies whenever two or more valid alternatives exist). The differences are differences between relative indices on
+past years, not predicted gains; whether a change suits the farm is the farmer's and local advisers' call.
+
 **Back-cast.** Each candidate is run through every window of consecutive agricultural years in the record (20 windows
 of 5 years for 2002–2025). The soil-water state at the start of a window comes from a continuous bare-soil balance
 over the whole record, started at field capacity on 1 January 2001 (nine months of spin-up). From one crop to the next
@@ -161,6 +174,17 @@ The response returns the ten highest totals. Yearly figures are medians across w
 the same numbers (window count and period, median demand and deficit, the 90th-percentile unmet share and the most
 extreme season, the nitrogen credit, diversity and cover).
 
+**Farmer inputs.** `farmer_inputs` on the explore request carries the farmer's own numbers, and the response's
+`inputs[]` lists every input the scores rest on with its source (`farmer`, `dataset` or `default`) and, for farmer
+values, the estimate it replaced. A topsoil test (`sand_pct` and `clay_pct` together, `organic_carbon_pct`)
+replaces the SoilGrids 0–15 cm values used for the surface evaporation layer and the 0–30 cm texture class. A
+measured `available_water_mm_per_m` replaces the SoilGrids 0–100 cm available water; without it, a changed texture
+or organic carbon recomputes available water with Saxton & Rawls (2006) from the tested soil, as if that soil filled
+the root zone. `crop_values` weights the income score: each crop year counts its share of water demand met times its
+value divided by the largest value, so the index rises with the share of valuable crops that get their water. Only
+ratios matter; no prices, costs or yields are assumed. The allowed crops are `crop_ids` and irrigation is
+`irrigated`, both reported in `inputs[]`. Soil pH is not taken: no part of the model uses it.
+
 **Language.** `language` (`en`, the default, or `tr`) on the explore request and on `/v1/validation` sets the language
 of `explanation[]` and `caveats[]`. The numbers are computed once and only the sentence around them changes; Turkish
 text uses a decimal comma, a space between thousands and a leading percent sign (`%4`). Ids, units, `method` and
@@ -181,6 +205,15 @@ a year needs at least six usable composites; years that fail are listed in the p
 ORNL DAAC MODIS web service, one request per band per season. If the service is down, the analysis is returned
 without `ndvi_history` rather than failing.
 
+**Field-scale NDVI (`/v1/field/ndvi`).** Every clear Harmonized Landsat Sentinel-2 v2.0 observation of the 30 m
+pixel at the field centre since 2020, with NDVI from the nadir BRDF-adjusted red and narrow-NIR bands (Landsat 8/9
+B04/B05, Sentinel-2 B04/B8A; HLS user guide v2.0, Table 3). An observation is clear when Fmask bits 1–5 (cloud,
+adjacent to cloud or shadow, cloud shadow, snow/ice, water) are 0 and the aerosol level is not high (Table 9; bit 0 is
+unused in v2.0). Scenes with more than 80 % cloud over the tile are not read, and overlapping MGRS tiles are counted
+once per date. Each year gets an April–September mean when at least five observations are clear. At the demo point
+the 30 m season means (0.40–0.54, 2020–2025) are well above the 250 m MODIS values (0.27–0.30): the larger pixel
+mixes the field with its surroundings.
+
 **Back-test (`/v1/validation`).** The protocol is fixed in `docs/VALIDATION.md` before results were computed. In short:
 modelled stress for year Y is 1 − ΣETa/ΣETc of rain-fed winter wheat from 1 April to harvest, from the section 5 water
 balance started on 1 October of Y−1; the observed series is the z-score of the growing-season NDVI; the statistic is
@@ -194,12 +227,12 @@ Planetary Computer does not answer; both serve the same granules.
 
 **Limitations.** The land use of the pixel is unknown, so the model crop is an assumption. A 250 m pixel can mix
 fields, roads and buildings. Irrigation is not represented in the back-test. Two dozen years give wide intervals.
-Field-scale (30 m) NDVI from Harmonized Landsat Sentinel-2 is not yet included.
+The 30 m HLS record (six seasons) is too short for the back-test, which uses MODIS.
 
 ## 9. Not yet implemented
 
 Yield response with Ky (FAO-33 / FAO-66), trend tests (Mann-Kendall, Sen's slope), P10/P50/P90 outcomes and the
-Pareto set in the explore response, HLS 30 m NDVI, and the GPM IMERG precipitation
+Pareto set in the explore response, HLS before 2020, and the GPM IMERG precipitation
 cross-check. Each will be documented here when it lands.
 
 ## References
@@ -217,5 +250,7 @@ cross-check. Each will be documented here when it lands.
   DAAC. https://doi.org/10.5067/MODIS/MOD13Q1.061
 - ORNL DAAC (2018). *Terrestrial Ecology Subsetting & Visualization Services (TESViS) Global Subsets Tool* (Version
   1.1). ORNL Distributed Active Archive Center. https://doi.org/10.3334/ORNLDAAC/1379
+- Ju, J., Zhou, Q., Freitag, B., et al. (2025). The Harmonized Landsat and Sentinel-2 version 2.0 surface reflectance
+  dataset. *Remote Sensing of Environment* 324, 114723. https://doi.org/10.1016/j.rse.2025.114723
 - Efron, B., Tibshirani, R. J. (1993). *An Introduction to the Bootstrap.* Chapman & Hall.
 - Soil Science Division Staff (2017). *Soil Survey Manual.* USDA Handbook 18.

@@ -1,0 +1,190 @@
+{
+  "field_id": "fld_37.8900_28.9800",
+  "climate": [
+    {
+      "year": 2001,
+      "precipitation_mm": 753.3,
+      "et0_mm": 1300.7,
+      "mean_temp_c": 15.32,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2002,
+      "precipitation_mm": 731.3,
+      "et0_mm": 1160.2,
+      "mean_temp_c": 14.09,
+      "root_zone_wetness": 0.57
+    },
+    {
+      "year": 2003,
+      "precipitation_mm": 750.7,
+      "et0_mm": 1220.2,
+      "mean_temp_c": 14.06,
+      "root_zone_wetness": 0.55
+    },
+    {
+      "year": 2004,
+      "precipitation_mm": 516.8,
+      "et0_mm": 1278.3,
+      "mean_temp_c": 14.33,
+      "root_zone_wetness": 0.5
+    },
+    {
+      "year": 2005,
+      "precipitation_mm": 693.2,
+      "et0_mm": 1227.0,
+      "mean_temp_c": 13.97,
+      "root_zone_wetness": 0.49
+    },
+    {
+      "year": 2006,
+      "precipitation_mm": 564.0,
+      "et0_mm": 1216.9,
+      "mean_temp_c": 14.22,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2007,
+      "precipitation_mm": 565.2,
+      "et0_mm": 1341.0,
+      "mean_temp_c": 15.25,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2008,
+      "precipitation_mm": 376.0,
+      "et0_mm": 1301.8,
+      "mean_temp_c": 14.89,
+      "root_zone_wetness": 0.47
+    },
+    {
+      "year": 2009,
+      "precipitation_mm": 885.3,
+      "et0_mm": 1200.3,
+      "mean_temp_c": 14.47,
+      "root_zone_wetness": 0.55
+    },
+    {
+      "year": 2010,
+      "precipitation_mm": 733.5,
+      "et0_mm": 1210.0,
+      "mean_temp_c": 15.66,
+      "root_zone_wetness": 0.53
+    },
+    {
+      "year": 2011,
+      "precipitation_mm": 614.9,
+      "et0_mm": 1199.3,
+      "mean_temp_c": 13.73,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2012,
+      "precipitation_mm": 814.9,
+      "et0_mm": 1245.8,
+      "mean_temp_c": 14.59,
+      "root_zone_wetness": 0.54
+    },
+    {
+      "year": 2013,
+      "precipitation_mm": 574.0,
+      "et0_mm": 1256.4,
+      "mean_temp_c": 14.46,
+      "root_zone_wetness": 0.52
+    },
+    {
+      "year": 2014,
+      "precipitation_mm": 686.9,
+      "et0_mm": 1234.2,
+      "mean_temp_c": 15.26,
+      "root_zone_wetness": 0.44
+    },
+    {
+      "year": 2015,
+      "precipitation_mm": 725.1,
+      "et0_mm": 1145.1,
+      "mean_temp_c": 14.1,
+      "root_zone_wetness": 0.57
+    },
+    {
+      "year": 2016,
+      "precipitation_mm": 538.5,
+      "et0_mm": 1299.9,
+      "mean_temp_c": 15.08,
+      "root_zone_wetness": 0.45
+    },
+    {
+      "year": 2017,
+      "precipitation_mm": 597.0,
+      "et0_mm": 1239.1,
+      "mean_temp_c": 14.68,
+      "root_zone_wetness": 0.48
+    },
+    {
+      "year": 2018,
+      "precipitation_mm": 693.6,
+      "et0_mm": 1236.2,
+      "mean_temp_c": 15.79,
+      "root_zone_wetness": 0.48
+    },
+    {
+      "year": 2019,
+      "precipitation_mm": 606.6,
+      "et0_mm": 1250.1,
+      "mean_temp_c": 15.33,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2020,
+      "precipitation_mm": 487.3,
+      "et0_mm": 1290.8,
+      "mean_temp_c": 15.43,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2021,
+      "precipitation_mm": 545.0,
+      "et0_mm": 1338.5,
+      "mean_temp_c": 15.15,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2022,
+      "precipitation_mm": 561.7,
+      "et0_mm": 1259.7,
+      "mean_temp_c": 14.68,
+      "root_zone_wetness": 0.51
+    },
+    {
+      "year": 2023,
+      "precipitation_mm": 725.2,
+      "et0_mm": 1200.5,
+      "mean_temp_c": 15.57,
+      "root_zone_wetness": 0.48
+    },
+    {
+      "year": 2024,
+      "precipitation_mm": 533.9,
+      "et0_mm": 1359.4,
+      "mean_temp_c": 16.65,
+      "root_zone_wetness": 0.46
+    },
+    {
+      "year": 2025,
+      "precipitation_mm": 512.8,
+      "et0_mm": 1315.9,
+      "mean_temp_c": 15.96,
+      "root_zone_wetness": 0.47
+    }
+  ],
+  "provenance": [
+    {
+      "dataset": "NASA POWER daily point data, Agroclimatology community (API v2.10.3)",
+      "provider": "NASA Langley Research Center, POWER Project",
+      "spatial_resolution": "0.5° × 0.625° (meteorology), 1° × 1° (solar radiation)",
+      "temporal_coverage": "2001–2025, daily",
+      "access_url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "note": "Gridded, model-based reanalysis values for the grid cell containing the field, not field measurements: MERRA-2 meteorology (0.5° × 0.625°) and CERES SYN1deg solar radiation (1° × 1°). Parameters T2M, T2M_MAX, T2M_MIN, T2MDEW, WS2M, PS, ALLSKY_SFC_SW_DWN, PRECTOTCORR, GWETROOT. Daily reference evapotranspiration is FAO-56 Penman-Monteith (eq. 6) with actual vapour pressure from the dew point (eq. 14) and net radiation from eqs. 37–40 using the POWER grid-cell elevation (676 m); annual ET0 is the sum of daily values. Hargreaves (eq. 52) was used on 0 day(s) where Penman-Monteith inputs were missing. Root-zone wetness is the GWETROOT fraction of saturation from the MERRA-2 land model, not a measured soil moisture."
+    }
+  ]
+}
