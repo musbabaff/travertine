@@ -44,6 +44,8 @@ counts as established only if the 95 % interval of r_model − r_baseline lies e
 interval contains zero the result is reported as "difference not established". (Wording edited on 14 November 2026;
 the rule itself is unchanged.)
 
+**Showcase.** `/v1/showcase` serves the section 5 results per site and pooled, read from the committed results file (`scripts/validate_sites.py` writes it to `docs/validation/multisite.json` and `services/engine/data/multisite.json`); the engine does not recompute them.
+
 **In the API.** `/v1/validation` returns these numbers as fields as well as in the first caveat: `correlation` and
 `correlation_ci95` for the model, `baseline` (name, correlation, interval and the yearly index values),
 `difference_ci95`, and `verdict`, which follows the rule above: `model_better` only if the interval of the

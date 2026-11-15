@@ -36,6 +36,7 @@ SITES = [
     ("fr-beauce", "Beauce, Eure-et-Loir, France", 48.25, 1.75),
 ]
 OUT = ENGINE_ROOT.parents[1] / "docs" / "validation" / "multisite.json"
+ENGINE_COPY = ENGINE_ROOT / "data" / "multisite.json"  # served by /v1/showcase
 
 log = logging.getLogger("validate_sites")
 
@@ -113,8 +114,7 @@ async def main_async() -> int:
             "mean_difference_ci95": _ci(p.ci_diff),
             "verdict": verdict(p.ci_diff),
         }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(
+    text = (
         json.dumps(
             {
                 "computed_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -128,9 +128,11 @@ async def main_async() -> int:
             indent=1,
             ensure_ascii=False,
         )
-        + "\n",
-        encoding="utf-8",
+        + "\n"
     )
+    for path in (OUT, ENGINE_COPY):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="\n")
     log.info("written", extra={"path": str(OUT)})
     return 0 if all(r["status"] == "ok" for r in rows) else 1
 
