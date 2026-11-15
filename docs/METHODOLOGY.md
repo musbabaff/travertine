@@ -161,6 +161,11 @@ The response returns the ten highest totals. Yearly figures are medians across w
 the same numbers (window count and period, median demand and deficit, the 90th-percentile unmet share and the most
 extreme season, the nitrogen credit, diversity and cover).
 
+**Language.** `language` (`en`, the default, or `tr`) on the explore request and on `/v1/validation` sets the language
+of `explanation[]` and `caveats[]`. The numbers are computed once and only the sentence around them changes; Turkish
+text uses a decimal comma, a space between thousands and a leading percent sign (`%4`). Ids, units, `method` and
+`provenance[]` stay in English. All templates live in `src/travertine_engine/text.py`.
+
 **Limitations.** Runoff is ignored, so heavy-rain years overstate infiltration; deep-percolation losses are counted as
 lost to the crop. Stage lengths are generic Table 11 rows, not local observations. Overlapping windows are not
 independent samples. POWER rain is a 0.5° grid-cell average, which smooths local storms. The income score is not

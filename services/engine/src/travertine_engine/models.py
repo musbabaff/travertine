@@ -7,6 +7,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from travertine_engine.text import Language
+
 Latitude = Annotated[float, Field(ge=-90, le=90)]
 Longitude = Annotated[float, Field(ge=-180, le=180)]
 Unit01 = Annotated[float, Field(ge=0, le=1)]
@@ -101,6 +103,7 @@ class RotationExploreRequest(_Model):
     priorities: Priorities
     irrigated: bool
     crop_ids: list[str] | None = None
+    language: Language = "en"
 
 
 class RotationScores(_Model):
