@@ -247,7 +247,7 @@ export function PlanScreen() {
                 {t("plan.scores", { water: n(scored.scores.water, 2), income: n(scored.scores.income, 2), soil: n(scored.scores.soil, 2), risk: n(scored.scores.risk, 2), total: n(scored.scores.total, 2) })}
               </p>
               {scored.rule_violations.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs text-warning">
+                <ul className="mt-2 space-y-1 text-xs text-warning" data-engine-text>
                   {scored.rule_violations.map((v, i) => (
                     <li key={i}>{v.message}</li>
                   ))}
@@ -267,7 +267,7 @@ export function PlanScreen() {
       {cal && (
         <section aria-labelledby="plan-caveats" className="mt-4 text-sm text-ink-2">
           <h2 id="plan-caveats" className="text-sm font-semibold text-ink">{t("evidence.caveats")}</h2>
-          <ul className="mt-1 list-disc space-y-1 pl-5">
+          <ul className="mt-1 list-disc space-y-1 pl-5" data-engine-text>
             {cal.caveats.map((c) => (
               <li key={c}>{c}</li>
             ))}

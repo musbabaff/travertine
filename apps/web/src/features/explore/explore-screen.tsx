@@ -207,7 +207,7 @@ export function ExploreScreen() {
           </div>
           <p className="mb-4 max-w-[72ch] text-xs text-ink-2">{t("explore.results.note")}</p>
           {scenarioLabel && (
-            <p role="note" className="mb-4 rounded-md border border-warning bg-warning-bg p-3 text-sm font-medium text-warning" data-testid="scenario-label">
+            <p role="note" className="mb-4 rounded-md border border-warning bg-warning-bg p-3 text-sm font-medium text-warning" data-testid="scenario-label" data-engine-text>
               {scenarioLabel}
             </p>
           )}

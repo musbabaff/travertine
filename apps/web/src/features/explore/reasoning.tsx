@@ -15,7 +15,7 @@ export function ReasoningParts({ reasoning, open = false }: { reasoning: Reasoni
   return (
     <details className="mt-4 rounded-md border border-border bg-surface" data-testid="reasoning" open={open || undefined}>
       <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-ink">{t("reasoning.title")}</summary>
-      <dl className="space-y-3 border-t border-border px-3 py-3">
+      <dl className="space-y-3 border-t border-border px-3 py-3" data-engine-text>
         {PARTS.map((part) => {
           const items = reasoning[part] ?? [];
           return (

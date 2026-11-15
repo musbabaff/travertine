@@ -10,6 +10,7 @@ import { pageMetadata, SITE_URL } from "@/lib/site";
 import { Providers } from "./providers";
 import { AppHeader } from "@/components/shell/app-header";
 import { LazyCosmo } from "@/components/cosmo/lazy";
+import { DocumentTitle } from "@/components/shell/document-title";
 import { Suspense } from "react";
 
 const plex = IBM_Plex_Sans({
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Suspense fallback={null}><AppHeader /></Suspense>
           <div className="tv-content">{children}</div>
           <LazyCosmo />
+          <DocumentTitle />
         </Providers>
       </body>
     </html>

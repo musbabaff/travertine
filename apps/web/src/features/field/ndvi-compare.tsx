@@ -82,7 +82,7 @@ export function NdviCompare({ field, modis }: { field: FieldState; modis: NdviYe
       )}
 
       {data.caveats.length > 0 && (
-        <ul lang="en" className="mt-2 space-y-1 text-xs text-ink-muted">
+        <ul lang="en" className="mt-2 space-y-1 text-xs text-ink-muted" data-engine-text>
           {data.caveats.map((c) => (
             <li key={c} className="flex gap-2">
               <span aria-hidden className="mt-1.5 size-1 shrink-0 rounded-full bg-warning" />

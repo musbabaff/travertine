@@ -242,12 +242,12 @@ export function EvidenceScreen() {
               <h2 id="method-title" className="text-h3 font-semibold">
                 {t("evidence.method")}
               </h2>
-              <p className="mt-2 text-sm text-ink-2" data-testid="method">
+              <p className="mt-2 text-sm text-ink-2" data-testid="method" data-engine-text>
                 {methodText(v.method, locale)}
               </p>
               <h2 className="mt-5 text-h3 font-semibold">{t("evidence.caveats")}</h2>
               {validationResponse.fromFixture && locale === "tr" && <p className="mt-2 text-xs text-warning">{t("demo.englishOnly")}</p>}
-              <ul className="mt-2 space-y-2 text-sm text-ink-2" data-testid="caveats" lang={validationResponse.fromFixture ? "en" : undefined}>
+              <ul className="mt-2 space-y-2 text-sm text-ink-2" data-testid="caveats" lang={validationResponse.fromFixture ? "en" : undefined} data-engine-text>
                 {v.caveats.map((c) => (
                   <li key={c} className="flex gap-2">
                     <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-warning" />
