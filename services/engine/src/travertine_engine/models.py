@@ -182,10 +182,26 @@ class ValidationYear(_Model):
     observed_ndvi_anomaly: float
 
 
+class BaselineValue(_Model):
+    year: int
+    value: float
+
+
+class ValidationBaseline(_Model):
+    name: str
+    correlation: float = Field(ge=-1, le=1)
+    correlation_ci95: tuple[float, float]
+    values: list[BaselineValue]
+
+
 class Validation(_Model):
     years: list[ValidationYear]
     correlation: float = Field(ge=-1, le=1)
     n: int = Field(ge=0)
+    correlation_ci95: tuple[float, float] | None = None
+    baseline: ValidationBaseline | None = None
+    difference_ci95: tuple[float, float] | None = None
+    verdict: Literal["model_better", "baseline_better", "no_detectable_difference"] | None = None
     method: str
     caveats: list[str]
     provenance: list[Provenance]

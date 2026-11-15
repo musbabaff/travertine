@@ -7,13 +7,14 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from datetime import date
+from typing import Literal
 
 import numpy as np
 
 from travertine_engine import text
 from travertine_engine.errors import OutOfCoverage
 from travertine_engine.explore import FAO56_PROVENANCE, ExploreService
-from travertine_engine.models import Validation, ValidationYear
+from travertine_engine.models import BaselineValue, Validation, ValidationBaseline, ValidationYear
 from travertine_engine.science.crops import CropParams, crops_by_id
 from travertine_engine.science.et0 import FloatArray
 from travertine_engine.science.ndvi import PairedBootstrap, paired_bootstrap, zscores
@@ -26,6 +27,8 @@ from travertine_engine.science.rotations import (
 from travertine_engine.science.season import harvest_date, sowing_date
 from travertine_engine.science.water import Elements, bare_soil_depletion, simulate
 from travertine_engine.text import Language
+
+VerdictCode = Literal["model_better", "baseline_better", "no_detectable_difference"]
 
 MODEL_CROP = "winter_wheat"
 WINDOW_START = (4, 1)
@@ -134,6 +137,21 @@ def back_test(inputs: FieldInputs, ndvi_by_year: dict[int, float]) -> BackTest:
     return BackTest(years, m, b, v, z, paired_bootstrap(m, b, z, resamples=RESAMPLES, seed=SEED))
 
 
+def verdict_code(ci_diff: tuple[float, float]) -> VerdictCode:
+    """The rule fixed in docs/VALIDATION.md: a side is better only when the whole interval of the difference
+    (model − baseline) lies on its side of 0; a more negative correlation is the better one."""
+    lo, hi = ci_diff
+    if hi < 0:
+        return "model_better"
+    if lo > 0:
+        return "baseline_better"
+    return "no_detectable_difference"
+
+
+def _round_ci(ci: tuple[float, float]) -> tuple[float, float]:
+    return round(ci[0], 2), round(ci[1], 2)
+
+
 METHOD = (
     "Pearson correlation, one value per year, between modelled water stress and the standardised anomaly (z-score, "
     "sample standard deviation) of growing-season MODIS NDVI at the field-centre pixel. Modelled stress is "
@@ -174,6 +192,18 @@ class ValidationService:
             ],
             correlation=round(s.r_a, 2),
             n=n,
+            correlation_ci95=_round_ci(s.ci_a),
+            baseline=ValidationBaseline(
+                name="Climatic dryness index, 1 − ΣP/ΣET0 over April–September",
+                correlation=round(s.r_b, 2),
+                correlation_ci95=_round_ci(s.ci_b),
+                values=[
+                    BaselineValue(year=y, value=round(float(b), 3))
+                    for y, b in zip(result.years, result.baseline, strict=True)
+                ],
+            ),
+            difference_ci95=_round_ci(s.ci_diff),
+            verdict=verdict_code(s.ci_diff),
             method=METHOD,
             caveats=caveats,
             provenance=[*provenance, ndvi.provenance, FAO56_PROVENANCE],
