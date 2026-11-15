@@ -7,7 +7,7 @@ import logging
 import math
 import time
 import uuid
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
 from contextlib import asynccontextmanager
 from typing import Annotated
 
@@ -54,13 +54,18 @@ ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
 }
 
 
-async def warm_fields(explore: ExploreService, fields: list[tuple[float, float]]) -> None:
-    """Fill the rotation caches for configured fields in the background, so the first explore of the demo field does
-    not pay for the back-cast. Failures are logged and ignored; the service answers either way."""
-    for lat, lon in fields:
+async def warm_fields(
+    explore: ExploreService, fields: list[tuple[float, float]], showcase: Sequence[tuple[float, float]] = ()
+) -> None:
+    """Fill the rotation caches for configured fields (every horizon), then for the showcase fields (3 years, the
+    default view), in the background, so their first explore does not pay for the back-cast. Failures are logged
+    and ignored; the service answers either way."""
+    jobs: list[tuple[float, float, tuple[int, ...]]] = [(lat, lon, (3, 4, 5)) for lat, lon in fields]
+    jobs += [(lat, lon, (3,)) for lat, lon in showcase if (lat, lon) not in fields]
+    for lat, lon, horizons in jobs:
         started = time.perf_counter()
         try:
-            await explore.warm(lat, lon)
+            await explore.warm(lat, lon, horizons)
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -102,7 +107,8 @@ def create_app(settings: Settings | None = None, upstream: Upstream | None = Non
                 "snapshot_entries_loaded": loaded,
             },
         )
-        warming = asyncio.create_task(warm_fields(app.state.explore, settings.warm_fields))
+        showcase = [(f.lat, f.lon) for f in load_showcase().fields] if settings.warm_showcase else []
+        warming = asyncio.create_task(warm_fields(app.state.explore, settings.warm_fields, showcase))
         yield
         warming.cancel()
         await client.aclose()

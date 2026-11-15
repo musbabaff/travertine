@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import replace
 
 import pytest
@@ -200,3 +201,23 @@ def test_health_version_carries_the_deployed_commit(
     assert client.get("/v1/health").json()["version"] == "0.1.0+69b6d7b"
     monkeypatch.setenv("ENGINE_COMMIT", "not a commit")
     assert client.get("/v1/health").json()["version"] == "0.1.0+69b6d7b"
+
+
+def test_warm_showcase_setting(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENGINE_WARM_SHOWCASE", "1")
+    assert Settings.from_env().warm_showcase
+    monkeypatch.setenv("ENGINE_WARM_SHOWCASE", "")
+    assert not Settings.from_env().warm_showcase
+
+
+def test_showcase_fields_are_warmed_at_three_years_only(monkeypatch: pytest.MonkeyPatch) -> None:
+    from travertine_engine.main import warm_fields  # noqa: PLC0415
+
+    calls: list[tuple[float, float, tuple[int, ...]]] = []
+
+    class Recorder:
+        async def warm(self, lat: float, lon: float, horizons: tuple[int, ...]) -> None:
+            calls.append((lat, lon, horizons))
+
+    asyncio.run(warm_fields(Recorder(), [(37.89, 28.98)], [(37.89, 28.98), (38.65, 32.93)]))  # type: ignore[arg-type]
+    assert calls == [(37.89, 28.98, (3, 4, 5)), (38.65, 32.93, (3,))]

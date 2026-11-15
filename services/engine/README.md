@@ -88,6 +88,7 @@ All optional. See the root `.env.example`.
 | `ENGINE_CORS_ORIGIN_REGEX` | unset | Extra origins matched by a full-match regex, for preview deployments |
 | `ENGINE_CACHE_DIR` | `services/engine/data/cache` | Disk cache location |
 | `ENGINE_WARM_FIELDS` | unset (image: `37.89,28.98`) | `lat,lon;lat,lon` fields whose rotation scores are computed in the background after start-up |
+| `ENGINE_WARM_SHOWCASE` | unset (image: `1`) | after those, also warm the `/v1/showcase` fields at the 3-year horizon (rain-fed and irrigated); measured locally: 3.5 s and +3 MB per site, 146 MB in all |
 | `ENGINE_SNAPSHOT_DIR` | `services/engine/data/snapshot` | Bundled upstream responses loaded into the cache at start-up |
 | `ENGINE_FIRST_YEAR` / `ENGINE_LAST_YEAR` | 2001 / last full calendar year | Climate record period |
 | `ENGINE_UPSTREAM_TIMEOUT_S` | 90 | Per-request timeout for upstream calls |
