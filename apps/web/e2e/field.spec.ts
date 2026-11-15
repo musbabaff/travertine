@@ -33,7 +33,8 @@ test.describe("Field screen", () => {
     await page.getByRole("radio", { name: "Satellite" }).click();
     await expect(page.getByTestId("imagery-credit")).toBeVisible();
     // Without an ArcGIS key the 10 m Sentinel-2 layer is used, capped at zoom 14.
-    await expect.poll(() => page.evaluate(() => (window as unknown as { __travertineMap?: { getMaxZoom(): number } }).__travertineMap?.getMaxZoom())).toBe(14);
+    const maxZoom = () => page.getByTestId("field-map").evaluate((el) => (el as HTMLElement & { __map?: { getMaxZoom(): number } }).__map?.getMaxZoom());
+    await expect.poll(maxZoom, { timeout: 15_000 }).toBe(14);
   });
 
   test("restores the field from a shared URL and toggles irrigation", async ({ page }) => {

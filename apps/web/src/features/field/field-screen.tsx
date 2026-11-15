@@ -3,7 +3,7 @@
 import type { Map as MLMap } from "maplibre-gl";
 import { ArrowRight, Check, Crosshair, MapPinned, Trash2, Undo2, X } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/segmented";
@@ -23,9 +23,23 @@ export function FieldScreen() {
   const { t, n } = useI18n();
   const { field, setField } = useField();
   const analysis = useFieldAnalysis(field);
-  const qs = useSearchParams().toString();
+  const params = useSearchParams();
+  const qs = params.toString();
+  const router = useRouter();
+  const pathname = usePathname();
   const [mode, setMode] = useState<MapMode>("draw");
-  const [basemap, setBasemap] = useState<Basemap>("map");
+  // In the URL (b=sat) so it survives re-renders of the route and can be shared.
+  const basemap: Basemap = params.get("b") === "sat" ? "satellite" : "map";
+  const setBasemap = useCallback(
+    (next: Basemap) => {
+      const p = new URLSearchParams(window.location.search);
+      if (next === "satellite") p.set("b", "sat");
+      else p.delete("b");
+      const s = p.toString();
+      router.replace(s ? `${pathname}?${s}` : pathname, { scroll: false });
+    },
+    [router, pathname],
+  );
   const [draft, setDraft] = useState<LngLat[]>([]);
   const [flyTo, setFlyTo] = useState<{ center: LngLat; zoom?: number; bounds?: [LngLat, LngLat]; key: number } | null>(null);
   const [coarse, setCoarse] = useState(false);
