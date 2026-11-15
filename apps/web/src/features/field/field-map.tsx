@@ -58,6 +58,12 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
   const { t } = useI18n();
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
+  /** Current zoom cap; re-applied after every style load so an async style swap cannot undo it. */
+  const capRef = useRef(VECTOR_MAX_ZOOM);
+  const applyCap = (z: number) => {
+    capRef.current = z;
+    mapRef.current?.setMaxZoom(z);
+  };
   const state = useRef({ point, ring, draft, mode, onMapClick });
   useLayoutEffect(() => {
     state.current = { point, ring, draft, mode, onMapClick };
@@ -102,6 +108,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     pad();
     window.addEventListener("resize", pad);
     map.on("style.load", () => {
+      map.setMaxZoom(capRef.current);
       addOverlay(map);
       sync();
     });
@@ -135,11 +142,11 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     if (!map) return;
     map.setStyle(basemap === "satellite" ? satelliteStyle() : VECTOR_STYLE, { diff: false });
     if (basemap !== "satellite") {
-      map.setMaxZoom(VECTOR_MAX_ZOOM);
+      applyCap(VECTOR_MAX_ZOOM);
       return;
     }
     if (satelliteProvider === "s2") {
-      map.setMaxZoom(S2_NATIVE_ZOOM);
+      applyCap(S2_NATIVE_ZOOM);
       return;
     }
     // Esri: never show imagery beyond its native zoom at the place being viewed.
@@ -150,7 +157,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
       const { lng, lat } = map.getCenter();
       const signal = ctrl.signal;
       void nativeMaxZoom(lng, lat, signal).then((z) => {
-        if (!signal.aborted) map.setMaxZoom(z);
+        if (!signal.aborted) applyCap(z);
       });
     };
     cap();
