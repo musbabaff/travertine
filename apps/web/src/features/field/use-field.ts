@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { api, isFixtureResponse, unwrap } from "@/lib/api/client";
 import type { FieldAnalysis, FieldNdvi, NdviYear, Provenance, Soil } from "@/lib/api/types";
+import { useI18n, type Locale } from "@/i18n";
 import { isMockMode } from "@/lib/engine";
 import { toGeometry } from "@/lib/geo";
 import { parseField, writeField, type FieldState } from "@/lib/url-state";
@@ -43,7 +44,7 @@ export interface FieldViewQuery {
   refetch: () => void;
 }
 
-const coords = (field: FieldState) => ({ params: { query: { lat: field.lat, lon: field.lon } } });
+const coords = (field: FieldState, language: Locale) => ({ params: { query: { lat: field.lat, lon: field.lon, language } } });
 
 /**
  * With a live engine, climate, soil and vegetation come from their own endpoints, so the climate (a few seconds for
@@ -51,34 +52,35 @@ const coords = (field: FieldState) => ({ params: { query: { lat: field.lat, lon:
  * fixture answers in one piece.
  */
 export function useFieldAnalysis(field: FieldState | null): FieldViewQuery {
+  const { locale } = useI18n();
   const mock = isMockMode();
   const full = useQuery<FieldAnalysis>({
-    queryKey: ["field-analyze", field?.lat, field?.lon, field?.ring, field?.irrigated],
+    queryKey: ["field-analyze", field?.lat, field?.lon, field?.ring, field?.irrigated, locale],
     enabled: !!field && mock,
     queryFn: async ({ signal }) =>
       unwrap(
         await api.POST("/v1/field/analyze", {
-          body: { lat: field!.lat, lon: field!.lon, irrigated: field!.irrigated, ...(field!.ring ? { geometry: toGeometry(field!.ring) } : {}) },
+          body: { lat: field!.lat, lon: field!.lon, irrigated: field!.irrigated, language: locale, ...(field!.ring ? { geometry: toGeometry(field!.ring) } : {}) },
           signal,
         }),
       ),
   });
   const climate = useQuery({
-    queryKey: ["field-climate", field?.lat, field?.lon],
+    queryKey: ["field-climate", field?.lat, field?.lon, locale],
     enabled: !!field && !mock,
-    queryFn: async ({ signal }) => unwrap(await api.GET("/v1/field/climate", { ...coords(field!), signal })),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/v1/field/climate", { ...coords(field!, locale), signal })),
   });
   const soil = useQuery({
-    queryKey: ["field-soil", field?.lat, field?.lon],
+    queryKey: ["field-soil", field?.lat, field?.lon, locale],
     enabled: !!field && !mock,
-    queryFn: async ({ signal }) => unwrap(await api.GET("/v1/field/soil", { ...coords(field!), signal })),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/v1/field/soil", { ...coords(field!, locale), signal })),
   });
   const vegetation = useQuery({
-    queryKey: ["field-vegetation", field?.lat, field?.lon],
+    queryKey: ["field-vegetation", field?.lat, field?.lon, locale],
     enabled: !!field && !mock,
     retry: false,
     queryFn: async ({ signal }) => {
-      const res = await api.GET("/v1/field/vegetation", { ...coords(field!), signal });
+      const res = await api.GET("/v1/field/vegetation", { ...coords(field!, locale), signal });
       return isFixtureResponse(res.response) ? null : unwrap(res);
     },
   });
@@ -122,11 +124,12 @@ export function useFieldAnalysis(field: FieldState | null): FieldViewQuery {
 
 /** 30 m HLS NDVI. A separate, possibly slow request (cold: about 2 minutes), loaded after the field summary. */
 export function useFieldNdvi(field: FieldState | null, enabled = true) {
+  const { locale } = useI18n();
   return useQuery<{ data: FieldNdvi; fromFixture: boolean }>({
-    queryKey: ["field-ndvi", field?.lat, field?.lon],
+    queryKey: ["field-ndvi", field?.lat, field?.lon, locale],
     enabled: !!field && enabled,
     queryFn: async ({ signal }) => {
-      const res = await api.GET("/v1/field/ndvi", { params: { query: { lat: field!.lat, lon: field!.lon } }, signal });
+      const res = await api.GET("/v1/field/ndvi", { params: { query: { lat: field!.lat, lon: field!.lon, language: locale } }, signal });
       return { data: unwrap(res), fromFixture: isFixtureResponse(res.response) };
     },
   });

@@ -48,8 +48,7 @@ export function HazardsPanel({ field }: { field: FieldState }) {
           </div>
         ))}
       </dl>
-      {locale === "tr" && <p className="mt-3 text-xs text-ink-muted">{t("hazards.englishOnly")}</p>}
-      <ul className="mt-3 space-y-1 text-xs text-ink-2" lang="en" data-engine-text>
+      <ul className="mt-3 space-y-1 text-xs text-ink-2" lang={fromFixture ? "en" : undefined} data-engine-text>
         {data.caveats.map((c) => (
           <li key={c}>{c}</li>
         ))}
