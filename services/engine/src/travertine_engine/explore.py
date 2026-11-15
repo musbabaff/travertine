@@ -16,6 +16,7 @@ from travertine_engine.errors import InvalidRequest
 from travertine_engine.farmer import SoilChoice, choose_soil, crop_weights, other_records
 from travertine_engine.field import FieldService, parse_field_id, power_provenance, resolve_soil
 from travertine_engine.models import (
+    BaselineRotation,
     FarmerInputs,
     FarmerSoil,
     Priorities,
@@ -25,17 +26,21 @@ from travertine_engine.models import (
     RotationExploreResponse,
     RotationScores,
     RotationYear,
+    RuleViolation,
+    ScoreDifference,
 )
 from travertine_engine.science.climate import annual_summary
-from travertine_engine.science.crops import CropParams, load_crops
+from travertine_engine.science.crops import CropParams, crops_by_id, load_crops
 from travertine_engine.science.rotations import (
     Backcast,
     FieldInputs,
     RotationTables,
     SoilIndicators,
+    agricultural_years,
     backcast,
     build_tables,
     enumerate_rotations,
+    rule_violations,
     soil_indicators,
 )
 from travertine_engine.science.soil import saxton_rawls_water_contents
@@ -75,7 +80,18 @@ A3517_PROVENANCE = Provenance(
 )
 
 
-def scoring_provenance(n_windows: int, first: int, last: int, horizon: int) -> Provenance:
+BASELINE_NOTE = (
+    " The baseline is the rotation the user entered as their current one, repeated to fill the horizon if shorter. "
+    "It is simulated through the same windows with the same water balance; its soil indicators are divided by the "
+    "same candidate maxima (limited to 1) and its total uses the same priorities. It is scored even when it breaks "
+    "the rotation rules the candidates obey, and `rule_violations` lists every rule it breaks. `vs_baseline` is an "
+    "alternative's score minus the baseline's."
+)
+
+
+def scoring_provenance(
+    n_windows: int, first: int, last: int, horizon: int, *, baseline: bool = False
+) -> Provenance:
     return Provenance(
         dataset="Travertine rotation back-cast and scoring",
         provider="Travertine engine",
@@ -90,6 +106,7 @@ def scoring_provenance(n_windows: int, first: int, last: int, horizon: int) -> P
             "soil = mean of legume nitrogen credit, family diversity, rooting-depth range and share of the year under "
             "a crop, each scaled to the candidates considered; income = mean water-limited relative "
             "evapotranspiration with every crop valued equally — no price or market data is used."
+            + (BASELINE_NOTE if baseline else "")
         ),
     )
 
@@ -155,9 +172,20 @@ class ExploreService:
         irrigated: bool,
         crops: tuple[CropParams, ...],
         test: FarmerSoil | None = None,
+        *,
+        enforce_rules: bool = True,
+        years: tuple[int, ...] | None = None,
     ) -> tuple[RotationTables, FieldInputs, list[Provenance], SoilChoice]:
         inputs, provenance, choice = await self.field_inputs(lat, lon, test)
-        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops), choice.key)
+        key = (
+            round(lat, 4),
+            round(lon, 4),
+            irrigated,
+            tuple(c.id for c in crops),
+            choice.key,
+            enforce_rules,
+            years,
+        )
         cached = self._tables.get(key)
         if cached is not None:
             self._tables.move_to_end(key)
@@ -168,7 +196,14 @@ class ExploreService:
             if cached is None:
                 started = time.perf_counter()
                 async with self._heavy:
-                    tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
+                    tables = await asyncio.to_thread(
+                        build_tables,
+                        inputs,
+                        crops,
+                        irrigated=irrigated,
+                        enforce_rules=enforce_rules,
+                        years=years,
+                    )
                 log.info(
                     "rotation tables built",
                     extra={"elapsed_ms": round((time.perf_counter() - started) * 1000)},
@@ -245,17 +280,72 @@ class ExploreService:
         tables, inputs, provenance, scores, choice = await self.scores(
             lat, lon, req.irrigated, crops, req.horizon_years, farmer.soil, weights
         )
-        result = await asyncio.to_thread(rank_scores, tables, scores, req.priorities)
+        current = expand_current(req.current_rotation, req.horizon_years)
+        result = await asyncio.to_thread(
+            rank_scores, tables, scores, req.priorities, tuple(c.id for c in current) if current else None
+        )
         rotations = describe(tables, result, inputs.texture, req)
+        baseline = None
+        if current:
+            baseline = await self.baseline(lat, lon, req, current, tables, inputs, scores)
+            for rotation in rotations:
+                rotation.vs_baseline = difference(rotation.scores, baseline.scores)
         n_windows = len(tables.years) - req.horizon_years + 1
         provenance = [
             *provenance,
             FAO56_PROVENANCE,
             A3517_PROVENANCE,
-            scoring_provenance(n_windows, tables.years[0], tables.years[-1], req.horizon_years),
+            scoring_provenance(
+                n_windows, tables.years[0], tables.years[-1], req.horizon_years, baseline=baseline is not None
+            ),
         ]
         records = [*choice.records, *other_records(crops, req.crop_ids, farmer.crop_values, req.irrigated)]
-        return RotationExploreResponse(rotations=rotations, inputs=records, provenance=provenance)
+        return RotationExploreResponse(
+            rotations=rotations, baseline=baseline, inputs=records, provenance=provenance
+        )
+
+    async def baseline(
+        self,
+        lat: float,
+        lon: float,
+        req: RotationExploreRequest,
+        current: list[CropParams],
+        tables: RotationTables,
+        inputs: FieldInputs,
+        scores: CandidateScores,
+    ) -> BaselineRotation:
+        """The farmer's current rotation, scored like a candidate over the candidates' agricultural years, with the
+        same soil (the farmer's soil test if given) and the same crop values. Its segment table holds only its own
+        crops and is built without the rotation rules."""
+        farmer = req.farmer_inputs or FarmerInputs()
+        weights = None
+        if farmer.crop_values:
+            unvalued = sorted({c.id for c in current} - set(farmer.crop_values))
+            if unvalued:
+                raise InvalidRequest(
+                    "crop_values has no value for a crop in current_rotation; add the crop to crop_ids and give it "
+                    "a value.",
+                    details={"missing": unvalued},
+                )
+            top = max(farmer.crop_values.values())
+            weights = np.array([[farmer.crop_values[c.id] / top for c in current]])
+        used = {c.id for c in current}
+        own = tuple(c for c in load_crops() if c.id in used)
+        possible = set(agricultural_years(inputs, own))
+        years = tuple(y for y in tables.years if y in possible)
+        own_tables, _, _, _ = await self.tables(
+            lat, lon, req.irrigated, own, farmer.soil, enforce_rules=False, years=years
+        )
+        return await asyncio.to_thread(
+            describe_baseline,
+            own_tables,
+            current,
+            inputs.texture,
+            scores,
+            req,
+            len(req.current_rotation or []),
+            weights,
+        )
 
 
 def select_crops(crop_ids: list[str] | None) -> tuple[CropParams, ...]:
@@ -270,6 +360,36 @@ def select_crops(crop_ids: list[str] | None) -> tuple[CropParams, ...]:
     if not any(c.is_legume for c in chosen):
         raise InvalidRequest("crop_ids must include at least one legume; every rotation needs one per cycle.")
     return chosen
+
+
+def expand_current(current: list[str] | None, horizon: int) -> list[CropParams]:
+    """The farmer's sequence as crops, repeated in order until it fills the horizon. Any crop in the table may
+    appear, whatever `crop_ids` says: it is what the field grows today."""
+    if not current:
+        return []
+    known = crops_by_id()
+    unknown = sorted(set(current) - known.keys())
+    if unknown:
+        raise InvalidRequest(
+            "Unknown crop ids in current_rotation.", details={"unknown": unknown, "known": sorted(known)}
+        )
+    if len(current) > horizon:
+        raise InvalidRequest(
+            "current_rotation is longer than horizon_years.",
+            details={"current_rotation_years": len(current), "horizon_years": horizon},
+        )
+    return [known[current[k % len(current)]] for k in range(horizon)]
+
+
+def difference(alternative: RotationScores, baseline: RotationScores) -> ScoreDifference:
+    """Alternative minus baseline, from the rounded scores both carry so the figures add up for a reader."""
+    return ScoreDifference(
+        water=round(alternative.water - baseline.water, 3),
+        income=round(alternative.income - baseline.income, 3),
+        soil=round(alternative.soil - baseline.soil, 3),
+        risk=round(alternative.risk - baseline.risk, 3),
+        total=round(alternative.total - baseline.total, 3),
+    )
 
 
 def row_percentile(values: np.ndarray, q: float) -> np.ndarray:
@@ -349,6 +469,8 @@ class CandidateScores:
     risk: np.ndarray
     soil: np.ndarray
     window_years: tuple[int, ...]  # first year of every window valid for at least one candidate
+    # Maxima among the candidates of nitrogen credit, families, rooting-depth range and cover: the soil divisors.
+    soil_scale: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
 
 
 def score_candidates(
@@ -375,10 +497,9 @@ def score_candidates(
     if not any_valid.any() or windows_used is None:
         raise InvalidRequest("The climate record is too short for this horizon.")
 
-    n_credit = _scale(np.array([i.n_credit_kg_ha for i in indicators]))
-    families = _scale(np.array([float(i.families) for i in indicators]))
-    roots = _scale(np.array([i.root_range_m for i in indicators]))
-    cover = _scale(np.array([i.cover_fraction for i in indicators]))
+    values = np.array([_indicator_values(i) for i in indicators])
+    n_credit, families, roots, cover = (_scale(values[:, k]) for k in range(4))
+    tops = values.max(axis=0)
     return CandidateScores(
         rotations=rot,
         indicators=indicators,
@@ -387,16 +508,36 @@ def score_candidates(
         risk=risk,
         soil=(n_credit + families + roots + cover) / 4.0,
         window_years=tuple(y for y, keep in zip(window_years, windows_used, strict=True) if keep),
+        soil_scale=(float(tops[0]), float(tops[1]), float(tops[2]), float(tops[3])),
     )
 
 
-def rank_scores(tables: RotationTables, c: CandidateScores, priorities: Priorities) -> Ranked:
+def _indicator_values(ind: SoilIndicators) -> tuple[float, float, float, float]:
+    return ind.n_credit_kg_ha, float(ind.families), ind.root_range_m, ind.cover_fraction
+
+
+def _weights(priorities: Priorities) -> np.ndarray:
     weights = np.array([priorities.water, priorities.income, priorities.soil, priorities.risk])
-    if weights.sum() == 0:
-        weights = np.ones(4)
+    return weights if weights.sum() > 0 else np.ones(4)
+
+
+def rank_scores(
+    tables: RotationTables,
+    c: CandidateScores,
+    priorities: Priorities,
+    exclude: tuple[str, ...] | None = None,
+) -> Ranked:
+    """`exclude` is a crop-id sequence (the farmer's current rotation) left out of the ranking, so the returned
+    rotations are alternatives to it."""
+    weights = _weights(priorities)
     stacked = np.vstack([c.water, c.income, c.soil, c.risk])
     total = (weights[:, None] * stacked).sum(axis=0) / weights.sum()
     order = np.lexsort((-c.water, -total))  # ties broken by water score
+    if exclude is not None and len(exclude) == c.rotations.shape[1]:
+        index = {crop.id: i for i, crop in enumerate(tables.crops)}
+        if all(crop_id in index for crop_id in exclude):
+            same = (c.rotations == np.array([index[crop_id] for crop_id in exclude])).all(axis=1)
+            order = order[~same[order]]
     top = order[:TOP_N]
     return Ranked(
         order=order,
@@ -419,80 +560,162 @@ def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorit
     return rank_scores(tables, score_candidates(tables, texture, horizon), priorities)
 
 
+def _rounded(water: float, income: float, soil: float, risk: float, total: float) -> RotationScores:
+    return RotationScores(
+        water=round(water, 3),
+        income=round(income, 3),
+        soil=round(soil, 3),
+        risk=round(risk, 3),
+        total=round(total, 3),
+    )
+
+
+def describe_one(
+    seq: list[CropParams],
+    cast: Backcast,
+    k: int,
+    first_years: list[int],
+    ind: SoilIndicators,
+    texture: str,
+    req: RotationExploreRequest,
+) -> tuple[list[RotationYear], list[str]]:
+    """Yearly medians and explanation sentences of rotation `k` of a back-cast."""
+    ok = cast.window_valid[k]
+    etc = cast.etc[k][ok]
+    eta = cast.eta[k][ok]
+    deficit = cast.deficit[k][ok]
+    stress = 1.0 - eta / np.maximum(etc, 1e-9)
+    yearly = [
+        RotationYear(
+            year_index=j + 1,
+            crop_id=seq[j].id,
+            water_demand_mm=round(float(np.median(etc[:, j])), 1),
+            water_deficit_mm=round(float(np.median(deficit[:, j])), 1),
+            stress_index=round(float(np.clip(np.median(stress[:, j]), 0.0, 1.0)), 3),
+        )
+        for j in range(len(seq))
+    ]
+    total_demand = np.median(etc.sum(axis=1))
+    total_deficit = np.median(deficit.sum(axis=1))
+    windows = int(ok.sum())
+    span = f"{first_years[0] - 1}/{first_years[0]}–{first_years[-1] + len(seq) - 2}/{first_years[-1] + len(seq) - 1}"
+    lang = req.language
+    unmet = (deficit / np.maximum(etc, 1e-9)).ravel()
+    worst = int(np.argmax(unmet))
+    w_window, w_year = divmod(worst, len(seq))
+    worst_ag_year = [y for y, keep in zip(cast.window_years, ok, strict=True) if keep][w_window] + w_year
+    legumes = list(dict.fromkeys(crop_name(c.id, c.name, lang) for c in seq if c.is_legume))
+    sentences = [
+        text.water_summary(
+            lang,
+            windows=windows,
+            years=len(seq),
+            span=span,
+            demand=float(total_demand),
+            deficit=float(total_deficit),
+            irrigated=req.irrigated,
+        ),
+        text.driest_seasons(
+            lang,
+            p90=float(np.percentile(unmet, 90)),
+            crop=crop_name(seq[w_year].id, seq[w_year].name, lang),
+            ag_year=worst_ag_year,
+            worst=float(unmet[worst]),
+            irrigated=req.irrigated,
+        ),
+    ]
+    if ind.n_credit_kg_ha > 0:
+        sentences.append(text.nitrogen_credit(lang, legumes=legumes, kg_ha=ind.n_credit_kg_ha))
+    elif legumes:  # a sequence without any legume says so in its rule violations instead
+        sentences.append(
+            text.no_nitrogen_credit(lang, legumes=legumes, coarse_soil=texture in {"sand", "loamy sand"})
+        )
+    sentences.append(
+        text.diversity(lang, families=ind.families, root_range_m=ind.root_range_m, cover=ind.cover_fraction)
+    )
+    sentences.append(
+        text.income_note(lang, weighted=bool(req.farmer_inputs and req.farmer_inputs.crop_values))
+    )
+    return yearly, sentences
+
+
 def describe(
     tables: RotationTables, ranked: Ranked, texture: str, req: RotationExploreRequest
 ) -> list[Rotation]:
-    s, cast = ranked.scored, ranked.cast
+    s = ranked.scored
     out: list[Rotation] = []
     first_years = list(ranked.window_years)
     for k, r in enumerate(ranked.top):
         seq = [tables.crops[i] for i in s.rotations[r]]
-        ok = cast.window_valid[k]
-        etc = cast.etc[k][ok]
-        eta = cast.eta[k][ok]
-        deficit = cast.deficit[k][ok]
-        stress = 1.0 - eta / np.maximum(etc, 1e-9)
-        yearly = [
-            RotationYear(
-                year_index=k + 1,
-                crop_id=seq[k].id,
-                water_demand_mm=round(float(np.median(etc[:, k])), 1),
-                water_deficit_mm=round(float(np.median(deficit[:, k])), 1),
-                stress_index=round(float(np.clip(np.median(stress[:, k]), 0.0, 1.0)), 3),
-            )
-            for k in range(len(seq))
-        ]
-        total_demand = np.median(etc.sum(axis=1))
-        total_deficit = np.median(deficit.sum(axis=1))
-        windows = int(ok.sum())
-        span = f"{first_years[0] - 1}/{first_years[0]}–{first_years[-1] + len(seq) - 2}/{first_years[-1] + len(seq) - 1}"
-        lang = req.language
-        unmet = (deficit / np.maximum(etc, 1e-9)).ravel()
-        worst = int(np.argmax(unmet))
-        w_window, w_year = divmod(worst, len(seq))
-        worst_ag_year = [y for y, keep in zip(cast.window_years, ok, strict=True) if keep][w_window] + w_year
-        ind = s.indicators[r]
-        legumes = list(dict.fromkeys(crop_name(c.id, c.name, lang) for c in seq if c.is_legume))
-        sentences = [
-            text.water_summary(
-                lang,
-                windows=windows,
-                years=len(seq),
-                span=span,
-                demand=float(total_demand),
-                deficit=float(total_deficit),
-                irrigated=req.irrigated,
-            ),
-            text.driest_seasons(
-                lang,
-                p90=float(np.percentile(unmet, 90)),
-                crop=crop_name(seq[w_year].id, seq[w_year].name, lang),
-                ag_year=worst_ag_year,
-                worst=float(unmet[worst]),
-                irrigated=req.irrigated,
-            ),
-            text.nitrogen_credit(lang, legumes=legumes, kg_ha=ind.n_credit_kg_ha)
-            if ind.n_credit_kg_ha > 0
-            else text.no_nitrogen_credit(
-                lang, legumes=legumes, coarse_soil=texture in {"sand", "loamy sand"}
-            ),
-            text.diversity(
-                lang, families=ind.families, root_range_m=ind.root_range_m, cover=ind.cover_fraction
-            ),
-            text.income_note(lang, weighted=bool(req.farmer_inputs and req.farmer_inputs.crop_values)),
-        ]
+        yearly, sentences = describe_one(seq, ranked.cast, k, first_years, s.indicators[r], texture, req)
         out.append(
             Rotation(
                 sequence=[c.id for c in seq],
-                scores=RotationScores(
-                    water=round(float(s.water[r]), 3),
-                    income=round(float(s.income[r]), 3),
-                    soil=round(float(s.soil[r]), 3),
-                    risk=round(float(s.risk[r]), 3),
-                    total=round(float(s.total[r]), 3),
+                scores=_rounded(
+                    float(s.water[r]),
+                    float(s.income[r]),
+                    float(s.soil[r]),
+                    float(s.risk[r]),
+                    float(s.total[r]),
                 ),
                 yearly=yearly,
                 explanation=sentences,
             )
         )
     return out
+
+
+def violation_messages(seq: list[CropParams], lang: text.Language) -> list[RuleViolation]:
+    out: list[RuleViolation] = []
+    for v in rule_violations(seq):
+        if v.rule == "same_family_in_consecutive_years" and v.crop and v.previous and v.year_index:
+            message = text.same_family(
+                lang,
+                year=v.year_index,
+                crop=crop_name(v.crop.id, v.crop.name, lang),
+                previous=crop_name(v.previous.id, v.previous.name, lang),
+                family=v.crop.family,
+            )
+        elif v.rule == "perennial_single_year" and v.crop and v.year_index:
+            message = text.perennial_single_year(
+                lang, year=v.year_index, crop=crop_name(v.crop.id, v.crop.name, lang)
+            )
+        else:
+            message = text.no_legume(lang)
+        out.append(
+            RuleViolation.model_validate({"rule": v.rule, "year_index": v.year_index, "message": message})
+        )
+    return out
+
+
+def describe_baseline(
+    tables: RotationTables,
+    seq: list[CropParams],
+    texture: str,
+    candidate_scores: CandidateScores,
+    req: RotationExploreRequest,
+    entered_years: int,
+    weights: np.ndarray | None = None,
+) -> BaselineRotation:
+    index = {c.id: i for i, c in enumerate(tables.crops)}
+    cast = backcast(tables, np.array([[index[c.id] for c in seq]], dtype=np.int64))
+    if not cast.window_valid.any():
+        raise InvalidRequest("The climate record is too short to score current_rotation over this horizon.")
+    water, income, risk = (float(v[0]) for v in _chunk_scores(cast, weights))
+    ind = soil_indicators(seq, texture)
+    parts = [
+        min(value / top, 1.0) if top > 0 else 0.0
+        for value, top in zip(_indicator_values(ind), candidate_scores.soil_scale, strict=True)
+    ]
+    soil = sum(parts) / 4.0
+    weights = _weights(req.priorities)
+    total = float((weights * np.array([water, income, soil, risk])).sum() / weights.sum())
+    first_years = [y for y, keep in zip(cast.window_years, cast.window_valid[0], strict=True) if keep]
+    yearly, sentences = describe_one(seq, cast, 0, first_years, ind, texture, req)
+    return BaselineRotation(
+        sequence=[c.id for c in seq],
+        scores=_rounded(water, income, soil, risk, total),
+        yearly=yearly,
+        explanation=[text.baseline_intro(req.language, entered=entered_years, years=len(seq)), *sentences],
+        rule_violations=violation_messages(seq, req.language),
+    )

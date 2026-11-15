@@ -140,6 +140,19 @@ sowings belong to the year in which they are harvested.
 
 With all 12 crops this yields 545, 5,437 and 51,021 candidates for 3, 4 and 5 years.
 
+**The farmer's current rotation (baseline).** A request may carry `current_rotation`, the crops the field grows now,
+one per year. A sequence shorter than the horizon is repeated in order until it fills it (wheat, barley over four
+years becomes wheat, barley, wheat, barley). It is then scored exactly like a candidate: the same daily water balance,
+the same historical windows, the same percentiles, the same priorities, and soil indicators divided by the same
+candidate maxima (limited to 1 if the sequence exceeds one of them). Rules 1, 3 and 4 are *not* applied to it: a
+sequence that breaks them is still simulated, and the response lists each broken rule with the year it falls in
+(`same_family_in_consecutive_years`, `no_legume_in_cycle`, `perennial_single_year`). Rule 2 cannot be broken with the
+present crop table, because no crop is sown before any other crop's harvest date. Every alternative carries
+`vs_baseline`, its score minus the baseline's for water, income, soil, risk and total; the baseline sequence itself is
+left out of the alternatives, so a response holds the existing rotation plus the ranked alternatives (at least three
+strategies whenever two or more valid alternatives exist). The differences are differences between relative indices on
+past years, not predicted gains; whether a change suits the farm is the farmer's and local advisers' call.
+
 **Back-cast.** Each candidate is run through every window of consecutive agricultural years in the record (20 windows
 of 5 years for 2002–2025). The soil-water state at the start of a window comes from a continuous bare-soil balance
 over the whole record, started at field capacity on 1 January 2001 (nine months of spin-up). From one crop to the next

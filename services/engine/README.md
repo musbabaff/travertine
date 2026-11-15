@@ -20,7 +20,7 @@ Methods are described in [`docs/METHODOLOGY.md`](../../docs/METHODOLOGY.md), dat
 | `GET /v1/field/climate`, `/v1/field/soil`, `/v1/field/vegetation` | implemented — the three parts of `/v1/field/analyze` on their own, so the client shows climate as soon as NASA POWER answers (about 3.5 s for a new location) while SoilGrids (often 20 s or more) and MODIS load separately; `climate` starts the other two in the background |
 | `GET /v1/field/ndvi` | implemented — 30 m HLS NDVI history since 2020 at the field centre, with its difference from MODIS for the same years |
 | `GET /v1/showcase` | implemented — the eight multi-site validation locations, their back-test results from `data/multisite.json` and the pooled result; their data are in the snapshot |
-| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]` |
+| `POST /v1/rotations/explore` | implemented — FAO-56 water-balance back-cast of every valid rotation over every historical window; `language: "en" \| "tr"` sets the language of `explanation[]`; `current_rotation` (1–5 crop ids, repeated to fill the horizon) is scored with the same model and returned as `baseline` with `rule_violations[]`, and every alternative carries `vs_baseline` |
 | `GET /v1/validation` | implemented — modelled stress vs MODIS NDVI anomalies with a baseline and bootstrap intervals; protocol in `docs/VALIDATION.md`; `?language=tr` for Turkish caveats |
 
 Interactive docs are served at `/docs` when the engine runs.
