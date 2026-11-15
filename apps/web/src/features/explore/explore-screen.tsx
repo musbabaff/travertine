@@ -20,6 +20,7 @@ import { CompareDialog } from "./compare-dialog";
 import { cropName } from "./crop-timeline";
 import { RotationCard, rotationKey } from "./rotation-card";
 import { OBJECTIVE_COLOR } from "./score-bars";
+import { CurrentRotationPicker, parseCurrent } from "./current-rotation";
 import { useCrops, useExploreParams, useRotations } from "./use-explore";
 
 function CardSkeleton() {
@@ -52,7 +53,9 @@ export function ExploreScreen() {
   const { priorities, debounced, horizon, setPriority, setAll, setHorizon } = useExploreParams();
   const demo = source !== "engine";
   const effectiveHorizon: Horizon = demo ? (FIXTURE_HORIZON as Horizon) : horizon;
-  const rotations = useRotations(field, debounced, effectiveHorizon);
+  const current = parseCurrent(new URLSearchParams(fieldQs.slice(1)));
+  const rotations = useRotations(field, debounced, effectiveHorizon, current, locale);
+  const baseline = rotations.data?.baseline;
   const crops = useCrops();
   const cropMap = useMemo(() => (crops.data ? new Map<string, Crop>(crops.data.map((c) => [c.id, c])) : undefined), [crops.data]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -186,6 +189,16 @@ export function ExploreScreen() {
 
           {/* Trade-off scatter view for the Pareto set slots in here once the contract carries it. */}
 
+          <div className="mb-4">
+            <CurrentRotationPicker crops={crops.data} horizon={effectiveHorizon} />
+            {current.length > 0 && rotations.data && !baseline && <p className="mt-2 text-xs text-warning">{t("current.unavailable")}</p>}
+          </div>
+          {baseline && (
+            <div className="mb-4" data-testid="baseline-card">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">{t("current.yours")}</p>
+              <RotationCard rotation={baseline} rank={0} crops={cropMap} irrigated={field.irrigated} selected={false} selectDisabled onToggleSelect={() => {}} isBaseline violations={baseline.rule_violations} />
+            </div>
+          )}
           {rotations.isPending ? (
             <div aria-busy="true" className="space-y-4">
               <span className="sr-only">{t("explore.loading")}</span>
@@ -212,6 +225,7 @@ export function ExploreScreen() {
                     selected={activeSel.includes(rotationKey(r))}
                     selectDisabled={activeSel.length >= 2}
                     onToggleSelect={() => toggle(rotationKey(r))}
+                    delta={r.vs_baseline}
                   />
                 </li>
               ))}
