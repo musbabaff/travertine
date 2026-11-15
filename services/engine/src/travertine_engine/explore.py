@@ -11,7 +11,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from travertine_engine import text
+from travertine_engine import reasoning, text
 from travertine_engine.errors import InvalidRequest
 from travertine_engine.farmer import SoilChoice, choose_soil, crop_weights, other_records
 from travertine_engine.field import FieldService, parse_field_id, power_provenance, resolve_soil
@@ -29,6 +29,7 @@ from travertine_engine.models import (
     RuleViolation,
     ScoreDifference,
 )
+from travertine_engine.reasoning import Facts
 from travertine_engine.science.climate import annual_summary
 from travertine_engine.science.crops import CropParams, crops_by_id, load_crops
 from travertine_engine.science.rotations import (
@@ -284,12 +285,32 @@ class ExploreService:
         result = await asyncio.to_thread(
             rank_scores, tables, scores, req.priorities, tuple(c.id for c in current) if current else None
         )
-        rotations = describe(tables, result, inputs.texture, req)
-        baseline = None
+        rotations, facts, shares = describe(tables, result, inputs.texture, req)
+        baseline, baseline_facts = None, None
         if current:
-            baseline = await self.baseline(lat, lon, req, current, tables, inputs, scores)
+            baseline, baseline_facts = await self.baseline(lat, lon, req, current, tables, inputs, scores)
             for rotation in rotations:
                 rotation.vs_baseline = difference(rotation.scores, baseline.scores)
+        ctx = reasoning.Context(
+            lang=req.language,
+            irrigated=req.irrigated,
+            priorities=req.priorities,
+            awc=next((r for r in choice.records if r.name == reasoning.AWC_RECORD), None),
+            crop_values_given=bool(farmer.crop_values),
+            n_ranked=int(result.order.shape[0]),
+        )
+        for rank, (rotation, f, share) in enumerate(zip(rotations, facts, shares, strict=True), start=1):
+            rotation.reasoning = reasoning.build(
+                ctx,
+                f,
+                rotation.scores,
+                rank=rank,
+                shares=share,
+                baseline=baseline_facts,
+                baseline_scores=baseline.scores if baseline else None,
+            )
+        if baseline is not None and baseline_facts is not None:
+            baseline.reasoning = reasoning.build(ctx, baseline_facts, baseline.scores)
         n_windows = len(tables.years) - req.horizon_years + 1
         provenance = [
             *provenance,
@@ -313,7 +334,7 @@ class ExploreService:
         tables: RotationTables,
         inputs: FieldInputs,
         scores: CandidateScores,
-    ) -> BaselineRotation:
+    ) -> tuple[BaselineRotation, Facts]:
         """The farmer's current rotation, scored like a candidate over the candidates' agricultural years, with the
         same soil (the farmer's soil test if given) and the same crop values. Its segment table holds only its own
         crops and is built without the rotation rules."""
@@ -578,8 +599,8 @@ def describe_one(
     ind: SoilIndicators,
     texture: str,
     req: RotationExploreRequest,
-) -> tuple[list[RotationYear], list[str]]:
-    """Yearly medians and explanation sentences of rotation `k` of a back-cast."""
+) -> tuple[list[RotationYear], list[str], Facts]:
+    """Yearly medians, explanation sentences and the facts behind them for rotation `k` of a back-cast."""
     ok = cast.window_valid[k]
     etc = cast.etc[k][ok]
     eta = cast.eta[k][ok]
@@ -636,18 +657,45 @@ def describe_one(
     sentences.append(
         text.income_note(lang, weighted=bool(req.farmer_inputs and req.farmer_inputs.crop_values))
     )
-    return yearly, sentences
+    facts = Facts(
+        seq=seq,
+        yearly=yearly,
+        windows=windows,
+        demand_mm=float(total_demand),
+        deficit_mm=float(total_deficit),
+        worst_crop=seq[w_year],
+        worst_ag_year=worst_ag_year,
+        worst_unmet=float(unmet[worst]),
+        indicators=ind,
+    )
+    return yearly, sentences, facts
 
 
 def describe(
     tables: RotationTables, ranked: Ranked, texture: str, req: RotationExploreRequest
-) -> list[Rotation]:
+) -> tuple[list[Rotation], list[Facts], list[dict[str, float]]]:
+    """The returned rotations, the facts behind each, and per score the share of ranked rotations scoring lower."""
     s = ranked.scored
     out: list[Rotation] = []
+    facts: list[Facts] = []
+    shares: list[dict[str, float]] = []
     first_years = list(ranked.window_years)
+    ranked_rows = ranked.order
     for k, r in enumerate(ranked.top):
         seq = [tables.crops[i] for i in s.rotations[r]]
-        yearly, sentences = describe_one(seq, ranked.cast, k, first_years, s.indicators[r], texture, req)
+        yearly, sentences, f = describe_one(seq, ranked.cast, k, first_years, s.indicators[r], texture, req)
+        facts.append(f)
+        shares.append(
+            {
+                name: float(np.mean(values[ranked_rows] < values[r]))
+                for name, values in (
+                    ("water", s.water),
+                    ("income", s.income),
+                    ("soil", s.soil),
+                    ("risk", s.risk),
+                )
+            }
+        )
         out.append(
             Rotation(
                 sequence=[c.id for c in seq],
@@ -662,7 +710,7 @@ def describe(
                 explanation=sentences,
             )
         )
-    return out
+    return out, facts, shares
 
 
 def violation_messages(seq: list[CropParams], lang: text.Language) -> list[RuleViolation]:
@@ -696,7 +744,7 @@ def describe_baseline(
     req: RotationExploreRequest,
     entered_years: int,
     weights: np.ndarray | None = None,
-) -> BaselineRotation:
+) -> tuple[BaselineRotation, Facts]:
     index = {c.id: i for i, c in enumerate(tables.crops)}
     cast = backcast(tables, np.array([[index[c.id] for c in seq]], dtype=np.int64))
     if not cast.window_valid.any():
@@ -711,11 +759,12 @@ def describe_baseline(
     weights = _weights(req.priorities)
     total = float((weights * np.array([water, income, soil, risk])).sum() / weights.sum())
     first_years = [y for y, keep in zip(cast.window_years, cast.window_valid[0], strict=True) if keep]
-    yearly, sentences = describe_one(seq, cast, 0, first_years, ind, texture, req)
-    return BaselineRotation(
+    yearly, sentences, facts = describe_one(seq, cast, 0, first_years, ind, texture, req)
+    rotation = BaselineRotation(
         sequence=[c.id for c in seq],
         scores=_rounded(water, income, soil, risk, total),
         yearly=yearly,
         explanation=[text.baseline_intro(req.language, entered=entered_years, years=len(seq)), *sentences],
         rule_violations=violation_messages(seq, req.language),
     )
+    return rotation, facts

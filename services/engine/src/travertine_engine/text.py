@@ -216,6 +216,239 @@ def perennial_single_year(lang: Language, *, year: int, crop: str) -> str:
     )
 
 
+# Structured reasoning per strategy (POST /v1/rotations/explore, `reasoning`)
+
+MONTHS: dict[Language, list[str]] = {
+    "en": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ],
+    "tr": [
+        "Ocak",
+        "Şubat",
+        "Mart",
+        "Nisan",
+        "Mayıs",
+        "Haziran",
+        "Temmuz",
+        "Ağustos",
+        "Eylül",
+        "Ekim",
+        "Kasım",
+        "Aralık",
+    ],
+}
+SCORE_NAMES: dict[Language, dict[str, str]] = {
+    "en": {"water": "water", "income": "income", "soil": "soil", "risk": "risk"},
+    "tr": {"water": "su", "income": "gelir", "soil": "toprak", "risk": "risk"},
+}
+
+
+def _cap(sentence: str) -> str:
+    return sentence[:1].upper() + sentence[1:]
+
+
+def why_rank(lang: Language, *, rank: int, n: int, priorities: object) -> str:
+    w, i, s, r = (
+        num(float(getattr(priorities, name)), 2, lang) for name in ("water", "income", "soil", "risk")
+    )
+    count = num(n, 0, lang)
+    if lang == "tr":
+        return (
+            f"Önceliklerinize göre (su {w}, gelir {i}, toprak {s}, risk {r}) rotasyon kurallarını sağlayan "
+            f"{count} rotasyon arasında {rank}. sırada."
+        )
+    return (
+        f"Ranked {rank} of {count} rotations that satisfy the rotation rules, under your priorities "
+        f"(water {w}, income {i}, soil {s}, risk {r})."
+    )
+
+
+def why_strongest(lang: Language, *, score: str, value: float, share: float) -> str:
+    name, v = SCORE_NAMES[lang][score], num(value, 3, lang)
+    if lang == "tr":
+        return f"{_cap(name)} puanı ({v}), bu rotasyonların {pct(share, lang)} kadarınınkinden yüksek."
+    return f"Its {name} score ({v}) is higher than that of {pct(share, lang)} of those rotations."
+
+
+def why_vs_current(lang: Language, *, total: float, current: float) -> str:
+    a, b = num(total, 3, lang), num(current, 3, lang)
+    d = num(abs(total - current), 3, lang)
+    if total > current:
+        if lang == "tr":
+            return f"Toplam puanı mevcut rotasyonunuzunkinden {d} yüksek ({b} yerine {a})."
+        return f"Its total score is {d} higher than your current rotation's ({a} against {b})."
+    if lang == "tr":
+        return f"Toplam puanı mevcut rotasyonunuzunkinden yüksek değil ({b} karşısında {a})."
+    return f"Its total score is not higher than your current rotation's ({a} against {b})."
+
+
+def evidence_demand(lang: Language, *, windows: int) -> str:
+    if lang == "tr":
+        return f"Rotasyon boyunca bitki su ihtiyacının ortancası ({windows} geçmiş dönem üzerinden)"
+    return f"Median crop water demand over the rotation, across {windows} historical windows"
+
+
+def evidence_deficit(lang: Language, *, irrigated: bool) -> str:
+    if lang == "tr":
+        if irrigated:
+            return "Rotasyon boyunca sulama suyu ihtiyacının ortancası"
+        return "Yağışın ve topraktaki suyun karşılayamadığı su ihtiyacının ortancası"
+    if irrigated:
+        return "Median irrigation requirement over the rotation"
+    return "Median water demand left unmet by rain and stored soil water"
+
+
+def evidence_worst(lang: Language, *, crop: str, season: str, irrigated: bool) -> str:
+    if lang == "tr":
+        what = "sulamayla karşılanması gereken" if irrigated else "karşılanamayan"
+        return f"Tek bir sezonda su ihtiyacının {what} en büyük payı ({crop}, {season})"
+    what = "that had to come from irrigation" if irrigated else "left unmet"
+    return f"Largest share of one season's water demand {what} ({crop}, {season})"
+
+
+def evidence_awc(lang: Language) -> str:
+    if lang == "tr":
+        return "Toprağın bitkiye yarayışlı su tutma kapasitesi"
+    return "Plant-available water capacity of the soil"
+
+
+def evidence_nitrogen(lang: Language) -> str:
+    if lang == "tr":
+        return "Baklagillerin kendilerinden sonraki ürünlere tahmini azot katkısı"
+    return "Estimated legume nitrogen credit to the crops that follow"
+
+
+def benefit_less_deficit(lang: Language, *, deficit: float, current: float, irrigated: bool) -> str:
+    a, b, d = num(deficit, 0, lang), num(current, 0, lang), num(current - deficit, 0, lang)
+    if lang == "tr":
+        what = "sulama suyu ihtiyacının" if irrigated else "karşılanamayan su ihtiyacının"
+        return (
+            f"Rotasyon boyunca {what} ortancası, mevcut rotasyonunuza göre {d} mm daha düşük "
+            f"({b} mm yerine {a} mm)."
+        )
+    what = "irrigation requirement" if irrigated else "unmet water demand"
+    return (
+        f"Over the rotation, the median {what} is {d} mm lower than with your current rotation "
+        f"({a} mm against {b} mm)."
+    )
+
+
+def gap_soil_dataset(lang: Language, *, awc: float) -> str:
+    value = num(awc, 0, lang)
+    if lang == "tr":
+        return (
+            f"Toprağın su tutma kapasitesi ({value} mm/m) bu tarlada yapılmış bir ölçüm değil, 250 m çözünürlüklü "
+            "SoilGrids tahminidir; çiftçi girdisi olarak girilen bir toprak analizi bunun yerini alır."
+        )
+    return (
+        f"The soil's water capacity ({value} mm/m) is a SoilGrids prediction at 250 m, not a measurement of this "
+        "field; a soil test entered as farmer input replaces it."
+    )
+
+
+def gap_soil_default(lang: Language) -> str:
+    if lang == "tr":
+        return (
+            "SoilGrids bu nokta için toprak verisi vermedi; bu yüzden genel bir tın toprak kullanıldı. Bir toprak "
+            "analizi girilene kadar buradaki bütün su değerleri buna bağlı olarak belirsizdir."
+        )
+    return (
+        "SoilGrids gave no soil data for this point, so a generic loam was used; every water figure here is "
+        "correspondingly uncertain until a soil test is entered."
+    )
+
+
+def gap_no_crop_values(lang: Language) -> str:
+    if lang == "tr":
+        return "Ürün değeri girilmedi; bu yüzden gelir endeksi her ürünü eşit sayar, fiyat ya da verim kullanmaz."
+    return "No crop values were given, so the income index counts every crop equally and uses no prices or yields."
+
+
+def gap_borrowed_credit(lang: Language, *, crops: list[str]) -> str:
+    names = ", ".join(crops)
+    if lang == "tr":
+        return (
+            f"Azot katkısında {names} için, kaynaktaki en yakın sınıf olan bezelye ve kuru fasulye değeri "
+            f"(UW-Extension A3517) kullanıldı; {names} için ölçülmüş bir değer kullanılmadı."
+        )
+    return (
+        f"The nitrogen credit for {names} uses the UW-Extension A3517 value for pea and dry bean, the closest "
+        f"category in that source; no value measured for {names} was used."
+    )
+
+
+def gap_irrigation_supply(lang: Language) -> str:
+    if lang == "tr":
+        return (
+            "Sulama suyu ihtiyacı, bitkinin ihtiyaç duyduğu her an suyun bulunduğunu varsayar; motorun bu tarlanın "
+            "su kaynağı hakkında bilgisi yoktur."
+        )
+    return (
+        "The irrigation requirement assumes water is available whenever the crop needs it; the engine has no "
+        "information on the water supply of this field."
+    )
+
+
+def review_stressed_crop(lang: Language, *, crop: str, year: int, unmet: float) -> str:
+    share = pct(unmet, lang)
+    if lang == "tr":
+        return (
+            f"{_cap(crop)} ({year}. yıl): ortanca geçmiş dönemde kuru tarımda su ihtiyacının {share} kadarı "
+            "karşılanamadı; bu ürünün burada sulamasız yetiştirilip yetiştirilmediğini yerelde doğrulayın."
+        )
+    return (
+        f"{_cap(crop)} (year {year}): in the median historical window {share} of its water demand was unmet under "
+        "rain-fed management; check locally whether it is grown without irrigation here."
+    )
+
+
+def review_worst_season(lang: Language, *, crop: str, season: str, unmet: float, irrigated: bool) -> str:
+    share = pct(unmet, lang)
+    if lang == "tr":
+        if irrigated:
+            return (
+                f"{season} tarım yılında {crop} ürününün su ihtiyacının {share} kadarının sulamayla karşılanması "
+                "gerekti; kurak bir yılda bu kadar suyun bulunup bulunmadığını doğrulayın."
+            )
+        return (
+            f"{season} tarım yılında {crop} ürününün su ihtiyacının {share} kadarı karşılanamadı; işletmenin "
+            "böyle bir sezonu kaldırıp kaldıramayacağını değerlendirin."
+        )
+    if irrigated:
+        return (
+            f"In {season}, {crop} needed {share} of its water demand from irrigation; check that such a volume is "
+            "available in a dry year."
+        )
+    return (
+        f"In {season}, {crop} had {share} of its water demand unmet; consider whether the farm could carry a "
+        "season like that."
+    )
+
+
+def review_sowing_dates(lang: Language, *, sowing: list[tuple[str, int, int]]) -> str:
+    dates = ", ".join(f"{crop} {day} {MONTHS[lang][month - 1]}" for crop, day, month in sowing)
+    if lang == "tr":
+        return (
+            f"Takvim şu ekim tarihlerini varsayar: {dates} (FAO-56 Tablo 11); bunları yerel ekim tarihleri ve "
+            "çeşitlerle karşılaştırın."
+        )
+    return (
+        f"The calendar assumes sowing on these dates: {dates} (FAO-56 Table 11); compare them with local sowing "
+        "dates and varieties."
+    )
+
+
 # Validation caveats (GET /v1/validation)
 
 
