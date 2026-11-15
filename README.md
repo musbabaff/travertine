@@ -53,11 +53,18 @@ observed vegetation, with the result shown whether or not it is flattering.
 - **Provenance everywhere**: every section carries source chips with provider, resolution, coverage and a link.
 - **Honest fallback**: if the engine is unreachable, the app shows contract fixtures for the demo field and says so in
   a "Demo data" badge; it never mixes demo values with a different location silently.
-- **English and Turkish**, shareable URLs for field and priorities, keyboard accessible, responsive down to 390 px.
+
+- **Overview** (`/app/overview`): the selected field's climate record, soil, NDVI and water balance from the engine on
+  one screen; without a field, the Denizli demo field is shown and labelled.
+- **Data** (`/app/data`): every dataset behind the numbers on screen, as the engine reports it.
+- **Cosmo guide**: a first-run tour of the screens and a chat with fixed, reviewed answers, including a glossary
+  (evapotranspiration, soil-moisture anomaly, NDVI, frost risk, water balance, satellite versus ground measurements).
+  No language model. The 3D model loads only when the guide is opened.
+- **English (default) and Turkish**, shareable URLs for field and priorities, keyboard accessible, responsive down to
+  390 px.
 
 ### Planned
 
-- Data page (provenance table for everything on screen), landing page and field overview dashboard.
 - Rotation plan with a printable one-page PDF, crop library, saved fields compared side by side.
 - Farmer inputs: allowed crops, own soil-test values and own crop prices (need contract fields first).
 - Climate and soil pages, methodology page, CSV exports, settings.

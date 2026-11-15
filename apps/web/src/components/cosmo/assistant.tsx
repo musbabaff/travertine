@@ -1,0 +1,311 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ArrowUp, ArrowUpRight, Mic, MicOff, Volume2, VolumeX, X } from "lucide-react";
+import type { CosmoPose } from "./mascot";
+import { useI18n, type MessageKey } from "@/i18n";
+import { askCosmo, GREETING, startersFor, type CosmoLink } from "./brain";
+import { COSMO_ASK, useGaze } from "./gaze";
+import { useCosmoSpeech } from "./speech";
+import CosmoStage from "./stage";
+import CosmoMascot from "./mascot";
+import { COSMO_INTRO } from "./intro";
+
+/** Cosmo messages hold a locale key (shown in the current language); user messages hold the typed text. */
+type Message = { id: number; from: "cosmo" | "user"; text: string; links?: CosmoLink[] };
+type Delivery = { id: number; words: string[] };
+
+const NUDGE_SEEN = "cosmo-nudge-seen";
+
+export default function CosmoAssistant() {
+  const { t } = useI18n();
+  const tRef = useRef(t);
+  useLayoutEffect(() => {
+    tRef.current = t;
+  }, [t]);
+  const pathname = usePathname();
+  const query = useSearchParams().toString();
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([{ id: 0, from: "cosmo", text: GREETING }]);
+  const [draft, setDraft] = useState("");
+  const [thinking, setThinking] = useState(false);
+  const [pose, setPose] = useState<CosmoPose>("idle");
+  const [nudge, setNudge] = useState(false);
+  const [delivery, setDelivery] = useState<Delivery | null>(null);
+
+  const dock = useGaze<HTMLDivElement>();
+  const chat = useRef<HTMLElement>(null);
+  const log = useRef<HTMLDivElement>(null);
+  const mouth = useRef<HTMLSpanElement>(null);
+  const trail = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const fab = useRef<HTMLButtonElement>(null);
+  const nextId = useRef(1);
+  const wasOpen = useRef(false);
+  const openRef = useRef(open);
+  const replyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const poseTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const deliveryTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Olay dinleyicisi bir kez bağlanıyor; güncel yol ve durum buradan okunur.
+  const live = useRef({ pathname, thinking });
+  const speech = useCosmoSpeech(send);
+
+  useLayoutEffect(() => {
+    openRef.current = open;
+    live.current = { pathname, thinking };
+  }, [open, pathname, thinking]);
+
+  function strike(next: CosmoPose, holdMs?: number) {
+    clearTimeout(poseTimer.current);
+    setPose(next);
+    if (holdMs) poseTimer.current = setTimeout(() => setPose("idle"), holdMs);
+  }
+
+  function show() {
+    setOpen(true);
+    setNudge(false);
+    strike("wave", 1800);
+  }
+
+  function dismiss() {
+    speech.stop();
+    setDelivery(null);
+    setOpen(false);
+  }
+
+  function send(raw: string) {
+    const question = raw.trim();
+    if (!question || live.current.thinking) return;
+    setMessages((list) => [...list, { id: nextId.current++, from: "user", text: question }]);
+    setDraft("");
+    setThinking(true);
+    setDelivery(null);
+    strike("think");
+
+    const reply = askCosmo(question, live.current.pathname);
+    replyTimer.current = setTimeout(
+      () => {
+        const answerId = nextId.current++;
+        setThinking(false);
+        setMessages((list) => [...list, { id: answerId, from: "cosmo", text: reply.text, links: reply.links }]);
+        const said = tRef.current(reply.text);
+        setDelivery({ id: answerId, words: said.match(/\S+/g)?.slice(0, 5) ?? [] });
+        clearTimeout(deliveryTimer.current);
+        deliveryTimer.current = setTimeout(() => setDelivery(null), 1200);
+        const settle = reply.pose === "sleep" ? undefined : reply.pose === "jump" ? 950 : 2400;
+        strike(reply.pose ?? "idle", reply.pose ? settle : undefined);
+        if (openRef.current) speech.speak(said);
+        speech.clearTranscript();
+      },
+      520 + Math.min(tRef.current(reply.text).length * 6, 700),
+    );
+  }
+
+  useEffect(() => {
+    function summoned(event: Event) {
+      show();
+      const question = (event as CustomEvent<string | undefined>).detail;
+      if (question) send(question);
+    }
+    window.addEventListener(COSMO_ASK, summoned);
+
+    let seen = true;
+    try {
+      seen = sessionStorage.getItem(NUDGE_SEEN) === "1";
+      sessionStorage.setItem(NUDGE_SEEN, "1");
+    } catch {}
+    const nudgeTimer = seen ? undefined : setTimeout(() => setNudge(true), 3500);
+
+    return () => {
+      window.removeEventListener(COSMO_ASK, summoned);
+      clearTimeout(nudgeTimer);
+      clearTimeout(replyTimer.current);
+      clearTimeout(poseTimer.current);
+      clearTimeout(deliveryTimer.current);
+    };
+    // Bu dinleyici bileşen ömrü boyunca tek kez bağlanır; güncel değerleri ref'lerden okur.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      if (wasOpen.current) fab.current?.focus();
+      return;
+    }
+    wasOpen.current = true;
+    input.current?.focus({ preventScroll: true });
+    function escape(event: KeyboardEvent) {
+      if (event.key === "Escape") dismiss();
+    }
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+    // Kapatma işlevi güncel ses oturumunu kullanır.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    log.current?.scrollTo({ top: log.current.scrollHeight, behavior: delivery ? "auto" : "smooth" });
+  }, [messages, thinking, open, delivery]);
+
+  useLayoutEffect(() => {
+    if (!delivery || !chat.current || !mouth.current || !trail.current) return;
+    const destination = chat.current.querySelector<HTMLElement>(`[data-message-id="${delivery.id}"]`);
+    if (!destination) return;
+
+    if (log.current) log.current.scrollTop = log.current.scrollHeight;
+    const chatBounds = chat.current.getBoundingClientRect();
+    const mouthBounds = mouth.current.getBoundingClientRect();
+    const bubbleBounds = destination.getBoundingClientRect();
+    const startX = mouthBounds.left + mouthBounds.width / 2 - chatBounds.left;
+    const startY = mouthBounds.top + mouthBounds.height / 2 - chatBounds.top;
+    const endX = bubbleBounds.left + Math.min(bubbleBounds.width / 2, 90) - chatBounds.left;
+    const endY = bubbleBounds.top + Math.min(bubbleBounds.height / 2, 24) - chatBounds.top;
+
+    trail.current.style.left = `${startX}px`;
+    trail.current.style.top = `${startY}px`;
+    trail.current.style.setProperty("--flight-x", `${endX - startX}px`);
+    trail.current.style.setProperty("--flight-y", `${endY - startY}px`);
+  }, [delivery]);
+
+  return (
+    <div className="cosmo-dock" ref={dock}>
+      {open && (
+        <section className="cosmo-chat" ref={chat} role="dialog" aria-label={t("cosmo.ui.chat")}>
+          <header>
+            <div>
+              <strong>Cosmo</strong>
+              <small>{speech.listening ? t("cosmo.ui.listening") : thinking ? t("cosmo.ui.thinking") : speech.speaking ? t("cosmo.ui.speaking") : t("cosmo.ui.role")}</small>
+            </div>
+            <button
+              className="cosmo-audio-toggle"
+              aria-label={speech.enabled ? t("cosmo.ui.voiceOff") : t("cosmo.ui.voiceOn")}
+              aria-pressed={speech.enabled}
+              disabled={!speech.outputSupported}
+              title={speech.outputSupported ? undefined : t("cosmo.ui.voiceUnsupported")}
+              onClick={speech.toggleOutput}
+            >
+              {speech.enabled ? <Volume2 /> : <VolumeX />}
+            </button>
+            <button aria-label={t("cosmo.ui.closeChat")} onClick={dismiss}>
+              <X />
+            </button>
+          </header>
+
+          <div className={`cosmo-presence${speech.listening ? " is-listening" : ""}${thinking ? " is-thinking" : ""}${speech.speaking ? " is-speaking" : ""}`} aria-hidden="true">
+            {(speech.listening || speech.speaking) && (
+              <div className="cosmo-presence-waves">
+                {Array.from({ length: 21 }, (_, position) => <i key={position} style={{ animationDelay: `${-position * 65}ms`, height: `${8 + (position * 11) % 31}px` }} />)}
+              </div>
+            )}
+            <div className="cosmo-presence-mascot">
+              <CosmoStage view="bust" pose={pose} listening={speech.listening} talking={speech.speaking || Boolean(delivery)} />
+              <span className="cosmo-mouth-anchor" ref={mouth} />
+            </div>
+            {thinking && <span className="cosmo-thought">?</span>}
+            <span className="cosmo-presence-label">{speech.listening ? t("cosmo.ui.tagListening") : thinking ? t("cosmo.ui.tagThinking") : speech.speaking ? t("cosmo.ui.tagSpeaking") : t("cosmo.ui.tagHere")}</span>
+          </div>
+
+          <div className="cosmo-log" ref={log} role="log" aria-live="polite">
+            {messages.map((message) => (
+              <div key={message.id} data-message-id={message.id} className={`cosmo-msg from-${message.from}${delivery?.id === message.id ? " is-arriving" : ""}`}>
+                <p>{message.from === "cosmo" ? t(message.text as MessageKey) : message.text}</p>
+                {message.links && (
+                  <div className="cosmo-msg-links">
+                    {message.links.map((link) => (
+                      <Link key={link.href} href={query ? `${link.href}?${query}` : link.href}>
+                        {t(link.label)}
+                        <ArrowUpRight size={14} />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            {thinking && <p className="cosmo-thinking-note" role="status">{t("cosmo.ui.preparing")}</p>}
+          </div>
+
+          <div className="cosmo-starters">
+            <button onClick={() => { dismiss(); window.dispatchEvent(new Event(COSMO_INTRO)); }}>{t("cosmo.ui.tour")}</button>
+            {startersFor(pathname).map((question) => (
+              <button key={question} disabled={thinking} onClick={() => send(t(question))}>
+                {t(question)}
+              </button>
+            ))}
+          </div>
+
+          {(speech.listening || speech.speaking || speech.error || speech.transcript || !speech.inputSupported) && (
+            <div className={`cosmo-voice-status${speech.listening ? " is-listening" : ""}${speech.speaking ? " is-speaking" : ""}`} role="status" aria-live="polite">
+              {(speech.listening || speech.speaking) && (
+                <span className="cosmo-voice-wave" aria-hidden="true">
+                  {Array.from({ length: 19 }, (_, index) => <i key={index} style={{ height: `${8 + (index * 7) % 16}px`, animationDelay: `${-index * 47}ms` }} />)}
+                </span>
+              )}
+              <span>
+                {(speech.error && t(speech.error as MessageKey)) ||
+                  (speech.listening ? (speech.transcript || t("cosmo.ui.listeningHint")) :
+                    speech.speaking ? t("cosmo.ui.speakingHint") :
+                    speech.transcript ? t("cosmo.ui.heard", { text: speech.transcript }) :
+                    t("cosmo.ui.noMic"))}
+              </span>
+            </div>
+          )}
+
+          <form
+            className="cosmo-compose"
+            onSubmit={(event) => {
+              event.preventDefault();
+              send(draft);
+            }}
+          >
+            <input
+              ref={input}
+              value={draft}
+              maxLength={160}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder={t("cosmo.ui.ask")}
+              aria-label={t("cosmo.ui.question")}
+            />
+            <button
+              type="button"
+              className={`cosmo-mic${speech.listening ? " is-listening" : ""}`}
+              aria-label={speech.listening ? "Dinlemeyi durdur" : "Sesli soru sor"}
+              aria-pressed={speech.listening}
+              disabled={!speech.inputSupported || thinking}
+              onClick={speech.toggleListening}
+            >
+              {speech.listening ? <MicOff /> : <Mic />}
+            </button>
+            <button type="submit" aria-label={t("cosmo.ui.send")} disabled={thinking || !draft.trim()}>
+              <ArrowUp />
+            </button>
+          </form>
+          {delivery && (
+            <div className="cosmo-word-trail" ref={trail} aria-hidden="true">
+              {delivery.words.map((word, index) => <span key={`${delivery.id}-${index}`} style={{ animationDelay: `${index * 90}ms` }}>{word}</span>)}
+            </div>
+          )}
+        </section>
+      )}
+
+      {!open && nudge && (
+        <div className="cosmo-nudge">
+          <button onClick={show}>{t("cosmo.ui.nudge")}</button>
+          <button aria-label={t("cosmo.ui.close")} onClick={() => setNudge(false)}>
+            <X />
+          </button>
+        </div>
+      )}
+
+      {!open && (
+        <button className="cosmo-fab" ref={fab} onClick={show}>
+          <span className="sr-only">{t("cosmo.ui.ask")}</span>
+          <span aria-hidden="true" className="contents [&_text]:hidden">
+            <CosmoMascot frame="full" pose={pose} talking={false} listening={false} label={null} />
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}

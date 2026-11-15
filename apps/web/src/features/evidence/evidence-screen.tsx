@@ -11,6 +11,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { useI18n } from "@/i18n";
 import type { Validation } from "@/lib/api/types";
+import { caveatText, methodText } from "@/lib/localize-engine";
 import { useField } from "../field/use-field";
 import { ModelVsBaseline } from "./model-vs-baseline";
 import { period, useValidation } from "./use-validation";
@@ -74,8 +75,8 @@ export function EvidenceScreen() {
     );
   }
 
-  const result = query.data;
-  const v = result?.data;
+  const validationResponse = query.data;
+  const v = validationResponse?.data;
   const span = v ? period(v) : null;
   const datasets = v ? [...new Set(v.provenance.map(shortName))].join(" + ") : "";
   const subtitle = v && span ? t("evidence.chart.subtitle", { from: span[0], to: span[1], n: v.n, datasets }) : "";
@@ -84,15 +85,16 @@ export function EvidenceScreen() {
   const chartLabel = v ? t("evidence.chart.aria", { r: n(v.correlation, 2), n: v.n, from: span?.[0] ?? "", to: span?.[1] ?? "" }) : "";
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-6 md:pt-8 xl:px-8">
-      <div className="mb-6">
+    <div className="tv-feature-page mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 md:px-6 md:pt-8 xl:px-8">
+      <div className="tv-page-banner mb-6">
+        <span className="tv-banner-eyebrow">TRAVERTINE / VERİ VE YÖNTEM</span>
         <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
           {t("evidence.title")}
         </h1>
         <p className="mt-1 max-w-[72ch] text-sm text-ink-2 md:text-body">{t("evidence.intro")}</p>
       </div>
 
-      {result?.fromFixture && (
+      {validationResponse?.fromFixture && (
         <div role="note" data-testid="baseline-note" className="mb-6 flex items-start gap-3 rounded-md border border-warning/30 bg-warning-bg p-4">
           <FlaskConical aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" strokeWidth={1.5} />
           <div className="min-w-0">
@@ -237,19 +239,18 @@ export function EvidenceScreen() {
               <h2 id="method-title" className="text-h3 font-semibold">
                 {t("evidence.method")}
               </h2>
-              <p lang="en" className="mt-2 text-sm text-ink-2" data-testid="method">
-                {v.method}
+              <p className="mt-2 text-sm text-ink-2" data-testid="method">
+                {methodText(v.method, locale)}
               </p>
               <h2 className="mt-5 text-h3 font-semibold">{t("evidence.caveats")}</h2>
-              <ul lang="en" className="mt-2 space-y-2 text-sm text-ink-2" data-testid="caveats">
+              <ul className="mt-2 space-y-2 text-sm text-ink-2" data-testid="caveats">
                 {v.caveats.map((c) => (
                   <li key={c} className="flex gap-2">
                     <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-warning" />
-                    <span>{c}</span>
+                    <span>{caveatText(c, v, locale, n)}</span>
                   </li>
                 ))}
               </ul>
-              {locale !== "en" && <p className="mt-4 text-xs text-ink-muted">{t("evidence.language")}</p>}
             </section>
             <Link href={`/app/explore?${qs}`} className="inline-flex text-sm font-medium text-teal-700 underline-offset-2 hover:underline">
               {t("evidence.toExplore")}

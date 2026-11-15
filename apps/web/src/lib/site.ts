@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const SITE_URL = "https://travertinefields.com";
 
 /** Public routes listed in the sitemap. Routes are added here as they ship. */
-export const PUBLIC_ROUTES = ["/", "/app", "/app/explore", "/app/evidence", "/app/data"] as const;
+export const PUBLIC_ROUTES = ["/", "/app", "/app/explore", "/app/evidence", "/app/data", "/app/overview"] as const;
 
 const OG_BASE = { type: "website" as const, siteName: "Travertine", locale: "en_GB", alternateLocale: ["tr_TR"] };
 

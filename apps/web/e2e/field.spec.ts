@@ -4,6 +4,11 @@ import ndvi30 from "../../../packages/contract/fixtures/field-ndvi.json";
 import { DEMO_QUERY, fakeEngine } from "./engine";
 
 test.describe("Field screen", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.title !== "switches to Turkish") {
+      await page.addInitScript(() => localStorage.setItem("travertine.locale", "en"));
+    }
+  });
   test("shows the empty state, then analyses the demo field", async ({ page }) => {
     await fakeEngine(page);
     await page.goto("/app");
