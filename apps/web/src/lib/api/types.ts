@@ -27,3 +27,7 @@ export type FarmerInputs = S["FarmerInputs"];
 export type NdviSeason = S["NdviSeason"];
 export type Health = S["Health"];
 export type ApiError = S["Error"];
+export type FieldHazards = S["FieldHazards"];
+export type HazardYear = S["HazardYear"];
+export type FieldCalendar = S["FieldCalendar"];
+export type RotationReasoning = S["RotationReasoning"];

@@ -5,7 +5,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUp, ArrowUpRight, Mic, MicOff, Volume2, VolumeX, X } from "lucide-react";
 import type { CosmoPose } from "./mascot";
-import { useI18n, type MessageKey } from "@/i18n";
+import { useQueryClient, type Query } from "@tanstack/react-query";
+import { useI18n, type MessageKey, type Vars } from "@/i18n";
+import type { Crop, Provenance, RotationExploreResponse } from "@/lib/api/types";
+import { cropLabel } from "@/lib/localize-engine";
+import { parseField } from "@/lib/url-state";
+import { useHazards } from "@/features/field/use-hazards";
+import { askField, fieldStarters, type FieldContext } from "./field-answers";
 import { askCosmo, GREETING, startersFor, type CosmoLink } from "./brain";
 import { COSMO_ASK, useGaze } from "./gaze";
 import { useCosmoSpeech } from "./speech";
@@ -13,21 +19,27 @@ import CosmoStage from "./stage";
 import CosmoMascot from "./mascot";
 import { COSMO_INTRO } from "./intro";
 
-/** Cosmo messages hold a locale key (shown in the current language); user messages hold the typed text. */
-type Message = { id: number; from: "cosmo" | "user"; text: string; links?: CosmoLink[] };
+/**
+ * Cosmo messages hold a locale key with its values (shown in the current language) and, for answers about the field,
+ * the engine's own sentences; user messages hold the typed text.
+ */
+type Message = { id: number; from: "cosmo" | "user"; text: string; vars?: Vars; lines?: string[]; links?: CosmoLink[] };
 type Delivery = { id: number; words: string[] };
 
 const NUDGE_SEEN = "cosmo-nudge-seen";
 
 export default function CosmoAssistant() {
-  const { t } = useI18n();
+  const { t, n, locale } = useI18n();
   const tRef = useRef(t);
   useLayoutEffect(() => {
     tRef.current = t;
   }, [t]);
   const pathname = usePathname();
   const query = useSearchParams().toString();
+  const field = parseField(new URLSearchParams(query));
+  const queries = useQueryClient();
   const [open, setOpen] = useState(false);
+  const hazards = useHazards(field, open);
   const [messages, setMessages] = useState<Message[]>([{ id: 0, from: "cosmo", text: GREETING }]);
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -48,14 +60,41 @@ export default function CosmoAssistant() {
   const replyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const poseTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const deliveryTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  /** The engine responses already loaded for the field in the URL, newest first. */
+  function fieldContext(): FieldContext | null {
+    if (!field) return null;
+    const forField = (q: Query) => q.queryKey[1] === field.lat && q.queryKey[2] === field.lon && q.state.data !== undefined;
+    const loaded = queries
+      .getQueryCache()
+      .findAll()
+      .filter(forField)
+      .sort((a, b) => b.state.dataUpdatedAt - a.state.dataUpdatedAt);
+    const unwrapData = (q: Query | undefined) => {
+      const d = q?.state.data as { data?: unknown } | undefined;
+      return d && typeof d === "object" && "fromFixture" in d ? d.data : d;
+    };
+    const rotations = unwrapData(loaded.find((q) => q.queryKey[0] === "rotations" && q.queryKey.at(-1) === locale)) as RotationExploreResponse | undefined;
+    const validation = unwrapData(loaded.find((q) => q.queryKey[0] === "validation")) as FieldContext["validation"];
+    const provenance = loaded.flatMap((q) => ((unwrapData(q) as { provenance?: Provenance[] } | undefined)?.provenance ?? []));
+    const crops = new Map((queries.getQueryData<Crop[]>(["crops"]) ?? []).map((c) => [c.id, c.name]));
+    return {
+      rotations,
+      validation,
+      hazards: hazards.data && !hazards.data.fromFixture ? hazards.data.data : undefined,
+      provenance,
+      cropName: (id) => cropLabel(id, crops.get(id) ?? id.replace(/_/g, " "), locale),
+      n,
+    };
+  }
+
   // Olay dinleyicisi bir kez bağlanıyor; güncel yol ve durum buradan okunur.
-  const live = useRef({ pathname, thinking });
+  const live = useRef({ pathname, thinking, fieldContext });
   const speech = useCosmoSpeech(send);
 
   useLayoutEffect(() => {
     openRef.current = open;
-    live.current = { pathname, thinking };
-  }, [open, pathname, thinking]);
+    live.current = { pathname, thinking, fieldContext };
+  });
 
   function strike(next: CosmoPose, holdMs?: number) {
     clearTimeout(poseTimer.current);
@@ -84,13 +123,15 @@ export default function CosmoAssistant() {
     setDelivery(null);
     strike("think");
 
-    const reply = askCosmo(question, live.current.pathname);
+    const ctx = live.current.fieldContext();
+    const reply: { text: MessageKey; vars?: Vars; lines?: string[]; links?: CosmoLink[]; pose?: CosmoPose } =
+      (ctx && askField(question, ctx)) ?? askCosmo(question, live.current.pathname);
     replyTimer.current = setTimeout(
       () => {
         const answerId = nextId.current++;
         setThinking(false);
-        setMessages((list) => [...list, { id: answerId, from: "cosmo", text: reply.text, links: reply.links }]);
-        const said = tRef.current(reply.text);
+        setMessages((list) => [...list, { id: answerId, from: "cosmo", text: reply.text, vars: reply.vars, lines: reply.lines, links: reply.links }]);
+        const said = [tRef.current(reply.text, reply.vars), ...(reply.lines ?? [])].join(" ");
         setDelivery({ id: answerId, words: said.match(/\S+/g)?.slice(0, 5) ?? [] });
         clearTimeout(deliveryTimer.current);
         deliveryTimer.current = setTimeout(() => setDelivery(null), 1200);
@@ -99,7 +140,7 @@ export default function CosmoAssistant() {
         if (openRef.current) speech.speak(said);
         speech.clearTranscript();
       },
-      520 + Math.min(tRef.current(reply.text).length * 6, 700),
+      520 + Math.min(tRef.current(reply.text, reply.vars).length * 6, 700),
     );
   }
 
@@ -210,7 +251,14 @@ export default function CosmoAssistant() {
           <div className="cosmo-log" ref={log} role="log" aria-live="polite">
             {messages.map((message) => (
               <div key={message.id} data-message-id={message.id} className={`cosmo-msg from-${message.from}${delivery?.id === message.id ? " is-arriving" : ""}`}>
-                <p>{message.from === "cosmo" ? t(message.text as MessageKey) : message.text}</p>
+                <p>{message.from === "cosmo" ? t(message.text as MessageKey, message.vars) : message.text}</p>
+                {message.lines && message.lines.length > 0 && (
+                  <ul className="cosmo-msg-lines">
+                    {message.lines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                )}
                 {message.links && (
                   <div className="cosmo-msg-links">
                     {message.links.map((link) => (
@@ -228,14 +276,15 @@ export default function CosmoAssistant() {
 
           <div className="cosmo-starters">
             <button onClick={() => { dismiss(); window.dispatchEvent(new Event(COSMO_INTRO)); }}>{t("cosmo.ui.tour")}</button>
-            {startersFor(pathname).map((question) => (
+            {[...fieldStarters(pathname, !!field), ...startersFor(pathname)].slice(0, 5).map((question) => (
               <button key={question} disabled={thinking} onClick={() => send(t(question))}>
                 {t(question)}
               </button>
             ))}
           </div>
 
-          {(speech.listening || speech.speaking || speech.error || speech.transcript || !speech.inputSupported) && (
+          {!speech.inputSupported && speech.showUnsupportedNote && <p className="cosmo-voice-note">{t("cosmo.ui.noMic")}</p>}
+          {(speech.listening || speech.speaking || speech.error || speech.transcript) && (
             <div className={`cosmo-voice-status${speech.listening ? " is-listening" : ""}${speech.speaking ? " is-speaking" : ""}`} role="status" aria-live="polite">
               {(speech.listening || speech.speaking) && (
                 <span className="cosmo-voice-wave" aria-hidden="true">
@@ -246,8 +295,7 @@ export default function CosmoAssistant() {
                 {(speech.error && t(speech.error as MessageKey)) ||
                   (speech.listening ? (speech.transcript || t("cosmo.ui.listeningHint")) :
                     speech.speaking ? t("cosmo.ui.speakingHint") :
-                    speech.transcript ? t("cosmo.ui.heard", { text: speech.transcript }) :
-                    t("cosmo.ui.noMic"))}
+                    speech.transcript ? t("cosmo.ui.heard", { text: speech.transcript }) : "")}
               </span>
             </div>
           )}
@@ -267,16 +315,18 @@ export default function CosmoAssistant() {
               placeholder={t("cosmo.ui.ask")}
               aria-label={t("cosmo.ui.question")}
             />
-            <button
-              type="button"
-              className={`cosmo-mic${speech.listening ? " is-listening" : ""}`}
-              aria-label={speech.listening ? "Dinlemeyi durdur" : "Sesli soru sor"}
-              aria-pressed={speech.listening}
-              disabled={!speech.inputSupported || thinking}
-              onClick={speech.toggleListening}
-            >
-              {speech.listening ? <MicOff /> : <Mic />}
-            </button>
+            {speech.inputSupported && (
+              <button
+                type="button"
+                className={`cosmo-mic${speech.listening ? " is-listening" : ""}`}
+                aria-label={speech.listening ? t("cosmo.ui.micStop") : t("cosmo.ui.micStart")}
+                aria-pressed={speech.listening}
+                disabled={thinking}
+                onClick={speech.toggleListening}
+              >
+                {speech.listening ? <MicOff /> : <Mic />}
+              </button>
+            )}
             <button type="submit" aria-label={t("cosmo.ui.send")} disabled={thinking || !draft.trim()}>
               <ArrowUp />
             </button>
