@@ -53,6 +53,76 @@ paths:
                 items: { $ref: "#/components/schemas/Crop" }
         default: { $ref: "#/components/responses/Error" }
 
+  /v1/field/climate:
+    get:
+      tags: [field]
+      operationId: getFieldClimate
+      summary: Climate history for a field, as soon as NASA POWER answers
+      description: "The climate part of /v1/field/analyze on its own (a few seconds for a new location). Calling it also starts fetching soil and vegetation in the background, so /v1/field/soil and /v1/field/vegetation called right after it are usually ready sooner. Each section can have its own loading state."
+      parameters:
+        - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
+        - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+      responses:
+        "200":
+          description: Yearly climate summary and its provenance.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldClimate" }
+        "422": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/field/soil:
+    get:
+      tags: [field]
+      operationId: getFieldSoil
+      summary: Soil of a field (SoilGrids 2.0)
+      description: "The soil part of /v1/field/analyze. SoilGrids can take 20 s or more for a new location. When SoilGrids has no prediction or does not answer, the response is the labelled default soil, as in /v1/field/analyze."
+      parameters:
+        - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
+        - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+      responses:
+        "200":
+          description: Soil summary and its provenance.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldSoil" }
+        "422": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/field/vegetation:
+    get:
+      tags: [field]
+      operationId: getFieldVegetation
+      summary: Growing-season MODIS NDVI history of a field
+      description: "The ndvi_history part of /v1/field/analyze. Returns 502 when MODIS cannot be read, so the rest of the field view does not depend on it."
+      parameters:
+        - { name: lat, in: query, required: true, schema: { $ref: "#/components/schemas/Latitude" } }
+        - { name: lon, in: query, required: true, schema: { $ref: "#/components/schemas/Longitude" } }
+      responses:
+        "200":
+          description: Yearly growing-season NDVI and its provenance.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldVegetation" }
+        "422": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /v1/showcase:
+    get:
+      tags: [validation]
+      operationId: getShowcase
+      summary: Showcase fields and their multi-site back-test results
+      description: "The fixed multi-site validation locations (docs/VALIDATION.md section 4) with the results exactly as computed by scripts/validate_sites.py. Their data are bundled with the engine, so they open without waiting on upstream services."
+      responses:
+        "200":
+          description: Showcase fields.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Showcase" }
+        default: { $ref: "#/components/responses/Error" }
+
   /v1/field/ndvi:
     get:
       tags: [field]
@@ -245,6 +315,101 @@ components:
         year: { type: integer }
         mean_ndvi: { type: number, minimum: -1, maximum: 1, description: Growing-season (Apr–Sep) mean NDVI. }
 
+    FieldClimate:
+      type: object
+      required: [field_id, climate, provenance]
+      properties:
+        field_id: { type: string }
+        climate:
+          type: array
+          items: { $ref: "#/components/schemas/ClimateYear" }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
+    FieldSoil:
+      type: object
+      required: [soil, provenance]
+      properties:
+        soil: { $ref: "#/components/schemas/Soil" }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
+    FieldVegetation:
+      type: object
+      required: [ndvi_history, provenance]
+      properties:
+        ndvi_history:
+          type: array
+          items: { $ref: "#/components/schemas/NdviYear" }
+        provenance:
+          type: array
+          items: { $ref: "#/components/schemas/Provenance" }
+
+    ShowcaseVerdict:
+      type: string
+      enum: [model_better, baseline_better, no_detectable_difference]
+      description: "Same rule as Validation.verdict, applied to difference_ci95. no_detectable_difference is worded \"difference not established\"."
+
+    ShowcaseValidation:
+      type: object
+      required: [status]
+      description: "Back-test of one site. When status is not_computed only reason is present."
+      properties:
+        status: { type: string, enum: [ok, not_computed] }
+        reason: { type: string, description: Why the site could not be computed. }
+        n: { type: integer, minimum: 0, description: Years used. }
+        correlation: { type: number, minimum: -1, maximum: 1, description: Pearson r of modelled stress with the NDVI anomaly. }
+        correlation_ci95: { $ref: "#/components/schemas/CorrelationInterval" }
+        baseline_correlation: { type: number, minimum: -1, maximum: 1, description: Same for the dryness-index baseline. }
+        baseline_correlation_ci95: { $ref: "#/components/schemas/CorrelationInterval" }
+        difference: { type: number, minimum: -2, maximum: 2, description: correlation − baseline_correlation. }
+        difference_ci95:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items: { type: number, minimum: -2, maximum: 2 }
+        verdict: { $ref: "#/components/schemas/ShowcaseVerdict" }
+
+    ShowcaseField:
+      type: object
+      required: [id, name, lat, lon, field_id, validation]
+      properties:
+        id: { type: string }
+        name: { type: string, description: "Place, region, country." }
+        lat: { $ref: "#/components/schemas/Latitude" }
+        lon: { $ref: "#/components/schemas/Longitude" }
+        field_id: { type: string, description: Usable with /v1/rotations/explore. }
+        validation: { $ref: "#/components/schemas/ShowcaseValidation" }
+
+    Showcase:
+      type: object
+      required: [fields, protocol, computed_at]
+      properties:
+        fields:
+          type: array
+          items: { $ref: "#/components/schemas/ShowcaseField" }
+        pooled:
+          type: object
+          description: "Mean over the computed sites, with a bootstrap stratified by site. Omitted when fewer than two sites were computed."
+          required: [sites, mean_correlation, mean_correlation_ci95, mean_baseline_correlation, mean_baseline_correlation_ci95, mean_difference, mean_difference_ci95, verdict]
+          properties:
+            sites: { type: integer, minimum: 0 }
+            mean_correlation: { type: number, minimum: -1, maximum: 1 }
+            mean_correlation_ci95: { $ref: "#/components/schemas/CorrelationInterval" }
+            mean_baseline_correlation: { type: number, minimum: -1, maximum: 1 }
+            mean_baseline_correlation_ci95: { $ref: "#/components/schemas/CorrelationInterval" }
+            mean_difference: { type: number, minimum: -2, maximum: 2 }
+            mean_difference_ci95:
+              type: array
+              minItems: 2
+              maxItems: 2
+              items: { type: number, minimum: -2, maximum: 2 }
+            verdict: { $ref: "#/components/schemas/ShowcaseVerdict" }
+        protocol: { type: string, description: Where the protocol is fixed. }
+        computed_at: { type: string, format: date-time }
+
     FieldAnalysis:
       type: object
       required: [field_id, climate, soil, provenance]
@@ -290,6 +455,12 @@ components:
         language:
           $ref: "#/components/schemas/Language"
           description: "Language of rotations[].explanation[]. Default en."
+        current_rotation:
+          type: array
+          description: "Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`."
+          minItems: 1
+          maxItems: 5
+          items: { type: string }
         farmer_inputs:
           $ref: "#/components/schemas/FarmerInputs"
           description: "Optional. The farmer's own soil test and crop values; each one replaces the dataset estimate it names in the response's inputs[]. The allowed crops are crop_ids and irrigation is irrigated."
@@ -372,6 +543,46 @@ components:
           type: array
           description: Plain-language English sentences explaining the score.
           items: { type: string }
+        vs_baseline:
+          $ref: "#/components/schemas/ScoreDifference"
+          description: "Optional. Present on every alternative when the request carried current_rotation."
+
+    ScoreDifference:
+      type: object
+      required: [water, income, soil, risk, total]
+      description: "Score of an alternative minus the same score of the baseline (the current rotation), unitless, −1 to 1. Positive means the alternative scores higher. Differences between relative indices on past years, not predicted gains."
+      properties:
+        water: { type: number, minimum: -1, maximum: 1 }
+        income: { type: number, minimum: -1, maximum: 1 }
+        soil: { type: number, minimum: -1, maximum: 1 }
+        risk: { type: number, minimum: -1, maximum: 1 }
+        total: { type: number, minimum: -1, maximum: 1 }
+
+    RuleViolation:
+      type: object
+      required: [rule, message]
+      properties:
+        rule:
+          type: string
+          enum: [same_family_in_consecutive_years, no_legume_in_cycle, perennial_single_year]
+          description: "The rotation rule the current rotation breaks (docs/METHODOLOGY.md, section 7)."
+        year_index:
+          type: integer
+          minimum: 1
+          description: "1-based rotation year the violation falls in. Omitted for rules about the whole sequence (no_legume_in_cycle)."
+        message: { type: string, description: "Which crops and why, in the request language. The UI renders it verbatim." }
+
+    BaselineRotation:
+      description: "The current rotation, expanded to horizon_years and scored like a candidate. It never carries vs_baseline."
+      allOf:
+        - $ref: "#/components/schemas/Rotation"
+        - type: object
+          required: [rule_violations]
+          properties:
+            rule_violations:
+              type: array
+              description: "Every rotation rule the sequence breaks, in year order. Empty when it breaks none."
+              items: { $ref: "#/components/schemas/RuleViolation" }
 
     RotationExploreResponse:
       type: object
@@ -379,7 +590,11 @@ components:
       properties:
         rotations:
           type: array
+          description: "Sorted by scores.total, highest first. When the request carried current_rotation, that sequence is left out of this list and returned as `baseline`."
           items: { $ref: "#/components/schemas/Rotation" }
+        baseline:
+          $ref: "#/components/schemas/BaselineRotation"
+          description: "Optional. Present when the request carried current_rotation."
         inputs:
           type: array
           description: "Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default."
