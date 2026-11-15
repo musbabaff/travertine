@@ -4,7 +4,7 @@ import { SlowHint } from "@/components/ui/slow-hint";
 import { Columns2, Loader2, MapPinned, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { pickProvenance, ProvenanceChips } from "@/components/ui/provenance-chip";
 import { Segmented } from "@/components/ui/segmented";
 import { Slider } from "@/components/ui/slider";
@@ -12,7 +12,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { useI18n, type MessageKey } from "@/i18n";
 import { FIXTURE_HORIZON } from "@/lib/api/mock";
 import { useDataSource } from "@/lib/api/source";
-import type { Crop } from "@/lib/api/types";
+import type { Crop, FarmerInputs } from "@/lib/api/types";
 import { polygonAreaM2 } from "@/lib/geo";
 import { DEFAULT_PRIORITIES, HORIZONS, OBJECTIVES, type Horizon } from "@/lib/priorities";
 import { useField } from "../field/use-field";
@@ -21,6 +21,8 @@ import { cropName } from "./crop-timeline";
 import { RotationCard, rotationKey } from "./rotation-card";
 import { OBJECTIVE_COLOR } from "./score-bars";
 import { CurrentRotationPicker, parseCurrent } from "./current-rotation";
+import { FarmerInputsForm, InputSources } from "./farmer-inputs";
+import { isActive, NO_SCENARIO, ScenarioPanel, type ScenarioValue } from "./scenario-panel";
 import { useCrops, useExploreParams, useRotations } from "./use-explore";
 
 function CardSkeleton() {
@@ -54,7 +56,18 @@ export function ExploreScreen() {
   const demo = source !== "engine";
   const effectiveHorizon: Horizon = demo ? (FIXTURE_HORIZON as Horizon) : horizon;
   const current = parseCurrent(new URLSearchParams(fieldQs.slice(1)));
-  const rotations = useRotations(field, debounced, effectiveHorizon, current, locale);
+  const [scenario, setScenario] = useState<ScenarioValue>(NO_SCENARIO);
+  const [scenarioDebounced, setScenarioDebounced] = useState<ScenarioValue>(NO_SCENARIO);
+  useEffect(() => {
+    const id = setTimeout(() => setScenarioDebounced(scenario), 400);
+    return () => clearTimeout(id);
+  }, [scenario]);
+  const [farmer, setFarmer] = useState<FarmerInputs | null>(null);
+  const rotations = useRotations(field, debounced, effectiveHorizon, current, locale, {
+    scenario: !demo && isActive(scenarioDebounced) ? scenarioDebounced : undefined,
+    farmer: demo ? null : farmer,
+  });
+  const scenarioLabel = rotations.data?.scenario?.label;
   const baseline = rotations.data?.baseline;
   const crops = useCrops();
   const cropMap = useMemo(() => (crops.data ? new Map<string, Crop>(crops.data.map((c) => [c.id, c])) : undefined), [crops.data]);
@@ -160,6 +173,15 @@ export function ExploreScreen() {
               {demo && <p className="mt-1.5 text-xs text-warning">{t("explore.horizon.demoOnly", { n: FIXTURE_HORIZON })}</p>}
             </div>
           </section>
+          {!demo && <ScenarioPanel value={scenario} onChange={setScenario} />}
+          {!demo && (
+            <FarmerInputsForm
+              crops={cropMap}
+              candidateIds={(crops.data ?? []).map((c) => c.id)}
+              value={farmer}
+              onApply={setFarmer}
+            />
+          )}
         </aside>
 
         {/* Results */}
@@ -182,6 +204,13 @@ export function ExploreScreen() {
             </div>
           </div>
           <p className="mb-4 max-w-[72ch] text-xs text-ink-2">{t("explore.results.note")}</p>
+          {scenarioLabel && (
+            <p role="note" className="mb-4 rounded-md border border-warning bg-warning-bg p-3 text-sm font-medium text-warning" data-testid="scenario-label">
+              {scenarioLabel}
+            </p>
+          )}
+          {rotations.isError && farmer && <p className="mb-3 text-xs text-danger">{rotations.error.message}</p>}
+          {farmer && rotations.data?.inputs && <InputSources inputs={rotations.data.inputs} />}
           <p aria-live="polite" className="sr-only">
             {announce}
           </p>
@@ -196,7 +225,7 @@ export function ExploreScreen() {
           {baseline && (
             <div className="mb-4" data-testid="baseline-card">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.04em] text-ink-muted">{t("current.yours")}</p>
-              <RotationCard rotation={baseline} rank={0} crops={cropMap} irrigated={field.irrigated} selected={false} selectDisabled onToggleSelect={() => {}} isBaseline violations={baseline.rule_violations} />
+              <RotationCard scenarioLabel={scenarioLabel} rotation={baseline} rank={0} crops={cropMap} irrigated={field.irrigated} selected={false} selectDisabled onToggleSelect={() => {}} isBaseline violations={baseline.rule_violations} />
             </div>
           )}
           {rotations.isPending ? (
@@ -218,6 +247,7 @@ export function ExploreScreen() {
               {list.map((r, i) => (
                 <li key={rotationKey(r)}>
                   <RotationCard
+                    scenarioLabel={scenarioLabel}
                     rotation={r}
                     rank={i + 1}
                     crops={cropMap}

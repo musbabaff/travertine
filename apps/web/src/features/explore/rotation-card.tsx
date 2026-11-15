@@ -26,8 +26,10 @@ export function RotationCard({
   delta,
   isBaseline = false,
   violations,
+  scenarioLabel,
 }: {
   rotation: Rotation;
+  scenarioLabel?: string;
   rank: number;
   crops?: Map<string, Crop>;
   irrigated: boolean;
@@ -78,6 +80,7 @@ export function RotationCard({
       </div>
 
       <div className="mt-4">
+        {scenarioLabel && <p className="mb-2 text-xs font-medium text-warning">{scenarioLabel}</p>}
         <ScoreBars scores={rotation.scores} delta={delta} />
         {delta && <p className="mt-1 text-xs text-ink-muted">{t("current.deltaNote")}</p>}
         {isBaseline && violations && violations.length > 0 && (
@@ -147,6 +150,7 @@ export function RotationCard({
 
       {showWater && (
         <div id={`${id}-water`} className="mt-3">
+          {scenarioLabel && <p className="mb-1 text-xs font-medium text-warning">{scenarioLabel}</p>}
           <WaterYearsChart yearly={rotation.yearly} cropLabel={(c) => cropName(c, crops, locale)} irrigated={irrigated} />
         </div>
       )}

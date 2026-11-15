@@ -11,6 +11,7 @@ import { FIXTURE_LOCATION } from "@/lib/api/mock";
 import { useDataSource } from "@/lib/api/source";
 import type { FieldView } from "./use-field";
 import { distanceKm } from "@/lib/geo";
+import { HazardsPanel } from "./hazards-panel";
 import { NdviCompare } from "./ndvi-compare";
 import type { FieldState } from "@/lib/url-state";
 
@@ -154,7 +155,9 @@ export function FieldSummary({ data, field }: { data: FieldView; field: FieldSta
         )}
         <NdviCompare field={field} modis={ndvi} />
       </Section>
-      {/* "Changing conditions" panel slots in here once the contract carries climate trend statistics. */}
+      <Section title={t("hazards.title")}>
+        <HazardsPanel field={field} />
+      </Section>
     </div>
   );
 }
