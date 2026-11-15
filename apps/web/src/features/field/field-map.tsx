@@ -67,6 +67,9 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
   const state = useRef({ point, ring, draft, mode, onMapClick });
   useLayoutEffect(() => {
     state.current = { point, ring, draft, mode, onMapClick };
+    // Static caps follow the basemap prop directly, so they hold even if the map was not ready when it changed.
+    if (basemap !== "satellite") capRef.current = VECTOR_MAX_ZOOM;
+    else if (satelliteProvider === "s2") capRef.current = S2_NATIVE_ZOOM;
   });
 
   const sync = () => {
@@ -88,7 +91,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     if (!container.current) return;
     const map = new maplibregl.Map({
       container: container.current,
-      style: VECTOR_STYLE,
+      style: basemap === "satellite" ? satelliteStyle() : VECTOR_STYLE,
       center: DENIZLI_VIEW.center,
       zoom: DENIZLI_VIEW.zoom,
       attributionControl: { compact: true },
@@ -96,7 +99,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
       dragRotate: false,
       pitchWithRotate: false,
       maxPitch: 0,
-      maxZoom: VECTOR_MAX_ZOOM,
+      maxZoom: capRef.current,
     });
     mapRef.current = map;
     // Exposed for end-to-end tests (zoom-cap assertions); read-only use.
