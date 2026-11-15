@@ -6,6 +6,7 @@ test("Cosmo guided tour across the app (English)", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await fakeEngine(page);
   await page.goto("/app/overview");
+  await page.keyboard.press("Shift"); // Cosmo loads on first interaction
 
   const tour = page.getByRole("dialog", { name: "Guided tour with Cosmo" });
   await expect(tour).toBeVisible();
@@ -51,6 +52,7 @@ test("Cosmo follows the language toggle and answers glossary questions", async (
   await page.addInitScript(() => localStorage.setItem("travertine-cosmo-intro-v4", "seen"));
   await fakeEngine(page);
   await page.goto(`/app/evidence?${DEMO_QUERY}`);
+  await page.keyboard.press("Shift"); // Cosmo loads on first interaction
   await page.getByRole("button", { name: "Ask Cosmo" }).click();
   const chat = page.getByRole("dialog", { name: "Chat with Cosmo" });
   await expect(chat).toBeVisible();
