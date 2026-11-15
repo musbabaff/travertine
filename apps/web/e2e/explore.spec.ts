@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import exploreFixture from "../../../packages/contract/fixtures/rotations-explore.json";
 import { DEMO_QUERY, fakeEngine } from "./engine";
 
 const rankings = (page: import("@playwright/test").Page) => page.locator("ol > li article h3");
@@ -68,5 +69,26 @@ test.describe("Explore screen", () => {
     const results = await new AxeBuilder({ page }).analyze();
     const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
     expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(", ")}`)).toEqual([]);
+  });
+});
+
+test.describe("Current rotation as baseline", () => {
+  test("shows the baseline with rule violations and the difference on every alternative", async ({ page }) => {
+    await fakeEngine(page);
+    const fixture = exploreFixture;
+    await page.route("http://engine.test/v1/rotations/explore", async (route) => {
+      if (route.request().method() === "OPTIONS") return route.fallback();
+      const body = route.request().postDataJSON();
+      const [base, ...rest] = fixture.rotations;
+      const delta = (r: typeof base) => Object.fromEntries((["water", "income", "soil", "risk", "total"] as const).map((k) => [k, +(r.scores[k] - base.scores[k]).toFixed(3)]));
+      const response = body.current_rotation
+        ? { ...fixture, rotations: rest.map((r) => ({ ...r, vs_baseline: delta(r) })), baseline: { ...base, rule_violations: [{ rule: "no_legume_in_cycle", message: "Test message: the sequence has no legume." }] } }
+        : fixture;
+      return route.fulfill({ status: 200, headers: { "access-control-allow-origin": "*", "content-type": "application/json" }, body: JSON.stringify(response) });
+    });
+    await page.goto(`/app/explore?${DEMO_QUERY}&cur=${fixture.rotations[0].sequence.join(",")}`);
+    await expect(page.getByTestId("baseline-card")).toBeVisible();
+    await expect(page.getByTestId("rule-violations")).toContainText("Test message: the sequence has no legume.");
+    await expect(page.getByText("Differences from your current rotation").first()).toBeVisible();
   });
 });

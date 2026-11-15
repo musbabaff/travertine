@@ -58,7 +58,7 @@ export function EvidenceScreen() {
   const { t, n, locale } = useI18n();
   const { field } = useField();
   const qs = useSearchParams().toString();
-  const query = useValidation(field);
+  const query = useValidation(field, locale);
   const [view, setView] = useState<"years" | "scatter">("years");
   const [active, setActive] = useState<number | null>(null);
   const [table, setTable] = useState(false);

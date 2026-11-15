@@ -4,6 +4,7 @@ import health from "@travertine/contract/fixtures/health.json";
 import rotations from "@travertine/contract/fixtures/rotations-explore.json";
 import validation from "@travertine/contract/fixtures/validation.json";
 import fieldNdvi from "@travertine/contract/fixtures/field-ndvi.json";
+import showcase from "@travertine/contract/fixtures/showcase.json";
 import fieldRequest from "@travertine/contract/fixtures/field-analyze.request.json";
 import exploreRequest from "@travertine/contract/fixtures/rotations-explore.request.json";
 import { weightedTotal } from "../priorities";
@@ -58,6 +59,8 @@ export function mockResponse(method: string, url: string, body: string | null = 
       return json(validation);
     case "GET /v1/field/ndvi":
       return json(fieldNdvi);
+    case "GET /v1/showcase":
+      return json(showcase);
     default:
       return null;
   }

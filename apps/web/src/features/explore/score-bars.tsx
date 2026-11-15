@@ -12,7 +12,7 @@ export const OBJECTIVE_COLOR: Record<Objective, string> = {
 };
 
 /** Four horizontal bars on one 0–1 scale, fixed order, value as a direct label. */
-export function ScoreBars({ scores, compareTo }: { scores: Rotation["scores"]; compareTo?: Rotation["scores"] }) {
+export function ScoreBars({ scores, compareTo, delta }: { scores: Rotation["scores"]; compareTo?: Rotation["scores"]; delta?: Record<Objective, number> }) {
   const { t, n } = useI18n();
   return (
     <dl
@@ -21,7 +21,7 @@ export function ScoreBars({ scores, compareTo }: { scores: Rotation["scores"]; c
     >
       {OBJECTIVES.map((k) => {
         const v = scores[k];
-        const diff = compareTo ? v - compareTo[k] : null;
+        const diff = delta ? delta[k] : compareTo ? v - compareTo[k] : null;
         return (
           <div key={k} className="contents">
             <dt className="text-xs text-ink-2">{t(`explore.score.${k}` as MessageKey)}</dt>
