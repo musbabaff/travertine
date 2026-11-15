@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 
-from travertine_engine.field import FieldService
+from travertine_engine.field import FieldService, NdviRecord
 from travertine_engine.models import FieldNdvi, NdviObservation, NdviSeason, Provenance
 from travertine_engine.sources.hls import FIRST_YEAR, MAX_SCENE_CLOUD, Observation, fetch_hls
 
@@ -59,13 +60,39 @@ def summarise(observations: list[Observation]) -> tuple[list[NdviObservation], l
     return clear, seasons
 
 
+def modis_comparison(seasons: list[NdviSeason], modis: NdviRecord | None) -> str:
+    """How the 30 m season means differ from the 250 m MODIS ones in the years both have."""
+    if modis is None:
+        return "The MODIS 250 m record could not be read just now, so no comparison with it is given."
+    pairs = [
+        (s.year, s.mean_ndvi - modis.by_year[s.year])
+        for s in seasons
+        if s.mean_ndvi is not None and s.year in modis.by_year
+    ]
+    if not pairs:
+        return "No year has a season mean in both this record and the MODIS 250 m record, so they are not compared."
+    diffs = [d for _, d in pairs]
+    mean = sum(diffs) / len(diffs)
+    years = ", ".join(str(y) for y, _ in pairs)
+    return (
+        f"Compared with the MODIS 250 m season means of the same point in the same years ({years}; n = {len(pairs)}), "
+        f"the 30 m means are {mean:+.3f} NDVI on average (per year {min(diffs):+.3f} to {max(diffs):+.3f}). The two "
+        "differ in footprint (one 30 m pixel against a 250 m pixel that may mix fields), in sensors and in season "
+        "definition (clear April–September observations here; 16-day composites from early April to late "
+        "September for MODIS), so a difference is expected and neither is the reference."
+    )
+
+
 class FieldNdviService:
     def __init__(self, fields: FieldService) -> None:
         self.fields = fields
 
     async def history(self, lat: float, lon: float) -> FieldNdvi:
         last = self.fields.settings.last_year
-        observations = await fetch_hls(self.fields.upstream, self.fields.cache, lat, lon, last)
+        observations, modis = await asyncio.gather(
+            fetch_hls(self.fields.upstream, self.fields.cache, lat, lon, last),
+            self.fields.ndvi_or_none(lat, lon),
+        )
         clear, seasons = summarise(observations)
         return FieldNdvi(
             observations=clear,
@@ -75,6 +102,7 @@ class FieldNdviService:
                 "Computer begins then. The full archive (2013 onwards) needs a NASA Earthdata login.",
                 "One 30 m pixel at the field centre; a field edge, track or tree inside that pixel changes the value.",
                 "NDVI shows green cover, not yield or crop type; bare soil after harvest and weeds both affect it.",
+                modis_comparison(seasons, modis),
             ],
-            provenance=[hls_provenance(FIRST_YEAR, last)],
+            provenance=[hls_provenance(FIRST_YEAR, last), *([modis.provenance] if modis else [])],
         )

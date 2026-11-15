@@ -121,3 +121,11 @@ def test_field_analyze_with_ndvi(client: TestClient) -> None:
     body = client.post("/v1/field/analyze", json={"lat": 37.89, "lon": 28.98, "irrigated": False}).json()
     assert body["ndvi_history"]
     assert errors("FieldAnalysis", body) == []
+
+
+def test_field_ndvi(settings: Settings) -> None:
+    cfg = Settings(cache_dir=settings.cache_dir, first_year=2001, last_year=2021, rate_limit_per_minute=1000)
+    with make_client(cfg, FakeUpstream()) as c:
+        r = c.get("/v1/field/ndvi", params={"lat": 37.89, "lon": 28.98})
+    assert r.status_code == 200, r.text
+    assert errors("FieldNdvi", r.json()) == []

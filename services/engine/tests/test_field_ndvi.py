@@ -51,3 +51,17 @@ def test_field_ndvi_endpoint(settings: Settings) -> None:
     assert all(date.fromisoformat(d).toordinal() % 3 for d in dates)  # cloudy-pixel dates dropped
     assert "2020" in body["caveats"][0]
     assert body["provenance"][0]["spatial_resolution"] == "30 m"
+    assert any("MOD13Q1" in p["dataset"] for p in body["provenance"])
+    comparison = body["caveats"][-1]
+    assert comparison.startswith("Compared with the MODIS 250 m season means")
+    assert "(2020, 2021; n = 2)" in comparison
+
+
+def test_field_ndvi_survives_a_modis_outage(settings: Settings) -> None:
+    cfg = Settings(cache_dir=settings.cache_dir, first_year=2001, last_year=2021, rate_limit_per_minute=1000)
+    with make_client(cfg, FakeUpstream(modis_fails=True)) as c:
+        r = c.get("/v1/field/ndvi", params={"lat": 37.89, "lon": 28.98})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["caveats"][-1].startswith("The MODIS 250 m record could not be read")
+    assert len(body["provenance"]) == 1
