@@ -103,7 +103,7 @@ export function FieldMap({ basemap, mode, point, ring, draft, flyTo, label, onMa
     });
     mapRef.current = map;
     // Exposed for end-to-end tests (zoom-cap assertions); read-only use.
-    (window as unknown as { __travertineMap?: MLMap }).__travertineMap = map;
+    (container.current as HTMLDivElement & { __map?: MLMap }).__map = map;
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     // Keep the field clear of the floating panel on wide screens.
