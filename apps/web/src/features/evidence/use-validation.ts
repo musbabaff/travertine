@@ -11,12 +11,12 @@ export interface ValidationResult {
   fromFixture: boolean;
 }
 
-export function useValidation(field: FieldState | null) {
+export function useValidation(field: FieldState | null, language: "en" | "tr" = "en") {
   return useQuery<ValidationResult>({
-    queryKey: ["validation", field?.lat, field?.lon],
+    queryKey: ["validation", field?.lat, field?.lon, language],
     enabled: !!field,
     queryFn: async ({ signal }) => {
-      const res = await api.GET("/v1/validation", { params: { query: { lat: field!.lat, lon: field!.lon } }, signal });
+      const res = await api.GET("/v1/validation", { params: { query: { lat: field!.lat, lon: field!.lon, language } }, signal });
       return { data: unwrap(res), fromFixture: isFixtureResponse(res.response) };
     },
   });

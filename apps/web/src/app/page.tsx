@@ -5,6 +5,7 @@ import Link from "next/link";
 import validation from "@travertine/contract/fixtures/validation.json";
 import { BrandLockup } from "@/components/brand/logo";
 import { SiteFooter } from "@/components/shell/site-footer";
+import { ChallengeMap, CosmoGlossary, CurrentEntry, LiveDemo, MultiSite, Roadmap } from "@/features/landing/landing-extra";
 import { useI18n, type MessageKey } from "@/i18n";
 import { DEMO_FIELD } from "@/lib/api/mock";
 import { encodePolyline, type LngLat } from "@/lib/geo";
@@ -60,6 +61,8 @@ export default function Landing() {
           </div>
         </div>
 
+        <LiveDemo demoHref={DEMO_HREF} />
+
         <Section id="problem" title={t("landing.problem.title")}>
           <p className="mt-3 max-w-[70ch] text-body text-ink-2">{t("landing.problem.body")}</p>
         </Section>
@@ -75,6 +78,8 @@ export default function Landing() {
             ))}
           </ol>
         </Section>
+
+        <CurrentEntry demoHref={DEMO_HREF} />
 
         <Section id="evidence" title={t("landing.evidence.title")}>
           <p className="mt-3 max-w-[70ch] text-body text-ink-2">{t("landing.evidence.body", { span, n: validation.n })}</p>
@@ -106,6 +111,8 @@ export default function Landing() {
           </p>
         </Section>
 
+        <MultiSite />
+
         <Section id="data" title={t("landing.data.title")}>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2">
             {SOURCES.map((s) => (
@@ -117,13 +124,20 @@ export default function Landing() {
           </ul>
         </Section>
 
+        <ChallengeMap />
+
+        <CosmoGlossary />
+
         <Section id="limits" title={t("landing.limits.title")}>
           <ul className="mt-4 max-w-[75ch] list-disc space-y-2 pl-5 text-body text-ink-2">
             {(["grid", "soil", "pixel", "past", "yield"] as const).map((k) => (
               <li key={k}>{t(`landing.limits.${k}` as MessageKey)}</li>
             ))}
           </ul>
+          <p className="mt-4 max-w-[75ch] rounded-md border border-border bg-surface p-4 text-body font-medium text-ink">{t("landing.supports")}</p>
         </Section>
+
+        <Roadmap />
 
         <Section id="team" title={t("landing.team.title")}>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2">

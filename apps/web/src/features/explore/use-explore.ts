@@ -33,15 +33,15 @@ export function useExploreParams() {
   return { priorities, debounced, horizon, setPriority, setAll, setHorizon: setHorizonState };
 }
 
-export function useRotations(field: FieldState | null, priorities: Priorities, horizon: Horizon, current: string[] = []) {
+export function useRotations(field: FieldState | null, priorities: Priorities, horizon: Horizon, current: string[] = [], language: "en" | "tr" = "en") {
   return useQuery<RotationExploreResponse>({
-    queryKey: ["rotations", field?.lat, field?.lon, field?.irrigated, priorities, horizon, current.join(",")],
+    queryKey: ["rotations", field?.lat, field?.lon, field?.irrigated, priorities, horizon, current.join(","), language],
     enabled: !!field,
     placeholderData: keepPreviousData,
     queryFn: async ({ signal }) =>
       unwrap(
         await api.POST("/v1/rotations/explore", {
-          body: { lat: field!.lat, lon: field!.lon, irrigated: field!.irrigated, horizon_years: horizon, priorities, ...(current.length ? { current_rotation: current } : {}) },
+          body: { lat: field!.lat, lon: field!.lon, irrigated: field!.irrigated, horizon_years: horizon, priorities, language, ...(current.length ? { current_rotation: current } : {}) },
           signal,
         }),
       ),

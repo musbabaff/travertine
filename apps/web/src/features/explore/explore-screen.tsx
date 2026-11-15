@@ -54,7 +54,7 @@ export function ExploreScreen() {
   const demo = source !== "engine";
   const effectiveHorizon: Horizon = demo ? (FIXTURE_HORIZON as Horizon) : horizon;
   const current = parseCurrent(new URLSearchParams(fieldQs.slice(1)));
-  const rotations = useRotations(field, debounced, effectiveHorizon, current);
+  const rotations = useRotations(field, debounced, effectiveHorizon, current, locale);
   const baseline = rotations.data?.baseline;
   const crops = useCrops();
   const cropMap = useMemo(() => (crops.data ? new Map<string, Crop>(crops.data.map((c) => [c.id, c])) : undefined), [crops.data]);

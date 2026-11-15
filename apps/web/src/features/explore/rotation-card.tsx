@@ -3,10 +3,12 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useId, useState } from "react";
 import { WaterYearsChart } from "@/components/charts/water-years-chart";
+import { useDataSource } from "@/lib/api/source";
 import { useI18n } from "@/i18n";
 import type { Crop, Rotation } from "@/lib/api/types";
 import { explanationText } from "@/lib/localize-engine";
 import { CropTimeline, cropName } from "./crop-timeline";
+import { ReasoningParts } from "./reasoning";
 import { ScoreBars } from "./score-bars";
 
 export const rotationKey = (r: Rotation) => r.sequence.join(">");
@@ -35,6 +37,7 @@ export function RotationCard({
   violations?: { rule: string; year_index?: number; message: string }[];
 }) {
   const { t, n, locale } = useI18n();
+  const source = useDataSource();
   const [showWater, setShowWater] = useState(false);
   const id = useId();
   const top = rank === 1;
@@ -84,6 +87,7 @@ export function RotationCard({
       </div>
 
       {/* P10/P50/P90 range display slots in here once the contract carries percentile outcomes. */}
+      {rotation.reasoning && <ReasoningParts reasoning={rotation.reasoning} />}
 
       {rotation.explanation.length > 0 && (
         <div className="mt-4">
