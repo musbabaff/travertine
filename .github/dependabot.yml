@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0  # paused until after the submission (16 Nov 2026)
     commit-message:
       prefix: chore(deps)
     groups:
@@ -19,7 +19,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0  # paused until after the submission (16 Nov 2026)
     commit-message:
       prefix: chore(deps)
     groups:
@@ -28,6 +28,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    open-pull-requests-limit: 0  # paused until after the submission (16 Nov 2026)
     schedule:
       interval: weekly
       day: monday
