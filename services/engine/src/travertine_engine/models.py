@@ -134,6 +134,26 @@ class RotationExploreResponse(_Model):
     provenance: list[Provenance]
 
 
+class NdviObservation(_Model):
+    date: str
+    ndvi: float = Field(ge=-1, le=1)
+    sensor: Literal["L30", "S30"]
+
+
+class NdviSeason(_Model):
+    year: int
+    mean_ndvi: float | None = Field(default=None, ge=-1, le=1)
+    n_clear: int = Field(ge=0)
+    n_scenes: int = Field(ge=0)
+
+
+class FieldNdvi(_Model):
+    observations: list[NdviObservation]
+    seasons: list[NdviSeason]
+    caveats: list[str]
+    provenance: list[Provenance]
+
+
 class ValidationYear(_Model):
     year: int
     modelled_stress: Unit01

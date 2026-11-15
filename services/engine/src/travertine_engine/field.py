@@ -234,7 +234,7 @@ class FieldService:
         provenance = modis_provenance(years[0], years[-1], skipped, reads.note("modis_mod13q1"))
         return NdviRecord(by_year, skipped, provenance)
 
-    async def _ndvi_or_none(self, lat: float, lon: float) -> NdviRecord | None:
+    async def ndvi_or_none(self, lat: float, lon: float) -> NdviRecord | None:
         try:
             return await self.ndvi(lat, lon)
         except UpstreamUnavailable as exc:
@@ -245,7 +245,7 @@ class FieldService:
         (daily, api_version), soil, ndvi = await asyncio.gather(
             self.daily_climate(lat, lon),
             resolve_soil(self.upstream, self.cache, lat, lon),
-            self._ndvi_or_none(lat, lon),
+            self.ndvi_or_none(lat, lon),
         )
         years, dropped = annual_summary(daily)
         first = years[0].year if years else self.settings.first_year

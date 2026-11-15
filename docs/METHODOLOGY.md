@@ -181,6 +181,15 @@ a year needs at least six usable composites; years that fail are listed in the p
 ORNL DAAC MODIS web service, one request per band per season. If the service is down, the analysis is returned
 without `ndvi_history` rather than failing.
 
+**Field-scale NDVI (`/v1/field/ndvi`).** Every clear Harmonized Landsat Sentinel-2 v2.0 observation of the 30 m
+pixel at the field centre since 2020, with NDVI from the nadir BRDF-adjusted red and narrow-NIR bands (Landsat 8/9
+B04/B05, Sentinel-2 B04/B8A; HLS user guide v2.0, Table 3). An observation is clear when Fmask bits 1–5 (cloud,
+adjacent to cloud or shadow, cloud shadow, snow/ice, water) are 0 and the aerosol level is not high (Table 9; bit 0 is
+unused in v2.0). Scenes with more than 80 % cloud over the tile are not read, and overlapping MGRS tiles are counted
+once per date. Each year gets an April–September mean when at least five observations are clear. At the demo point
+the 30 m season means (0.40–0.54, 2020–2025) are well above the 250 m MODIS values (0.27–0.30): the larger pixel
+mixes the field with its surroundings.
+
 **Back-test (`/v1/validation`).** The protocol is fixed in `docs/VALIDATION.md` before results were computed. In short:
 modelled stress for year Y is 1 − ΣETa/ΣETc of rain-fed winter wheat from 1 April to harvest, from the section 5 water
 balance started on 1 October of Y−1; the observed series is the z-score of the growing-season NDVI; the statistic is
@@ -194,12 +203,12 @@ Planetary Computer does not answer; both serve the same granules.
 
 **Limitations.** The land use of the pixel is unknown, so the model crop is an assumption. A 250 m pixel can mix
 fields, roads and buildings. Irrigation is not represented in the back-test. Two dozen years give wide intervals.
-Field-scale (30 m) NDVI from Harmonized Landsat Sentinel-2 is not yet included.
+The 30 m HLS record (six seasons) is too short for the back-test, which uses MODIS.
 
 ## 9. Not yet implemented
 
 Yield response with Ky (FAO-33 / FAO-66), trend tests (Mann-Kendall, Sen's slope), P10/P50/P90 outcomes and the
-Pareto set in the explore response, HLS 30 m NDVI, and the GPM IMERG precipitation
+Pareto set in the explore response, HLS before 2020, and the GPM IMERG precipitation
 cross-check. Each will be documented here when it lands.
 
 ## References
@@ -217,5 +226,7 @@ cross-check. Each will be documented here when it lands.
   DAAC. https://doi.org/10.5067/MODIS/MOD13Q1.061
 - ORNL DAAC (2018). *Terrestrial Ecology Subsetting & Visualization Services (TESViS) Global Subsets Tool* (Version
   1.1). ORNL Distributed Active Archive Center. https://doi.org/10.3334/ORNLDAAC/1379
+- Ju, J., Zhou, Q., Freitag, B., et al. (2025). The Harmonized Landsat and Sentinel-2 version 2.0 surface reflectance
+  dataset. *Remote Sensing of Environment* 324, 114723. https://doi.org/10.1016/j.rse.2025.114723
 - Efron, B., Tibshirani, R. J. (1993). *An Introduction to the Bootstrap.* Chapman & Hall.
 - Soil Science Division Staff (2017). *Soil Survey Manual.* USDA Handbook 18.
