@@ -86,7 +86,7 @@ export function MultiSite({ title }: { title?: MessageKey } = {}) {
     <Section id="multisite" title={t(title ?? "landing.multi.title")}>
       <p className="mt-2 max-w-[70ch] text-sm text-ink-2">{t("landing.multi.body")}</p>
       {pooled && (
-        <p className="tv-card mt-4 rounded-md border border-border bg-surface p-4 text-sm text-ink" data-testid="pooled">
+        <p className="mt-4 rounded-md border border-border bg-surface p-4 text-sm text-ink" data-testid="pooled">
           {t("landing.multi.pooled", { sites: pooled.sites, r: n(pooled.mean_correlation, 2), b: n(pooled.mean_baseline_correlation, 2), lo: n(pooled.mean_difference_ci95[0], 2), hi: n(pooled.mean_difference_ci95[1], 2) })}{" "}
           <strong>{verdict(pooled.verdict)}</strong>
         </p>
