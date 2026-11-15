@@ -42,29 +42,22 @@ olsun olmasın, olduğu gibi gösterilir.
 
 ### Şu anda kullanılabilir
 
-- **Tarla**: uydu görüntülü haritada sınır çizin, nokta bırakın ya da yer arayın. Tarla özeti: 2001–2025 iklim
-  ortalamaları, yıllara göre yağış ile referans evapotranspirasyon, SoilGrids doku, organik karbon, pH ve kullanılabilir
-  su; yetişme dönemi NDVI'si 250 m'de (MODIS) ve varsa yanında 30 m'de (HLS).
-- **Keşfet**: dört öncelik kaydırıcısı ve 3, 4 ya da 5 yıllık ufuk, motorun ürettiği nöbetleri yeniden sıralar. Her
-  kartta ürün sırası, tek bir 0–1 ölçeğinde dört puan, motorun açıklamaları ve yıllara göre su ihtiyacı ile açığı yer
-  alır. Herhangi iki nöbet yan yana karşılaştırılabilir.
-- **Kanıt**: modellenen su stresinin gözlenen NDVI anomalilerine karşı geriye dönük testi; korelasyon, n, yöntem ve
-  sınırlamalar motorun döndürdüğü haliyle, yıllık ve saçılım görünümleriyle. Motor sağladığında %95 aralıklarıyla
-  model–temel çizgi karşılaştırması.
-- **Her yerde kaynak bilgisi**: her bölümde sağlayıcıyı, çözünürlüğü, kapsamı ve bağlantıyı gösteren kaynak etiketleri.
-- **Dürüst yedek mod**: motora ulaşılamazsa uygulama demo tarla için sözleşme örnek verilerini gösterir ve bunu
-  "Demo verisi" rozetiyle belirtir; demo değerlerini başka bir konuma ait gibi asla sessizce göstermez.
-- **İngilizce ve Türkçe**, tarla ve öncelikler için paylaşılabilir bağlantılar, klavyeyle kullanım, 390 px'e kadar
-  duyarlı tasarım.
+- **Genel bakış** (`/app/overview`): seçili tarlanın iklim kaydı, toprağı, NDVI'si ve su dengesi motor yanıtlarından
+  tek ekranda; tarla seçilmediyse Denizli demo tarlası açıkça etiketlenir.
+- **Veri** (`/app/data`): ekrandaki her sayının arkasındaki veri kümeleri, motorun bildirdiği haliyle.
+- **Cosmo rehberi**: ekranları gezdiren ilk kullanım turu ve sabit, gözden geçirilmiş yanıtlar veren sohbet; sözlük
+  terimlerini (evapotranspirasyon, toprak nemi anomalisi, NDVI, don riski, su dengesi, uydu ve yer ölçümü) açıklar. Dil
+  modeli kullanmaz. 3B model yalnızca rehber açıldığında yüklenir.
+- **İngilizce (varsayılan) ve Türkçe**, tarla ve öncelikler için paylaşılabilir bağlantılar, klavyeyle kullanım, 390 px'e
+  kadar duyarlı tasarım.
 
 ### Planlanan
 
-- Veri sayfası (ekrandaki her şeyin kaynak tablosu), açılış sayfası ve tarla genel bakış panosu.
 - Yazdırılabilir tek sayfalık PDF ile ekim planı, ürün kütüphanesi, kayıtlı tarlaların yan yana karşılaştırılması.
 - Çiftçi girdileri: izin verilen ürünler, kendi toprak analizi değerleri ve kendi ürün fiyatları (önce sözleşmede
   alanların tanımlanması gerekiyor).
 - İklim ve toprak sayfaları, yöntem sayfası, CSV dışa aktarma, ayarlar.
-- Son tarlanın çevrimdışı açılabildiği kurulabilir uygulama, ilk kullanımda rehberli tur.
+- Son tarlanın çevrimdışı açılabildiği kurulabilir uygulama.
 - Motor: 30 m HLS NDVI uç noktası (incelemede), iklim eğilimi istatistikleri, çok noktalı doğrulama.
 
 ## Nasıl çalışır

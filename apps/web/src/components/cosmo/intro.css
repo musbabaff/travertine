@@ -1,0 +1,48 @@
+.cosmo-tour { position: fixed; inset: 0; z-index: 1000; pointer-events: none; font-family: Inter, Arial, sans-serif; }
+.cosmo-tour-dim { position: absolute; inset: 0; background: #0c2115a6; backdrop-filter: blur(3px); }
+.cosmo-tour-focus { position: fixed; border: 2px solid #d8f286; border-radius: 14px; box-shadow: 0 0 0 9999px #0c2115a6, 0 0 0 7px #d8f28655; transition: top .35s ease, left .35s ease, width .35s ease, height .35s ease; }
+.cosmo-tour-cursor { position: fixed; z-index: 2; width: 30px; height: 30px; fill: #d8f286; color: #183d27; filter: drop-shadow(0 5px 6px #06150c88); animation: cosmo-tour-point 1s ease-in-out infinite alternate; }
+.cosmo-tour-cursor.is-clicking { animation: cosmo-tour-click .55s ease-out both; }
+.cosmo-tour-panel { position: fixed; right: 30px; bottom: 30px; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr); width: min(480px, calc(100vw - 32px)); min-height: 0; overflow: hidden; border-radius: 22px; background: #fbfcf8; box-shadow: 0 24px 80px #07190d66; pointer-events: auto; animation: cosmo-tour-enter .4s ease-out both; }
+.cosmo-tour-guide { position: fixed; top: 0; left: 0; z-index: 4; width: 240px; pointer-events: none; transition: transform 0ms cubic-bezier(.4, 0, .3, 1); will-change: transform; filter: drop-shadow(0 10px 10px #08190e59); }
+.cosmo-tour-copy { display: flex; flex-direction: column; padding: 30px 28px 24px; animation: cosmo-tour-copy .3s ease-out both; }
+.cosmo-tour-count { color: #5b835d; font-size: 10px; font-weight: 700; letter-spacing: .13em; }
+.cosmo-tour-copy h2 { margin: 12px 28px 8px 0; color: #193624; font-size: 24px; line-height: 1.12; letter-spacing: -.04em; }
+.cosmo-tour-copy p { margin: 0; color: #526557; font-size: 14px; line-height: 1.5; }
+.cosmo-tour-progress { height: 4px; margin: auto 0 18px; padding-top: 20px; background: linear-gradient(#dce7d7, #dce7d7) left 20px / 100% 4px no-repeat; }
+.cosmo-tour-progress span { display: block; height: 4px; border-radius: 4px; background: #6c9c60; transition: width .35s ease; }
+.cosmo-tour-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cosmo-tour-actions button { min-height: 40px; border-radius: 9px; font-size: 13px; }
+.cosmo-tour-skip { color: #66766a; }
+.cosmo-tour-next { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; background: #274b31; color: #fff; font-weight: 600; }
+.cosmo-tour-next:disabled { opacity: .7; }
+.cosmo-tour-close { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #48604d; background: #ebf0e8; }
+.cosmo-tour-ask { position: fixed; right: 38px; bottom: 280px; z-index: 3; padding: 10px 14px; border-radius: 10px; background: #d8f286; color: #243e2c; pointer-events: auto; box-shadow: 0 8px 22px #132e1b40; }
+/* Açıklama metni ekranda Cosmo'nun konuşması olarak görünür; kartta yalnızca ekran okuyucular için durur. */
+.cosmo-tour-transcript { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.cosmo-tour-speech { position: fixed; z-index: 5; width: 300px; margin: 0; padding: 14px 16px; border-radius: 16px; background: #fbfcf8; color: #24402d; font-size: 15px; font-weight: 500; line-height: 1.5; box-shadow: 0 14px 40px #07190d4d; pointer-events: none; animation: cosmo-speech-open .22s ease-out both; }
+.cosmo-tour-speech span { display: inline-block; margin-right: .28em; animation: cosmo-word-out .44s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--order) * 75ms + 160ms); }
+.cosmo-tour-speech.is-falling { background: transparent; box-shadow: none; animation: none; }
+.cosmo-tour-speech.is-falling span { color: #eef4e6; animation: cosmo-word-drop .8s cubic-bezier(.55, 0, .9, .45) both; animation-delay: calc(var(--order) * 16ms); }
+@keyframes cosmo-speech-open { from { opacity: 0; transform: scale(.94); } }
+@keyframes cosmo-word-out { from { opacity: 0; transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(.3); } 55% { opacity: 1; } }
+@keyframes cosmo-word-drop { 30% { opacity: 1; } to { opacity: 0; transform: translateY(calc(110px + var(--order) * 3px)) rotate(calc(var(--tilt) * 1deg)); } }
+@keyframes cosmo-tour-enter { from { opacity: 0; transform: translateY(18px) scale(.97); } }
+@keyframes cosmo-tour-copy { from { opacity: 0; transform: translateY(7px); } }
+@keyframes cosmo-tour-point { to { transform: translate(-5px, -7px) rotate(-8deg); } }
+@keyframes cosmo-tour-click { 45% { transform: scale(.7); } 100% { transform: scale(1.25); opacity: 0; } }
+@media (max-width: 760px) {
+  .cosmo-tour-panel { left: 10px; right: 10px; bottom: calc(86px + env(safe-area-inset-bottom)); width: auto; min-height: 0; }
+  .cosmo-tour-panel.is-content-step { top: 70px; bottom: auto; }
+  .cosmo-tour-guide { width: 150px; }
+  .cosmo-tour-speech { width: 210px; padding: 11px 12px; font-size: 13px; }
+  .cosmo-tour-copy { padding: 22px 16px 18px; }
+  .cosmo-tour-copy h2 { font-size: 19px; margin-right: 15px; }
+  .cosmo-tour-copy p { font-size: 12px; }
+  .cosmo-tour-actions { gap: 5px; }
+  .cosmo-tour-next { padding: 0 9px; font-size: 11px; }
+  .cosmo-tour-skip { font-size: 11px; }
+  .cosmo-tour-ask { right: 18px; bottom: 310px; }
+}
+@media (max-height: 560px) { .cosmo-tour-panel { top: 12px; bottom: auto; max-height: calc(100dvh - 24px); overflow-y: auto; } }
+@media (prefers-reduced-motion: reduce) { .cosmo-tour-panel, .cosmo-tour-copy, .cosmo-tour-cursor { animation: none; } .cosmo-tour-guide { transition: none; } .cosmo-tour-speech, .cosmo-tour-speech span { animation: none; } .cosmo-tour-speech.is-falling { display: none; } .cosmo-tour-focus { transition: none; } }

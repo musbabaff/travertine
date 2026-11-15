@@ -110,3 +110,11 @@ Engine commands are documented in `services/engine/README.md` by the engine agen
 
 `apps/web` uses Next.js 16. Its APIs differ from older versions. Read `apps/web/AGENTS.md` and the guides in
 `apps/web/node_modules/next/dist/docs/` before writing framework code.
+
+## 13. Design — the teammate's design is the design
+
+The interface adopted from `feat/travertine-ui-cosmo-tour` (styles in `apps/web/src/app/travertine-ui.css`, the header
+with the section rail, the card frame, the Cosmo guide) is **the** design of Travertine. Every existing page moves to
+it, and every new page, or page without a design, is built in it. The prototype under `design-reference/` (for example
+the rotation-plan and field-summary screens) is the visual reference. Truth-in-data, accessibility and brand rules
+still apply: no stock photography, no navigation to features without a data source, the logo is never recoloured.

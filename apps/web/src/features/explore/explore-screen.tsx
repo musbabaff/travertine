@@ -45,7 +45,7 @@ function CardSkeleton() {
 }
 
 export function ExploreScreen() {
-  const { t, n } = useI18n();
+  const { t, n, locale } = useI18n();
   const { field } = useField();
   const fieldQs = `?${useSearchParams().toString()}`;
   const source = useDataSource();
@@ -60,7 +60,7 @@ export function ExploreScreen() {
 
   const list = rotations.data?.rotations;
   const top = list?.[0];
-  const announce = top ? t("explore.live", { sequence: top.sequence.map((c) => cropName(c, cropMap)).join(", ") }) : "";
+  const announce = top ? t("explore.live", { sequence: top.sequence.map((c) => cropName(c, cropMap, locale)).join(", ") }) : "";
 
   // Drop selections that are no longer in the list (e.g. after a horizon change).
   const keys = useMemo(() => new Set(list?.map(rotationKey)), [list]);
@@ -86,8 +86,9 @@ export function ExploreScreen() {
   const isDefault = OBJECTIVES.every((k) => priorities[k] === DEFAULT_PRIORITIES[k]);
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-4 pt-6 md:px-6 md:pt-8 xl:px-8">
-      <div className="mb-6">
+    <div className="tv-feature-page mx-auto w-full max-w-[1280px] px-4 pt-6 md:px-6 md:pt-8 xl:px-8">
+      <div className="tv-page-banner mb-6">
+        <span className="tv-banner-eyebrow">TRAVERTINE / ANALİZLER</span>
         <h1 id="main" tabIndex={-1} className="text-h2 font-semibold tracking-[-0.01em] md:text-h1">
           {t("explore.title")}
         </h1>
