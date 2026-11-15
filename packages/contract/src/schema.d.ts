@@ -38,6 +38,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/field/ndvi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Field-scale (30 m) NDVI history from Harmonized Landsat Sentinel-2
+         * @description Separate from /v1/field/analyze because a cold request reads hundreds of scenes (about 2 minutes); warm requests come from the engine's cache. Load it after the field summary with its own loading state.
+         */
+        get: operations["getFieldNdvi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/field/analyze": {
         parameters: {
             query?: never;
@@ -253,6 +273,53 @@ export interface components {
             modelled_stress: components["schemas"]["Unit01"];
             /** @description Standardised anomaly of growing-season mean NDVI (σ, z-score) relative to the record. */
             observed_ndvi_anomaly: number;
+            /** @description Optional. Baseline dryness index for this year (1 − ΣP/ΣET0, April–September), unitless. Same value as in baseline.values. */
+            baseline_index?: number;
+        };
+        /** @description 95 % paired percentile bootstrap interval (lower, upper) of a Pearson correlation. */
+        CorrelationInterval: number[];
+        /** @description The same back-test for a climate-only dryness index, so the model can be judged against a simple baseline. */
+        ValidationBaseline: {
+            /** @description Human-readable label, English. */
+            name: string;
+            /** @description Pearson r between the baseline index and the NDVI anomaly. */
+            correlation: number;
+            correlation_ci95: components["schemas"]["CorrelationInterval"];
+            /** @description Baseline index per year, same years as Validation.years. */
+            values: {
+                year: number;
+                /** @description 1 − ΣP/ΣET0 over April–September, unitless. */
+                value: number;
+            }[];
+        };
+        NdviObservation: {
+            /** Format: date */
+            date: string;
+            /** @description NDVI of one clear-sky observation (unitless). */
+            ndvi: number;
+            /**
+             * @description L30 = Landsat 8/9, S30 = Sentinel-2 (HLS v2.0 products).
+             * @enum {string}
+             */
+            sensor: "L30" | "S30";
+        };
+        NdviSeason: {
+            year: number;
+            /** @description Mean of clear April–September observations (unitless). Omitted when n_clear < 5. */
+            mean_ndvi?: number;
+            /** @description Clear observations used. */
+            n_clear: number;
+            /** @description Scenes looked at that year. */
+            n_scenes: number;
+        };
+        FieldNdvi: {
+            /** @description Every clear-sky observation of the 30 m pixel at the field centre, ascending by date. */
+            observations: components["schemas"]["NdviObservation"][];
+            /** @description Growing-season (April–September) summary per year, ascending by year. */
+            seasons: components["schemas"]["NdviSeason"][];
+            /** @description Limitations. The UI renders these verbatim. */
+            caveats: string[];
+            provenance: components["schemas"]["Provenance"][];
         };
         Validation: {
             years: components["schemas"]["ValidationYear"][];
@@ -260,6 +327,17 @@ export interface components {
             correlation: number;
             /** @description Number of years used. */
             n: number;
+            /** @description Optional. 95 % paired percentile bootstrap interval for correlation. */
+            correlation_ci95?: components["schemas"]["CorrelationInterval"];
+            /** @description Optional. The same statistic for a baseline dryness index. */
+            baseline?: components["schemas"]["ValidationBaseline"];
+            /** @description Optional. 95 % interval of correlation − baseline.correlation (lower, upper). */
+            difference_ci95?: number[];
+            /**
+             * @description Optional. Pre-registered rule (docs/VALIDATION.md): model_better only if difference_ci95 lies entirely below 0; baseline_better only if entirely above 0; otherwise no_detectable_difference.
+             * @enum {string}
+             */
+            verdict?: "model_better" | "baseline_better" | "no_detectable_difference";
             /** @description How the back-test was computed, including the correlation type. */
             method: string;
             /** @description Limitations. The UI renders these verbatim. */
@@ -323,6 +401,32 @@ export interface operations {
                     "application/json": components["schemas"]["Crop"][];
                 };
             };
+            default: components["responses"]["Error"];
+        };
+    };
+    getFieldNdvi: {
+        parameters: {
+            query: {
+                lat: components["schemas"]["Latitude"];
+                lon: components["schemas"]["Longitude"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Clear-sky observations and growing-season summaries for the 30 m pixel at the field centre. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldNdvi"];
+                };
+            };
+            422: components["responses"]["Error"];
+            502: components["responses"]["Error"];
             default: components["responses"]["Error"];
         };
     };

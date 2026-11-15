@@ -1,0 +1,15 @@
+# Ownership as defined in CLAUDE.md. Later rules take precedence.
+
+# Default: web lead (repository tooling, web app, contract, agent rules, root docs)
+*                         @musbabaff
+
+# Engine and the documents the engine lead owns
+/services/engine/         @r0ine
+/docs/METHODOLOGY.md      @r0ine
+/docs/DATA_SOURCES.md     @r0ine
+/docs/MODEL_CARD.md       @r0ine
+/docs/VALIDATION.md       @r0ine
+
+# Shared: both humans review AI-use records and contract changes
+/docs/AI_USE.md           @musbabaff @r0ine
+/packages/contract/       @musbabaff @r0ine

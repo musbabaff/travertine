@@ -72,3 +72,51 @@ def paired_bootstrap(
         ci_diff=ci(ra - rb),
         resamples=int(ok.sum()),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class PooledBootstrap:
+    mean_r_a: float
+    mean_r_b: float
+    mean_diff: float
+    ci_a: tuple[float, float]
+    ci_b: tuple[float, float]
+    ci_diff: tuple[float, float]
+    sites: int
+
+
+def pooled_paired_bootstrap(
+    sites: Sequence[tuple[FloatArray, FloatArray, FloatArray]], *, resamples: int = 10_000, seed: int = 2026
+) -> PooledBootstrap:
+    """Mean over sites of corr(a, target), corr(b, target) and their difference. Years are resampled within each
+    site (stratified), with the same draw for a and b; resamples where any site's series is constant are dropped."""
+    rng = np.random.default_rng(seed)
+    ra_all = np.zeros(resamples)
+    rb_all = np.zeros(resamples)
+    ok = np.ones(resamples, dtype=bool)
+    for a, b, target in sites:
+        n = target.shape[0]
+        idx = rng.integers(0, n, size=(resamples, n))
+        ra = _rows_pearson(a[idx], target[idx])
+        rb = _rows_pearson(b[idx], target[idx])
+        ok &= np.isfinite(ra) & np.isfinite(rb)
+        ra_all += np.nan_to_num(ra)
+        rb_all += np.nan_to_num(rb)
+    k = len(sites)
+    ra_all, rb_all = ra_all[ok] / k, rb_all[ok] / k
+
+    def ci(v: FloatArray) -> tuple[float, float]:
+        lo, hi = np.percentile(v, [2.5, 97.5])
+        return float(lo), float(hi)
+
+    point_a = float(np.mean([pearson(a, t) for a, _, t in sites]))
+    point_b = float(np.mean([pearson(b, t) for _, b, t in sites]))
+    return PooledBootstrap(
+        mean_r_a=point_a,
+        mean_r_b=point_b,
+        mean_diff=point_a - point_b,
+        ci_a=ci(ra_all),
+        ci_b=ci(rb_all),
+        ci_diff=ci(ra_all - rb_all),
+        sites=k,
+    )

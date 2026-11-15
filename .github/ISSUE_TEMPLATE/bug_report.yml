@@ -1,0 +1,42 @@
+name: Bug report
+description: Something in the app or the engine does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting. Please do not include personal data, and never report security problems here (see SECURITY.md).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Web app, Engine / API, Contract, Docs, Not sure]
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page URL or endpoint
+      description: The address in the browser (it contains the field and priorities) or the API call.
+      placeholder: https://travertinefields.com/app/explore?lat=…
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open …\n2. Click …\n3. See …"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Browser, device and language
+      placeholder: Edge 131 on Windows 11, Turkish
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs

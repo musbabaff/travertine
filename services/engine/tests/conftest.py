@@ -127,6 +127,19 @@ def synthetic_hls(url: str, params: Any) -> dict[str, Any]:
     return {"values": [red, nir, fmask], "band_names": ["B04_b1", "B05_b1", "Fmask_b1"]}
 
 
+def synthetic_modis_pc(url: str, params: Any, cloudy_year: int | None) -> dict[str, Any]:
+    """Planetary Computer payloads for MOD13Q1: a STAC search with Terra and Aqua items, then point values."""
+    if url.endswith("/search"):
+        year = int(str(dict(params)["datetime"])[:4])
+        ids = [f"MOD13Q1.A{year}{doy:03d}.h20v05.061.2024000000000" for doy in range(81, 274, 16)]
+        ids += [f"MYD13Q1.A{year}{doy:03d}.h20v05.061.2024000000000" for doy in range(89, 266, 16)]
+        return {"features": [{"id": i} for i in ids], "links": []}
+    item = dict(params)["item"]
+    year = int(item[9:13])
+    ndvi = 0.30 + 0.05 * math.sin(1.7 * year)
+    return {"values": [round(ndvi * 10000), 3 if year == cloudy_year else 0]}
+
+
 class FakeUpstream(Upstream):
     def __init__(
         self,
@@ -134,6 +147,7 @@ class FakeUpstream(Upstream):
         soil_fails: bool = False,
         power_fails: bool = False,
         modis_fails: bool = False,
+        pc_modis: bool = False,
         varying_rain: bool = False,
         cloudy_year: int | None = None,
     ) -> None:
@@ -141,6 +155,7 @@ class FakeUpstream(Upstream):
         self.soil_fails = soil_fails
         self.power_fails = power_fails
         self.modis_fails = modis_fails
+        self.pc_modis = pc_modis
         self.varying_rain = varying_rain
         self.cloudy_year = cloudy_year
         self.calls: list[str] = []
@@ -162,6 +177,12 @@ class FakeUpstream(Upstream):
             return synthetic_modis(dict(params), self.cloudy_year)
         if source == "HLS (Planetary Computer)":
             return synthetic_hls(url, params)
+        if source == "MODIS (Planetary Computer)":
+            if not self.pc_modis:  # most tests exercise the ORNL path
+                raise UpstreamUnavailable(
+                    "Planetary Computer did not return data.", details={"source": source}
+                )
+            return synthetic_modis_pc(url, params, self.cloudy_year)
         raise AssertionError(f"unexpected upstream {source}")
 
 

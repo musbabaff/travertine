@@ -53,7 +53,8 @@ export function BacktestSeries({ years, active, onActive, label }: Props) {
   const height = M.top + topH + gap + botH + M.bottom;
   const iw = Math.max(0, width - M.left - M.right);
   const x = scaleBand({ domain: years.map((y) => y.year), range: [0, iw], padding: 0.25 });
-  const stress = years.map((y) => y.modelled_stress);
+  const base = years.map((y) => y.baseline_index).filter((v): v is number => v !== undefined);
+  const stress = [...years.map((y) => y.modelled_stress), ...base];
   const sMin = Math.min(...stress), sMax = Math.max(...stress);
   const pad = Math.max(0.02, (sMax - sMin) * 0.15);
   const ys = scaleLinear({ domain: [Math.max(0, sMin - pad), Math.min(1, sMax + pad)], range: [topH, 0], nice: true });
@@ -91,11 +92,21 @@ export function BacktestSeries({ years, active, onActive, label }: Props) {
 
             {/* Top: modelled stress */}
             <text x={-M.left} y={-10} {...axisTitle}>
-              {t("evidence.axis.stress")}
+              {base.length ? t("evidence.axis.index") : t("evidence.axis.stress")}
             </text>
             {ys.ticks(3).map((v) => (
               <line key={`s${v}`} x1={0} x2={iw} y1={ys(v)} y2={ys(v)} stroke="var(--viz-grid)" />
             ))}
+            {base.length === years.length && (
+              <path
+                d={years.map((d, i) => `${i ? "L" : "M"}${cx(d.year)},${ys(d.baseline_index!)}`).join("")}
+                fill="none"
+                stroke="var(--viz-neutral)"
+                strokeWidth={1.5}
+                strokeDasharray="4 3"
+                pointerEvents="none"
+              />
+            )}
             <path d={path} fill="none" stroke="var(--viz-model)" strokeWidth={1.75} pointerEvents="none" />
             {years.map((d, i) => (
               <circle key={`p${d.year}`} cx={cx(d.year)} cy={ys(d.modelled_stress)} r={active === i ? 4.5 : 3} fill="var(--viz-model)" pointerEvents="none" />

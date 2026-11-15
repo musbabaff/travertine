@@ -4,7 +4,12 @@ import { mockResponse, SOURCE_HEADER } from "./mock";
 import { setDataSource, type DataSource } from "./source";
 import type { paths } from "./types";
 
-const TIMEOUT_MS = 25_000;
+/**
+ * Measured on the deployed engine: about 90 s to wake from idle, about 40 s for a 5-year search, and up to about 210 s
+ * for the first analysis of a new location (25 years of daily climate fetched upstream). Only an engine that is
+ * still silent after this falls back to fixtures.
+ */
+const TIMEOUT_MS = 300_000;
 const FALLBACK_STATUS = new Set([502, 503, 504]);
 /** The contract defines no 404/501, so these mean the engine does not serve this route yet. */
 const NOT_SERVED_STATUS = new Set([404, 501]);

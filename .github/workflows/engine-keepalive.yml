@@ -1,0 +1,26 @@
+name: Engine keep-alive
+
+# Render's free instance sleeps after 15 minutes without traffic; a ping every 10 minutes keeps it warm.
+# Scheduled runs are best effort, so an occasional cold start is still possible. (Requested in #19.)
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ENGINE_URL: ${{ vars.ENGINE_URL }}
+    steps:
+      - name: GET /v1/health
+        run: |
+          if [ -z "$ENGINE_URL" ]; then echo "::warning::ENGINE_URL repository variable is not set"; exit 0; fi
+          for i in 1 2 3; do
+            if curl -fsS -m 90 "$ENGINE_URL/v1/health"; then exit 0; fi
+            sleep 20
+          done
+          exit 1

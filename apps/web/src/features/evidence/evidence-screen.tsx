@@ -1,5 +1,6 @@
 "use client";
 
+import { SlowHint } from "@/components/ui/slow-hint";
 import { FlaskConical, MapPinned } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -11,6 +12,7 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/ui/states";
 import { useI18n } from "@/i18n";
 import type { Validation } from "@/lib/api/types";
 import { useField } from "../field/use-field";
+import { ModelVsBaseline } from "./model-vs-baseline";
 import { period, useValidation } from "./use-validation";
 
 function readingKey(r: number) {
@@ -78,6 +80,7 @@ export function EvidenceScreen() {
   const datasets = v ? [...new Set(v.provenance.map(shortName))].join(" + ") : "";
   const subtitle = v && span ? t("evidence.chart.subtitle", { from: span[0], to: span[1], n: v.n, datasets }) : "";
   const cur = v && active !== null ? v.years[active] : null;
+  const hasBaseline = !!v?.years.some((y) => y.baseline_index !== undefined);
   const chartLabel = v ? t("evidence.chart.aria", { r: n(v.correlation, 2), n: v.n, from: span?.[0] ?? "", to: span?.[1] ?? "" }) : "";
 
   return (
@@ -102,6 +105,7 @@ export function EvidenceScreen() {
       {query.isPending ? (
         <div aria-busy="true" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <span className="sr-only">{t("evidence.loading")}</span>
+          <SlowHint className="lg:col-span-2" />
           <div className="order-2 rounded-md border border-border bg-surface p-5 lg:order-1">
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="mt-2 h-3 w-1/2" />
@@ -154,6 +158,12 @@ export function EvidenceScreen() {
                       <span className="inline-block h-0.5 w-4 rounded-full bg-teal-700" />
                       {t("evidence.legend.stress")}
                     </span>
+                    {hasBaseline && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block w-4 border-t-2 border-dashed border-[var(--viz-neutral)]" />
+                        {t("evidence.legend.baseline")}
+                      </span>
+                    )}
                     <span className="inline-flex items-center gap-1.5">
                       <span className="inline-block size-2.5 rounded-[2px] bg-[var(--viz-water)]" />
                       {t("evidence.legend.greener")}
@@ -195,6 +205,7 @@ export function EvidenceScreen() {
                         <th scope="col" className="px-3 py-1.5 text-left font-medium">{t("chart.axis.year")}</th>
                         <th scope="col" className="px-3 py-1.5 text-right font-medium">{t("evidence.axis.stress")}</th>
                         <th scope="col" className="px-3 py-1.5 text-right font-medium">{t("evidence.axis.anomaly")}</th>
+                        {hasBaseline && <th scope="col" className="px-3 py-1.5 text-right font-medium">{t("evidence.axis.baseline")}</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -203,6 +214,7 @@ export function EvidenceScreen() {
                           <th scope="row" className="px-3 py-1 text-left font-normal">{d.year}</th>
                           <td className="px-3 py-1 text-right">{n(d.modelled_stress, 3)}</td>
                           <td className="px-3 py-1 text-right">{n(d.observed_ndvi_anomaly, 2)}</td>
+                          {hasBaseline && <td className="px-3 py-1 text-right">{d.baseline_index === undefined ? "" : n(d.baseline_index, 3)}</td>}
                         </tr>
                       ))}
                     </tbody>
@@ -216,8 +228,8 @@ export function EvidenceScreen() {
               </div>
             </section>
 
-            {/* Baseline-versus-model comparison and the multi-site table with confidence intervals slot in here
-                once the contract carries those fields. Hidden until then: no placeholder values. */}
+            <ModelVsBaseline v={v} />
+            {/* The multi-site table with confidence intervals slots in here once the contract carries it. */}
           </div>
 
           <aside aria-labelledby="method-title" className="space-y-4 lg:col-start-2 lg:row-start-2">

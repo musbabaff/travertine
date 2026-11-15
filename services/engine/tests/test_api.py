@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from tests.conftest import FakeUpstream, make_client
+from travertine_engine import explore
 from travertine_engine.config import Settings
 from travertine_engine.errors import InvalidRequest
 from travertine_engine.field import make_field_id, parse_field_id
@@ -98,3 +99,64 @@ def test_cors_allows_listed_and_preview_origins(settings: Settings, fake: FakeUp
         assert preflight(preview) == preview
         assert preflight("https://travertine-evil.vercel.app") is None
         assert preflight("https://travertine-x-musbabaffs-projects.vercel.app.evil.com") is None
+
+
+def test_explore_ranking_does_not_depend_on_chunk_size(
+    settings: Settings, fake: FakeUpstream, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    long = replace(settings, last_year=2008)
+    body = {
+        "lat": 37.89,
+        "lon": 28.98,
+        "horizon_years": 3,
+        "priorities": {"water": 0.8, "income": 0.4, "soil": 0.6, "risk": 0.5},
+        "irrigated": False,
+    }
+    results = []
+    for chunk in (10_000, 7):
+        monkeypatch.setattr(explore, "CHUNK", chunk)
+        with make_client(long, fake) as c:
+            r = c.post("/v1/rotations/explore", json=body)
+        assert r.status_code == 200, r.text
+        results.append(r.json()["rotations"])
+    assert results[0] == results[1]
+
+
+def test_candidate_scores_are_reused_across_priorities(
+    settings: Settings, fake: FakeUpstream, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls = []
+    original = explore.score_candidates
+
+    def counting(*args: object) -> explore.CandidateScores:
+        calls.append(args[2])
+        return original(*args)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(explore, "score_candidates", counting)
+    long = replace(settings, last_year=2008)
+    base = {"lat": 37.89, "lon": 28.98, "horizon_years": 3, "irrigated": False}
+    with make_client(long, fake) as c:
+        a = c.post(
+            "/v1/rotations/explore",
+            json={**base, "priorities": {"water": 1, "income": 0, "soil": 0, "risk": 0}},
+        )
+        b = c.post(
+            "/v1/rotations/explore",
+            json={**base, "priorities": {"water": 0, "income": 0, "soil": 1, "risk": 0}},
+        )
+    assert a.status_code == b.status_code == 200
+    assert calls == [3]
+    assert a.json()["rotations"] != b.json()["rotations"]
+
+
+def test_warm_fields_setting_parses_points(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ENGINE_WARM_FIELDS", "37.89,28.98; 40.1,-88.2")
+    assert Settings.from_env().warm_fields == [(37.89, 28.98), (40.1, -88.2)]
+
+
+def test_daily_climate_is_computed_once_per_location(settings: Settings, fake: FakeUpstream) -> None:
+    with make_client(settings, fake) as c:
+        service = c.app.state.fields  # type: ignore[attr-defined]
+        first = c.portal.call(service.daily_climate, 37.89, 28.98)  # type: ignore[union-attr]
+        again = c.portal.call(service.daily_climate, 37.8901, 28.9799)  # type: ignore[union-attr]
+    assert again[0] is first[0]

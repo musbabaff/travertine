@@ -41,6 +41,7 @@ log = logging.getLogger(__name__)
 
 TOP_N = 10
 TABLE_CACHE_SIZE = 16
+SCORE_CACHE_SIZE = 48
 
 FAO56_PROVENANCE = Provenance(
     dataset="FAO Irrigation and Drainage Paper No. 56 — Crop evapotranspiration",
@@ -106,6 +107,11 @@ class ExploreService:
             tuple[float, float, bool, tuple[str, ...]], tuple[RotationTables, FieldInputs]
         ] = OrderedDict()
         self._locks: dict[tuple[float, float, bool, tuple[str, ...]], asyncio.Lock] = {}
+        self._scores: OrderedDict[tuple[object, ...], CandidateScores] = OrderedDict()
+        self._score_locks: dict[tuple[object, ...], asyncio.Lock] = {}
+        # One heavy computation at a time: on a 512 MB instance a background warm-up and a user request building
+        # scores side by side can run out of memory.
+        self._heavy = asyncio.Semaphore(1)
 
     async def inputs(self, lat: float, lon: float) -> tuple[FieldInputs, list[Provenance], str]:
         (daily, api_version), soil = await asyncio.gather(
@@ -151,7 +157,8 @@ class ExploreService:
             cached = self._tables.get(key)
             if cached is None:
                 started = time.perf_counter()
-                tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
+                async with self._heavy:
+                    tables = await asyncio.to_thread(build_tables, inputs, crops, irrigated=irrigated)
                 log.info(
                     "rotation tables built",
                     extra={"elapsed_ms": round((time.perf_counter() - started) * 1000)},
@@ -162,6 +169,41 @@ class ExploreService:
                 cached = self._tables[key]
         return cached[0], cached[1], provenance
 
+    async def scores(
+        self, lat: float, lon: float, irrigated: bool, crops: tuple[CropParams, ...], horizon: int
+    ) -> tuple[RotationTables, FieldInputs, list[Provenance], CandidateScores]:
+        """Candidate scores are independent of the priorities, so they are computed once per field, mode, crop set
+        and horizon; a request then only weighs them and describes the top ten."""
+        tables, inputs, provenance = await self.tables(lat, lon, irrigated, crops)
+        key = (round(lat, 4), round(lon, 4), irrigated, tuple(c.id for c in crops), horizon)
+        cached = self._scores.get(key)
+        if cached is None:
+            async with self._score_locks.setdefault(key, asyncio.Lock()):
+                cached = self._scores.get(key)
+                if cached is None:
+                    started = time.perf_counter()
+                    async with self._heavy:
+                        cached = await asyncio.to_thread(score_candidates, tables, inputs.texture, horizon)
+                    log.info(
+                        "candidate scores built",
+                        extra={
+                            "horizon": horizon,
+                            "elapsed_ms": round((time.perf_counter() - started) * 1000),
+                        },
+                    )
+                    self._scores[key] = cached
+                    while len(self._scores) > SCORE_CACHE_SIZE:
+                        self._scores.popitem(last=False)
+        self._scores.move_to_end(key)
+        return tables, inputs, provenance, cached
+
+    async def warm(self, lat: float, lon: float, horizons: tuple[int, ...] = (3, 4, 5)) -> None:
+        """Fill the table and score caches for one field, rain-fed then irrigated, all crops."""
+        crops = select_crops(None)
+        for irrigated in (False, True):
+            for horizon in horizons:
+                await self.scores(lat, lon, irrigated, crops, horizon)
+
     async def explore(self, req: RotationExploreRequest) -> RotationExploreResponse:
         if req.field_id is not None:
             lat, lon = parse_field_id(req.field_id)
@@ -170,8 +212,10 @@ class ExploreService:
         else:
             raise InvalidRequest("Provide field_id or both lat and lon.")
         crops = select_crops(req.crop_ids)
-        tables, inputs, provenance = await self.tables(lat, lon, req.irrigated, crops)
-        result = await asyncio.to_thread(rank, tables, inputs.texture, req.horizon_years, req.priorities)
+        tables, inputs, provenance, scores = await self.scores(
+            lat, lon, req.irrigated, crops, req.horizon_years
+        )
+        result = await asyncio.to_thread(rank_scores, tables, scores, req.priorities)
         rotations = describe(tables, result, inputs.texture, req)
         n_windows = len(tables.years) - req.horizon_years + 1
         provenance = [
@@ -228,57 +272,109 @@ def _scale(values: np.ndarray) -> np.ndarray:
 class Ranked:
     order: np.ndarray
     scored: Scored
-    cast: Backcast
+    top: np.ndarray  # rotation indices of the returned rotations, best first
+    cast: Backcast  # back-cast of the `top` rotations only, in the same order
+    window_years: tuple[int, ...]  # first year of every window that is valid for at least one candidate
 
 
-def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
-    rot, indicators = candidates(tables.crops, horizon, texture)
-    if rot.shape[0] == 0:
-        raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
-    cast = backcast(tables, rot)
+CHUNK = 1024  # candidates back-cast at once; bounds memory to a few tens of MB whatever the horizon
+
+
+def _chunk_scores(cast: Backcast) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     ok = cast.window_valid
-    if not ok.any():
-        raise InvalidRequest("The climate record is too short for this horizon.")
-
+    n = ok.shape[0]
     demand = cast.etc.sum(axis=2)
     deficit = cast.deficit.sum(axis=2)
     met = np.where(ok, 1.0 - deficit / np.maximum(demand, 1e-9), np.nan)
     water = np.clip(row_percentile(met, 50), 0.0, 1.0)
 
     unmet = cast.deficit / np.maximum(cast.etc, 1e-9)
-    unmet = np.where(ok[:, :, None], unmet, np.nan).reshape(rot.shape[0], -1)
+    unmet = np.where(ok[:, :, None], unmet, np.nan).reshape(n, -1)
     p10 = row_percentile(unmet, 10)
     p90 = row_percentile(unmet, 90)
     risk = np.clip(1.0 - (0.5 * p90 + 0.5 * (p90 - p10)), 0.0, 1.0)
 
-    rel_et = np.where(ok[:, :, None], cast.eta / np.maximum(cast.etc, 1e-9), np.nan)
-    income = np.clip(np.nanmean(rel_et.reshape(rot.shape[0], -1), axis=1), 0.0, 1.0)
+    rel_et = np.where(ok[:, :, None], cast.eta / np.maximum(cast.etc, 1e-9), np.nan).reshape(n, -1)
+    with np.errstate(invalid="ignore"):
+        income = np.clip(np.nanmean(rel_et, axis=1), 0.0, 1.0)
+    return water, income, risk
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateScores:
+    """Everything about the candidates that does not depend on the user's priorities."""
+
+    rotations: np.ndarray
+    indicators: list[SoilIndicators]
+    water: np.ndarray
+    income: np.ndarray
+    risk: np.ndarray
+    soil: np.ndarray
+    window_years: tuple[int, ...]  # first year of every window valid for at least one candidate
+
+
+def score_candidates(tables: RotationTables, texture: str, horizon: int) -> CandidateScores:
+    rot, indicators = candidates(tables.crops, horizon, texture)
+    if rot.shape[0] == 0:
+        raise InvalidRequest("No rotation satisfies the agronomic rules with these crops and horizon.")
+    n = rot.shape[0]
+    water, income, risk = np.zeros(n), np.zeros(n), np.zeros(n)
+    any_valid = np.zeros(n, dtype=bool)
+    windows_used: np.ndarray | None = None
+    window_years: tuple[int, ...] = ()
+    for lo in range(0, n, CHUNK):
+        part = backcast(tables, rot[lo : lo + CHUNK])
+        hi = lo + part.etc.shape[0]
+        water[lo:hi], income[lo:hi], risk[lo:hi] = _chunk_scores(part)
+        any_valid[lo:hi] = part.window_valid.any(axis=1)
+        used = part.window_valid.any(axis=0)
+        windows_used = used if windows_used is None else windows_used | used
+        window_years = part.window_years
+    if not any_valid.any() or windows_used is None:
+        raise InvalidRequest("The climate record is too short for this horizon.")
 
     n_credit = _scale(np.array([i.n_credit_kg_ha for i in indicators]))
     families = _scale(np.array([float(i.families) for i in indicators]))
     roots = _scale(np.array([i.root_range_m for i in indicators]))
     cover = _scale(np.array([i.cover_fraction for i in indicators]))
-    soil = (n_credit + families + roots + cover) / 4.0
+    return CandidateScores(
+        rotations=rot,
+        indicators=indicators,
+        water=water,
+        income=income,
+        risk=risk,
+        soil=(n_credit + families + roots + cover) / 4.0,
+        window_years=tuple(y for y, keep in zip(window_years, windows_used, strict=True) if keep),
+    )
 
+
+def rank_scores(tables: RotationTables, c: CandidateScores, priorities: Priorities) -> Ranked:
     weights = np.array([priorities.water, priorities.income, priorities.soil, priorities.risk])
     if weights.sum() == 0:
         weights = np.ones(4)
-    stacked = np.vstack([water, income, soil, risk])
+    stacked = np.vstack([c.water, c.income, c.soil, c.risk])
     total = (weights[:, None] * stacked).sum(axis=0) / weights.sum()
-    order = np.lexsort((-water, -total))  # ties broken by water score
+    order = np.lexsort((-c.water, -total))  # ties broken by water score
+    top = order[:TOP_N]
     return Ranked(
         order=order,
         scored=Scored(
-            rotations=rot,
-            water=water,
-            income=income,
-            soil=soil,
-            risk=risk,
+            rotations=c.rotations,
+            water=c.water,
+            income=c.income,
+            soil=c.soil,
+            risk=c.risk,
             total=total,
-            indicators=indicators,
+            indicators=c.indicators,
         ),
-        cast=cast,
+        top=top,
+        cast=backcast(tables, c.rotations[top]),
+        window_years=c.window_years,
     )
+
+
+def rank(tables: RotationTables, texture: str, horizon: int, priorities: Priorities) -> Ranked:
+    return rank_scores(tables, score_candidates(tables, texture, horizon), priorities)
 
 
 def _pct(x: float) -> str:
@@ -290,13 +386,13 @@ def describe(
 ) -> list[Rotation]:
     s, cast = ranked.scored, ranked.cast
     out: list[Rotation] = []
-    first_years = [y for y, ok in zip(cast.window_years, cast.window_valid.any(axis=0), strict=True) if ok]
-    for r in ranked.order[:TOP_N]:
+    first_years = list(ranked.window_years)
+    for k, r in enumerate(ranked.top):
         seq = [tables.crops[i] for i in s.rotations[r]]
-        ok = cast.window_valid[r]
-        etc = cast.etc[r][ok]
-        eta = cast.eta[r][ok]
-        deficit = cast.deficit[r][ok]
+        ok = cast.window_valid[k]
+        etc = cast.etc[k][ok]
+        eta = cast.eta[k][ok]
+        deficit = cast.deficit[k][ok]
         stress = 1.0 - eta / np.maximum(etc, 1e-9)
         yearly = [
             RotationYear(

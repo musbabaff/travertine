@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use Travertine, please cite it as below."
+title: "Travertine: crop-rotation decision support from Earth observation data"
+abstract: >-
+  Web app and engine that compare three- to five-year crop rotations for a field using NASA POWER weather,
+  SoilGrids soil, MODIS NDVI and an FAO-56 daily soil-water balance, with a pre-registered back-test against
+  observed vegetation. Built for the NASA Space Apps Challenge 2026 ("Field Shift: Adapting Farms with NASA Data").
+type: software
+authors:
+  - family-names: Babayev
+    given-names: Mustafa
+    alias: musbabaff
+  - family-names: Gencel
+    given-names: Kemal
+    alias: r0ine
+repository-code: "https://github.com/musbabaff/travertine"
+url: "https://travertinefields.com"
+license: MIT
+version: 0.1.0
+date-released: "2026-11-14"
+keywords:
+  - crop rotation
+  - climate adaptation
+  - earth observation
+  - FAO-56
+  - NASA POWER
+  - decision support

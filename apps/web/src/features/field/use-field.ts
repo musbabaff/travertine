@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { api, unwrap } from "@/lib/api/client";
-import type { FieldAnalysis } from "@/lib/api/types";
+import { api, isFixtureResponse, unwrap } from "@/lib/api/client";
+import type { FieldAnalysis, FieldNdvi } from "@/lib/api/types";
 import { toGeometry } from "@/lib/geo";
 import { parseField, writeField, type FieldState } from "@/lib/url-state";
 
@@ -43,5 +43,17 @@ export function useFieldAnalysis(field: FieldState | null) {
           signal,
         }),
       ),
+  });
+}
+
+/** 30 m HLS NDVI. A separate, possibly slow request (cold: about 2 minutes), loaded after the field summary. */
+export function useFieldNdvi(field: FieldState | null, enabled = true) {
+  return useQuery<{ data: FieldNdvi; fromFixture: boolean }>({
+    queryKey: ["field-ndvi", field?.lat, field?.lon],
+    enabled: !!field && enabled,
+    queryFn: async ({ signal }) => {
+      const res = await api.GET("/v1/field/ndvi", { params: { query: { lat: field!.lat, lon: field!.lon } }, signal });
+      return { data: unwrap(res), fromFixture: isFixtureResponse(res.response) };
+    },
   });
 }

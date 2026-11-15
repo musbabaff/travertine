@@ -11,6 +11,7 @@ const ROUTES: Record<string, string> = {
   "/v1/field/analyze": "field-analyze.json",
   "/v1/rotations/explore": "rotations-explore.json",
   "/v1/validation": "validation.json",
+  "/v1/field/ndvi": "field-ndvi.json",
 };
 
 const cors = {
@@ -19,7 +20,7 @@ const cors = {
   "access-control-allow-methods": "GET,POST,OPTIONS",
 };
 
-/** "partial": engine is live but does not serve /v1/validation yet (404), as before the engine implements it. */
+/** "partial": engine is live but does not serve /v1/validation or /v1/field/ndvi yet (404). */
 export type EngineMode = "ok" | "slow" | "error" | "down" | "partial";
 
 /** Fakes the engine at http://engine.test using contract fixtures. */
@@ -33,7 +34,7 @@ export async function fakeEngine(page: Page, mode: EngineMode = "ok") {
       return route.fulfill({ status: 422, headers: { ...cors, "content-type": "application/json" }, body: JSON.stringify({ code: "out_of_coverage", message: "No soil data for this location." }) });
     }
     if (mode === "slow") await new Promise(() => {}); // never resolves: loading state
-    const file = mode === "partial" && path === "/v1/validation" ? undefined : ROUTES[path];
+    const file = mode === "partial" && (path === "/v1/validation" || path === "/v1/field/ndvi") ? undefined : ROUTES[path];
     if (!file) return route.fulfill({ status: 404, headers: cors, body: "{}" });
     return route.fulfill({ status: 200, headers: { ...cors, "content-type": "application/json" }, body: fixture(file) });
   });

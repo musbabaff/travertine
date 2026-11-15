@@ -35,10 +35,17 @@ improve agreement with observations. Details are in `docs/METHODOLOGY.md`.
 ## Evaluation
 
 The only evaluation so far is the demo-field back-test against MODIS NDVI anomalies, with a protocol fixed in
-advance (`docs/VALIDATION.md`). Result for 2002–2025 (n = 24): model r = −0.66 (95 % interval −0.85 to −0.43);
-a plain dryness index 1 − P/ET0 gives r = −0.53 (−0.74 to −0.26); the interval of the difference (−0.34 to +0.03)
-includes zero, so the model is **not shown to beat the baseline**. This checks a dryness signal at one 250 m pixel of
-unknown land use; it does not validate deficits, yields or rankings. Multi-site validation is planned.
+advance (`docs/VALIDATION.md`). Result for 2002–2025 (n = 24): model r = −0.66 (95 % interval −0.85 to −0.43, which
+excludes zero); a plain dryness index 1 − P/ET0 gives r = −0.53 (−0.74 to −0.26). The interval of the difference
+(−0.34 to +0.03) includes zero, so a difference between model and baseline is **not established** at n = 24. This checks a dryness signal at one 250 m pixel of
+unknown land use; it does not validate deficits, yields or rankings.
+
+Multi-site back-test with the same protocol, fixed before results (`docs/VALIDATION.md` sections 4–5): eight sites
+were chosen, six could be computed (SoilGrids has no complete prediction at the other two). Pooled over the six, mean
+model r = −0.60 (−0.70 to −0.50), mean baseline r = −0.49 (−0.61 to −0.37), difference −0.11 (−0.20 to −0.02): the
+model's stronger association is established at the pooled level for these six sites. Site by site it is established
+only at one site (Bărăgan, Romania); at Polatlı the baseline's correlation is the stronger one, without an
+established difference.
 
 ## Known limitations
 
