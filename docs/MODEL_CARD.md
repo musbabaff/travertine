@@ -16,7 +16,7 @@ improve agreement with observations. Details are in `docs/METHODOLOGY.md`.
 
 The tool can score the rotation a farmer already grows next to the alternatives it proposes, including one that
 breaks its own rotation rules, and reports the difference in every score. It supports the farmer's judgment and local
-expertise; it does not replace them.
+expertise; it does not replace them. Each strategy lists its information gaps and the points that need local review.
 
 ## Not intended for
 

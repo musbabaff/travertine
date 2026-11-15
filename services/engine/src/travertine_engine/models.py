@@ -170,12 +170,30 @@ class ScoreDifference(_Model):
     total: float = Field(ge=-1, le=1)
 
 
+class EvidenceItem(_Model):
+    statement: str
+    value: float
+    unit: str
+    dataset: str
+
+
+class RotationReasoning(_Model):
+    """Each part may be empty: nothing generic is written to fill one."""
+
+    why_suggested: list[str]
+    evidence: list[EvidenceItem]
+    benefits: list[str]
+    information_gaps: list[str]
+    local_review: list[str]
+
+
 class Rotation(_Model):
     sequence: list[str]
     scores: RotationScores
     yearly: list[RotationYear]
     explanation: list[str]
     vs_baseline: ScoreDifference | None = None
+    reasoning: RotationReasoning | None = None
 
 
 class RuleViolation(_Model):
