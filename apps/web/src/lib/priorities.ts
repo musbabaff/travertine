@@ -28,6 +28,9 @@ export function writeExplore(params: URLSearchParams, priorities: Priorities, ho
   const next = new URLSearchParams(params);
   next.set("p", OBJECTIVES.map((k) => round2(priorities[k]).toFixed(2)).join(","));
   next.set("h", String(horizon));
+  // The current rotation never outlasts the horizon: the engine rejects a longer one.
+  const cur = (next.get("cur") ?? "").split(",").filter(Boolean);
+  if (cur.length > horizon) next.set("cur", cur.slice(0, horizon).join(","));
   return next;
 }
 

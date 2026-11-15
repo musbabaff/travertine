@@ -1,4 +1,5 @@
 import type { MessageKey } from "@/i18n";
+import { foldKeyword, foldQuestion, hasAny } from "@/lib/fold";
 import type { CosmoPose } from "./mascot";
 
 /**
@@ -33,7 +34,10 @@ const GLOSSARY: { words: string[]; text: MessageKey; links?: CosmoLink[] }[] = [
   { words: ["satellite", "ground", "station", "uydu", "yer ölçüm", "istasyon"], text: "cosmo.gloss.satellite", links: [data] },
 ];
 
-const has = (text: string, words: string[]) => words.some((w) => text.includes(w));
+const has = hasAny;
+
+// Fold every keyword once, when the module loads.
+for (const g of GLOSSARY) g.words.forEach(foldKeyword);
 
 export const GREETING: MessageKey = "cosmo.greeting";
 
@@ -46,7 +50,7 @@ export function startersFor(pathname: string): MessageKey[] {
 }
 
 export function askCosmo(question: string, pathname: string): CosmoReply {
-  const q = ` ${question.toLocaleLowerCase("tr-TR").toLocaleLowerCase("en-GB")} `;
+  const q = foldQuestion(question);
 
   if (has(q, ["jump", "zıpla", "hopla"])) return { text: "cosmo.r.jump", pose: "jump" };
   if (has(q, ["dance", "celebrate", "dans", "kutla", "sevin"])) return { text: "cosmo.r.cheer", pose: "cheer" };

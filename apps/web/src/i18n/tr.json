@@ -641,5 +641,21 @@
   "scenario.reset": "Sıfırla",
   "data.eyebrow": "Travertine / Veri",
   "data.req.hazards": "İklim tehlikeleri",
-  "cosmo.ui.generated": "Bu tarla için motorun verisinden Gemini yazdı; sayıları sayfada kontrol et."
+  "cosmo.ui.generated": "Bu tarla için motorun verisinden Gemini yazdı; sayıları sayfada kontrol et.",
+  "error.generic": "Bu istekte bir sorun oluştu. Lütfen yeniden deneyin; sorun sürerse başka bir tarla seçin ya da daha sonra tekrar deneyin.",
+  "error.currentTooLong": "Mevcut rotasyonunuz seçilen süreden daha fazla yıl içeriyor. Süreye uyacak şekilde kısaltıldı; lütfen yılları kontrol edin.",
+  "error.currentUnknownCrop": "Mevcut rotasyonunuzda motorun tanımadığı bir ürün var. Lütfen ürünleri yeniden seçin.",
+  "error.currentNoValue": "Mevcut rotasyonunuzdaki her ürün için bir değer girin ya da ürün değerlerini temizleyin.",
+  "error.valuesZero": "En az bir ürün değeri 0'dan büyük olmalıdır.",
+  "error.sandClaySum": "Kum ve kil toplamı %100'ü geçemez.",
+  "error.needLegume": "İzin verilen ürünler en az bir baklagil içermelidir; her rotasyon döngüsünde bir baklagil gerekir.",
+  "error.unknownCrop": "Seçilen ürünlerden biri motorun ürün tablosunda yok.",
+  "error.noRotation": "Bu ürünler ve bu süreyle rotasyon kurallarını sağlayan bir rotasyon yok. Daha fazla ürüne izin verin ya da daha kısa bir süre seçin.",
+  "error.recordShort": "Bu noktadaki iklim kaydı bu süre için çok kısa.",
+  "error.noPower": "NASA POWER'ın bu konum için verisi yok.",
+  "error.fewNdviYears": "Burada hem modellenmiş değeri hem de kullanılabilir bir bitki örtüsü sezonu olan yıl sayısı çok az; geriye dönük test hesaplanamıyor.",
+  "error.demoHorizon": "Örnek veri yalnızca tek bir rotasyon süresini kapsıyor.",
+  "error.rateLimited": "Kısa sürede çok fazla istek gönderildi. Lütfen bir dakika bekleyip yeniden deneyin.",
+  "error.upstream": "Motorun dayandığı bir veri servisi yanıt vermedi. Lütfen biraz sonra yeniden deneyin.",
+  "error.outOfCoverage": "Bu sonuç için gereken veriler bu konumda bulunmuyor."
 }

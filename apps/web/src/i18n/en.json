@@ -641,5 +641,21 @@
   "scenario.reset": "Reset",
   "data.eyebrow": "Travertine / Data",
   "data.req.hazards": "Climate hazards",
-  "cosmo.ui.generated": "Written by Gemini from the engine's data for this field; check the numbers on the page."
+  "cosmo.ui.generated": "Written by Gemini from the engine's data for this field; check the numbers on the page.",
+  "error.generic": "Something went wrong with this request. Please try again; if it keeps failing, try another field or come back later.",
+  "error.currentTooLong": "Your current rotation has more years than the chosen horizon. It has been shortened to fit; please check the years.",
+  "error.currentUnknownCrop": "Your current rotation contains a crop the engine does not know. Please choose the crops again.",
+  "error.currentNoValue": "Give a crop value for every crop in your current rotation, or clear the crop values.",
+  "error.valuesZero": "At least one crop value must be above 0.",
+  "error.sandClaySum": "Sand and clay together cannot be more than 100 %.",
+  "error.needLegume": "The allowed crops must include at least one legume; every rotation needs one per cycle.",
+  "error.unknownCrop": "One of the chosen crops is not in the engine's crop table.",
+  "error.noRotation": "No rotation meets the rotation rules with these crops and this horizon. Allow more crops or choose a shorter horizon.",
+  "error.recordShort": "The climate record at this point is too short for this horizon.",
+  "error.noPower": "NASA POWER has no data at this location.",
+  "error.fewNdviYears": "Too few years have both a modelled value and a usable vegetation season here, so the back-test cannot be computed.",
+  "error.demoHorizon": "Demo data covers only one rotation length.",
+  "error.rateLimited": "Too many requests in a short time. Please wait a minute and try again.",
+  "error.upstream": "A data service the engine depends on did not answer. Please try again in a moment.",
+  "error.outOfCoverage": "The data needed for this result are not available at this location."
 }

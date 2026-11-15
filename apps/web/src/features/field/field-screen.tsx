@@ -238,7 +238,7 @@ export function FieldScreen() {
             <div>
               <h2 className="mb-4 text-h3 font-semibold">{t("summary.title")}</h2>
               {analysis.isError && !analysis.data ? (
-                <FieldSummaryError message={analysis.error?.message ?? ""} onRetry={() => analysis.refetch()} />
+                <FieldSummaryError error={analysis.error} onRetry={() => analysis.refetch()} />
               ) : !analysis.data ? (
                 <FieldSummarySkeleton />
               ) : (

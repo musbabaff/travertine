@@ -14,7 +14,7 @@ export function CurrentRotationPicker({ crops, horizon }: { crops: Crop[] | unde
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const current = parseCurrent(new URLSearchParams(params.toString()));
+  const current = parseCurrent(new URLSearchParams(params.toString())).slice(0, horizon);
 
   const write = (next: string[]) => {
     const p = new URLSearchParams(window.location.search);

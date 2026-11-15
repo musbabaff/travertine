@@ -1,5 +1,7 @@
 "use client";
 
+import { errorText } from "@/lib/api/errors";
+
 import { SlowHint } from "@/components/ui/slow-hint";
 import { Info } from "lucide-react";
 import type { ReactNode } from "react";
@@ -77,9 +79,9 @@ export function FieldSummarySkeleton() {
   );
 }
 
-export function FieldSummaryError({ message, onRetry }: { message: string; onRetry: () => void }) {
+export function FieldSummaryError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const { t } = useI18n();
-  return <ErrorState title={t("state.error.title")} body={t("state.error.body", { message })} retryLabel={t("state.retry")} onRetry={onRetry} />;
+  return <ErrorState title={t("state.error.title")} body={errorText(error, t)} retryLabel={t("state.retry")} onRetry={onRetry} />;
 }
 
 export function FieldSummary({ data, field }: { data: FieldView; field: FieldState }) {

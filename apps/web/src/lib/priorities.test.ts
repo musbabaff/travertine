@@ -9,6 +9,13 @@ describe("priorities URL state", () => {
     expect(p.get("lat")).toBe("1");
     expect(parseExplore(p)).toEqual({ priorities: { water: 0.8, income: 0.25, soil: 0, risk: 1 }, horizon: 5 });
   });
+  it("shortens the current rotation to the horizon in the same write", () => {
+    const p = writeExplore(new URLSearchParams("lat=1&cur=cotton,cotton,cotton,cotton"), DEFAULT_PRIORITIES, 3);
+    expect(p.get("cur")).toBe("cotton,cotton,cotton");
+    expect(p.get("h")).toBe("3");
+    expect(writeExplore(new URLSearchParams("cur=lentil,barley"), DEFAULT_PRIORITIES, 5).get("cur")).toBe("lentil,barley");
+    expect(writeExplore(new URLSearchParams("lat=1"), DEFAULT_PRIORITIES, 3).has("cur")).toBe(false);
+  });
   it("clamps and falls back on invalid input", () => {
     expect(parseExplore(new URLSearchParams("p=2,-1,0.5,0.5&h=7"))).toEqual({ priorities: { water: 1, income: 0, soil: 0.5, risk: 0.5 }, horizon: 4 });
     expect(parseExplore(new URLSearchParams("p=a,b")).priorities).toEqual(DEFAULT_PRIORITIES);

@@ -1,5 +1,7 @@
 "use client";
 
+import { errorText } from "@/lib/api/errors";
+
 import { SlowHint } from "@/components/ui/slow-hint";
 import { FlaskConical, MapPinned } from "lucide-react";
 import Link from "next/link";
@@ -122,7 +124,7 @@ export function EvidenceScreen() {
           </div>
         </div>
       ) : query.isError ? (
-        <ErrorState title={t("evidence.error.title")} body={t("state.error.body", { message: query.error.message })} retryLabel={t("state.retry")} onRetry={() => query.refetch()} />
+        <ErrorState title={t("evidence.error.title")} body={errorText(query.error, t)} retryLabel={t("state.retry")} onRetry={() => query.refetch()} />
       ) : !v || v.years.length === 0 ? (
         <div className="rounded-md border border-border bg-surface p-5">
           <EmptyState title={t("evidence.empty.title")} body={t("evidence.empty.body")} />

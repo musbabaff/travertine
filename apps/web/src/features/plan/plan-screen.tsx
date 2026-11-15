@@ -1,5 +1,7 @@
 "use client";
 
+import { errorText } from "@/lib/api/errors";
+
 import { ArrowLeft, MapPinned, Printer } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -205,7 +207,7 @@ export function PlanScreen() {
               <Skeleton className="h-24 w-full" />
             </div>
           ) : calendar.isError ? (
-            <ErrorState title={t("state.error.title")} body={t("state.error.body", { message: calendar.error.message })} retryLabel={t("state.retry")} onRetry={() => calendar.refetch()} />
+            <ErrorState title={t("state.error.title")} body={errorText(calendar.error, t)} retryLabel={t("state.retry")} onRetry={() => calendar.refetch()} />
           ) : cal ? (
             <Calendar cal={cal} name={name} />
           ) : null}
@@ -216,7 +218,7 @@ export function PlanScreen() {
           {rotations.isPending ? (
             <Skeleton className="mt-3 h-24 w-full" />
           ) : rotations.isError ? (
-            <ErrorState title={t("state.error.title")} body={t("state.error.body", { message: rotations.error.message })} retryLabel={t("state.retry")} onRetry={() => rotations.refetch()} />
+            <ErrorState title={t("state.error.title")} body={errorText(rotations.error, t)} retryLabel={t("state.retry")} onRetry={() => rotations.refetch()} />
           ) : scored ? (
             <>
               <table className="mt-3 w-full text-sm tabular-nums">
