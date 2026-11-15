@@ -247,7 +247,42 @@ export interface components {
             language?: components["schemas"]["Language"];
             /** @description Optional. The rotation the field grows now, one crop_id per year. A sequence shorter than horizon_years is repeated in order to fill it; a longer one is rejected (422). Any crop from /v1/crops may appear, whatever crop_ids says. It is scored with the same model as the candidates, even when it breaks the rotation rules, and returned as `baseline`. */
             current_rotation?: string[];
+            /** @description Optional. The farmer's own soil test and crop values; each one replaces the dataset estimate it names in the response's inputs[]. The allowed crops are crop_ids and irrigation is irrigated. */
+            farmer_inputs?: components["schemas"]["FarmerInputs"];
         } | unknown | unknown;
+        FarmerInputs: {
+            soil?: components["schemas"]["FarmerSoil"];
+            /** @description Value per crop id for the income score, in any one unit (e.g. revenue per hectare at full yield). Only ratios matter: each crop year is weighted by its value divided by the largest. Must name every candidate crop (crop_ids, or all crops) and no others; at least one value above 0. Other inputs return 422. */
+            crop_values?: {
+                [key: string]: number;
+            };
+        };
+        /** @description Topsoil test. sand_pct and clay_pct come together (silt = 100 − sand − clay) and set the texture class. If texture or organic carbon is given without available_water_mm_per_m, available water is recomputed from them with Saxton & Rawls (2006) as if the tested soil filled the root zone. */
+        FarmerSoil: {
+            /** @description Sand, % of fine earth. */
+            sand_pct?: number;
+            /** @description Clay, % of fine earth. sand_pct + clay_pct ≤ 100. */
+            clay_pct?: number;
+            /** @description Soil organic carbon, % by mass (not organic matter). */
+            organic_carbon_pct?: number;
+            /** @description Measured plant-available water (field capacity − wilting point), mm per metre of soil. */
+            available_water_mm_per_m?: number;
+        };
+        InputSource: {
+            /** @description soil.sand_pct, soil.clay_pct, soil.organic_carbon_pct, soil.texture_class, soil.available_water_mm_per_m, allowed_crops, irrigated, crop_values (default) or crop_value.<crop_id> (farmer). */
+            name: string;
+            /** @description Value the engine used. */
+            value: number | string;
+            /** @description %, mm/m, relative, or empty. */
+            unit: string;
+            /**
+             * @description farmer = given in this request (or computed from the farmer's soil test); dataset = SoilGrids 2.0; default = engine default (no measurement).
+             * @enum {string}
+             */
+            source: "farmer" | "dataset" | "default";
+            /** @description When source is farmer, the estimate it replaced, e.g. "SoilGrids 2.0, 0–100 cm: 139 mm/m". Empty otherwise. */
+            replaces: string;
+        };
         /** @description All scores 0–1, higher is better. `risk` is high when risk is LOW. */
         RotationScores: {
             water: components["schemas"]["Unit01"];
@@ -305,6 +340,8 @@ export interface components {
             rotations: components["schemas"]["Rotation"][];
             /** @description Optional. Present when the request carried current_rotation. */
             baseline?: components["schemas"]["BaselineRotation"];
+            /** @description Every input the scores rest on and where it came from: the farmer, a dataset, or an engine default. */
+            inputs?: components["schemas"]["InputSource"][];
             provenance: components["schemas"]["Provenance"][];
         };
         ValidationYear: {
