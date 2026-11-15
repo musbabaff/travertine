@@ -53,9 +53,11 @@ button { cursor: pointer; }
 .tv-menu-toggle svg { width: 20px; height: 20px; }
 .tv-mobile-menu { display: none; }
 .tv-rail { position: fixed; z-index: 45; top: 98px; left: 38px; display: flex; flex-direction: column; gap: 13px; width: 48px; }
-.tv-rail a { width: 48px; height: 48px; display: grid; place-items: center; flex: none; border-radius: 13px; color: #617064; transition: color 180ms, background 180ms, transform 180ms; }
+.tv-rail a, .tv-rail-pending { width: 48px; height: 48px; display: grid; place-items: center; flex: none; border-radius: 13px; color: #617064; transition: color 180ms, background 180ms, transform 180ms; }
 .tv-rail a:hover { color: #244b2c; background: #e8eee7; transform: translateY(-2px); }
 .tv-rail a[aria-current="page"] { color: #fff; background: radial-gradient(circle at 45% 35%, #303a30, #0f1410 75%); box-shadow: inset 0 0 14px #ffffff22, 0 5px 16px #142b1822; }
+.tv-rail-pending { color: #8c998d; cursor: default; }
+.tv-rail-pending:hover { background: #e8eee7; }
 .tv-rail svg { width: 22px; height: 22px; stroke-width: 1.7; }
 .tv-bottom-nav { display: none; }
 .tv-content { min-height: calc(100svh - 82px); margin-left: 106px; min-width: 0; }

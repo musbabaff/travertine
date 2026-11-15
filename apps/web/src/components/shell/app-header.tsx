@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChartNoAxesCombined, ChevronDown, Fingerprint, Home, Layers, Menu, Sprout, X } from "lucide-react";
+import { Bell, ChartNoAxesCombined, ChevronDown, ClipboardList, CloudSun, Droplets, Fingerprint, Home, Layers, Menu, Package, Settings, Sprout, X } from "lucide-react";
 import { SourceBadge } from "./source-badge";
 
 const groups = [
@@ -19,6 +19,19 @@ const rail = [
   { href: "/app", title: "Tarla İzleme", icon: Layers },
   { href: "/app/explore", title: "Ekim Önerileri", icon: Sprout },
   { href: "/app/evidence", title: "Veri ve Yöntem", icon: ChartNoAxesCombined },
+] as const;
+
+const desktopRail = [
+  { href: "/", title: "Genel Bakış", icon: Home },
+  { href: "/app", title: "Tarla İzleme", icon: Layers },
+  { href: null, title: "Hava Durumu", icon: CloudSun },
+  { href: null, title: "Üretim", icon: Sprout },
+  { href: null, title: "Sulama", icon: Droplets },
+  { href: "/app/explore", title: "Ekim Önerileri", icon: ChartNoAxesCombined },
+  { href: null, title: "Hasat", icon: Package },
+  { href: "/app/evidence", title: "Veri ve Yöntem", icon: ClipboardList },
+  { href: null, title: "Bildirimler", icon: Bell },
+  { href: null, title: "Ayarlar", icon: Settings },
 ] as const;
 
 export function AppHeader() {
@@ -83,7 +96,11 @@ export function AppHeader() {
         )}
       </header>
       <nav className="tv-rail" aria-label="Bölümler">
-        {rail.map(({ href, title, icon: Icon }) => <Link key={href} href={hrefWithField(href)} data-cosmo-tour={href === "/app" ? "field-nav" : href === "/app/evidence" ? "evidence-nav" : undefined} aria-label={title} title={title} aria-current={pathname === href ? "page" : undefined}><Icon aria-hidden="true" /></Link>)}
+        {desktopRail.map(({ href, title, icon: Icon }) => href ? (
+          <Link key={title} href={hrefWithField(href)} data-cosmo-tour={href === "/app" ? "field-nav" : href === "/app/evidence" ? "evidence-nav" : undefined} aria-label={title} title={title} aria-current={pathname === href ? "page" : undefined}><Icon aria-hidden="true" /></Link>
+        ) : (
+          <span key={title} className="tv-rail-pending" role="img" aria-label={`${title}, henüz kullanılamıyor`} title={`${title} · hazırlanıyor`}><Icon aria-hidden="true" /></span>
+        ))}
       </nav>
       <nav className="tv-bottom-nav" aria-label="Hızlı gezinme">
         {rail.map(({ href, title, icon: Icon }) => <Link key={href} href={hrefWithField(href)} data-cosmo-tour={href === "/app" ? "field-nav" : href === "/app/evidence" ? "evidence-nav" : undefined} aria-label={title} aria-current={pathname === href ? "page" : undefined}><Icon aria-hidden="true" /><span>{title}</span></Link>)}
