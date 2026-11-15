@@ -8,7 +8,7 @@
   2001,
   2025
  ],
- "note": "Upstream responses for the demo field, fetched live by scripts/make_snapshot.py. Loaded into the cache at image build and start-up; responses that use them say so in their provenance note.",
+ "note": "Upstream responses for the demo field and the multi-site validation locations, fetched live by scripts/make_snapshot.py and scripts/validate_sites.py. Loaded into the cache at image build and start-up; responses that use them say so in their provenance note.",
  "entries": [
   {
    "key": "modis_mod13q1/+37.890_+28.980_089a220e3b5e8329acdf5899",
@@ -250,6 +250,1464 @@
    "sha256": "fc19e3820ff792b6143ae2299f18d2b4aeb6e034db99f733767340879f721e0a",
    "fetched_at": "2026-11-14T15:17:46+00:00",
    "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=28.9800&lat=37.8900&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "power_daily/+33.000_-7.620_854027dce1e172f5ac4b5a08",
+   "source": "power_daily",
+   "file": "files/power_daily/+33.000_-7.620_854027dce1e172f5ac4b5a08.json.gz",
+   "sha256": "85a71ce10ae1d21dd1571decf1d537b408b46989f5a92c59f62ab4ae2d57b43f",
+   "fetched_at": "2026-11-14T16:00:17+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=33.0000&longitude=-7.6200&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "power_daily/+38.360_-98.760_3f34dee015a4ea1d51ef2002",
+   "source": "power_daily",
+   "file": "files/power_daily/+38.360_-98.760_3f34dee015a4ea1d51ef2002.json.gz",
+   "sha256": "e9b399018fbbef573575fcac52212ec77e992465a6c9d9eeafb3cd9f694fd95e",
+   "fetched_at": "2026-11-14T19:02:31+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=38.3600&longitude=-98.7600&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "power_daily/+38.650_+32.930_804888da63e71818a400cc23",
+   "source": "power_daily",
+   "file": "files/power_daily/+38.650_+32.930_804888da63e71818a400cc23.json.gz",
+   "sha256": "c19d8eea8493eb206e9d893462b14011301f39a81dd56934ebb6b9f8c5a0e3fc",
+   "fetched_at": "2026-11-14T15:45:08+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=38.6500&longitude=32.9300&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "power_daily/+39.580_+32.150_8997a2f90639e2210e01d118",
+   "source": "power_daily",
+   "file": "files/power_daily/+39.580_+32.150_8997a2f90639e2210e01d118.json.gz",
+   "sha256": "f271fcb5e00329407cdbf8dc393e178ceddde91bf3b5655fd2bad3e05c9511d5",
+   "fetched_at": "2026-11-14T15:55:21+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=39.5800&longitude=32.1500&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "power_daily/+41.950_-4.950_5771ccad516d758beaa5b554",
+   "source": "power_daily",
+   "file": "files/power_daily/+41.950_-4.950_5771ccad516d758beaa5b554.json.gz",
+   "sha256": "e36f3e6437c092ae656f3a5a53ee720ca13837c6659d67f546eada7c2f38432c",
+   "fetched_at": "2026-11-14T18:56:57+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=41.9500&longitude=-4.9500&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "power_daily/+44.350_+27.200_71b79a80751885ad138b594c",
+   "source": "power_daily",
+   "file": "files/power_daily/+44.350_+27.200_71b79a80751885ad138b594c.json.gz",
+   "sha256": "2024a89c2d21c70e50ed0a81cefe1f11f028a51f6dbb0f968a612f90f8d6c163",
+   "fetched_at": "2026-11-14T18:59:47+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=44.3500&longitude=27.2000&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "power_daily/+48.250_+1.750_f076ce0e5ca9924bb65487be",
+   "source": "power_daily",
+   "file": "files/power_daily/+48.250_+1.750_f076ce0e5ca9924bb65487be.json.gz",
+   "sha256": "0df228d4e2b486835badd8a1e6f0589890726ef0e1d011dbc6effb91af6ec8ed",
+   "fetched_at": "2026-11-14T19:06:01+00:00",
+   "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M%2CT2M_MAX%2CT2M_MIN%2CT2MDEW%2CRH2M%2CWS2M%2CPS%2CALLSKY_SFC_SW_DWN%2CPRECTOTCORR%2CGWETROOT%2CGWETTOP&community=AG&latitude=48.2500&longitude=1.7500&start=20010101&end=20251231&format=JSON&time-standard=LST"
+  },
+  {
+   "key": "soilgrids/+33.000_-7.620_572070c6502ca607036251e3",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+33.000_-7.620_572070c6502ca607036251e3.json.gz",
+   "sha256": "9cc3fc30141eb37e1f6a1040bf8c386154ff013c94d1bf807a5d976bd5e51a60",
+   "fetched_at": "2026-11-14T16:00:12+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-7.6200&lat=33.0000&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "soilgrids/+38.360_-98.760_95aec9f6becd3130a0873b7a",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+38.360_-98.760_95aec9f6becd3130a0873b7a.json.gz",
+   "sha256": "a1c135898ca3b26688f397f60ddecae4e409bc9a9b3e962c872df152a3f602c6",
+   "fetched_at": "2026-11-14T19:02:51+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-98.7600&lat=38.3600&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "soilgrids/+38.650_+32.930_de60e51bee405eb10be5017f",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+38.650_+32.930_de60e51bee405eb10be5017f.json.gz",
+   "sha256": "d97034c0412a6f879822018e31f540506073239954bfa1daa14ba6e922be0ae9",
+   "fetched_at": "2026-11-14T15:45:33+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=32.9300&lat=38.6500&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "soilgrids/+39.580_+32.150_47e3967fbb0fcf685c43b6ac",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+39.580_+32.150_47e3967fbb0fcf685c43b6ac.json.gz",
+   "sha256": "478f51e820aaf3598f92de2fc2fd25ebbb843d5d7e882bdf92dc204d39131ebc",
+   "fetched_at": "2026-11-14T15:55:42+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=32.1500&lat=39.5800&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "soilgrids/+41.950_-4.950_69af5b24389f4a346aa71c81",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+41.950_-4.950_69af5b24389f4a346aa71c81.json.gz",
+   "sha256": "1095fe01abecc0bd3b393e100d2e303a6fb4ad106eca5c3f298165ce78ef8670",
+   "fetched_at": "2026-11-14T18:58:16+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=-4.9500&lat=41.9500&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "soilgrids/+44.350_+27.200_4cb8c4d90dad12587f2debe6",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+44.350_+27.200_4cb8c4d90dad12587f2debe6.json.gz",
+   "sha256": "9d582fa66ed5bd33f47307d154bbb3bad2b1c7cd84165b95183d882aa70cd2ae",
+   "fetched_at": "2026-11-14T19:00:06+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=27.2000&lat=44.3500&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "soilgrids/+48.250_+1.750_0ead79110f231539847f7d6f",
+   "source": "soilgrids",
+   "file": "files/soilgrids/+48.250_+1.750_0ead79110f231539847f7d6f.json.gz",
+   "sha256": "02b024afb99728a2bb3390087a1b8b2854a98ae194bc535af76c100d26595538",
+   "fetched_at": "2026-11-14T19:06:27+00:00",
+   "url": "https://rest.isric.org/soilgrids/v2.0/properties/query?lon=1.7500&lat=48.2500&property=clay&property=sand&property=silt&property=soc&property=phh2o&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean&value=Q0.05&value=Q0.95"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_0914206234fda2d83f52b442",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_0914206234fda2d83f52b442.json.gz",
+   "sha256": "3488a21db22f3416234bc64d440a364e2181fb4a8ef9d5eaee5e7c40b5942722",
+   "fetched_at": "2026-11-15T06:17:29+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2003-03-15%2F2003-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_0e5b6e54436cd11f7fd1047b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_0e5b6e54436cd11f7fd1047b.json.gz",
+   "sha256": "d193a7d15050abd621ebc7e5a54564a305ea854dae5fd621627bf305bdf70a84",
+   "fetched_at": "2026-11-15T06:17:33+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2010-03-15%2F2010-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_1ce9e4d71df0b0a72932dc50",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_1ce9e4d71df0b0a72932dc50.json.gz",
+   "sha256": "7bbd7190e4e7c49f5e7d7e7959a32296ae60053e4cb51230b31a7a760b71fb3d",
+   "fetched_at": "2026-11-15T06:17:36+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2018-03-15%2F2018-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_1f5fdff2e885f2f047e8e2a4",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_1f5fdff2e885f2f047e8e2a4.json.gz",
+   "sha256": "f572509cdeff5d647085eca4da0fb11b2e7b3fd3e355cab604706883510e630b",
+   "fetched_at": "2026-11-15T06:17:34+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2013-03-15%2F2013-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_2d74a1432757cd11876d53f1",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_2d74a1432757cd11876d53f1.json.gz",
+   "sha256": "1e0d5bbdd431269362747072e9328d795ca086a46065f77763a3bba3f82b7e65",
+   "fetched_at": "2026-11-15T06:17:38+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2021-03-15%2F2021-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_3544b81abf97d59130ff8491",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_3544b81abf97d59130ff8491.json.gz",
+   "sha256": "67f7ba9b35cf879ac7cb313111b33dc4a6b0cbbc8b2012653b6fadbd621bfd8c",
+   "fetched_at": "2026-11-15T06:17:30+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2004-03-15%2F2004-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_36244b0672245a3359214324",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_36244b0672245a3359214324.json.gz",
+   "sha256": "b47eb79dbae72e378a2d651bf9d3f4109a877472f365eca863937f6c5a36860c",
+   "fetched_at": "2026-11-15T06:17:29+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2002-03-15%2F2002-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_46eb95cd805894f674fa897a",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_46eb95cd805894f674fa897a.json.gz",
+   "sha256": "37523aa5be365c49f4dd626a2c1f74c9285544fe3cf37ae909306aa7b969ef16",
+   "fetched_at": "2026-11-15T06:17:34+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2014-03-15%2F2014-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_56ffd94d92732283799444fd",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_56ffd94d92732283799444fd.json.gz",
+   "sha256": "f12a2acbe9d59c5cebda31f673fe74ab536689f26c8b8b02c0eef4f581206080",
+   "fetched_at": "2026-11-15T06:17:36+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2017-03-15%2F2017-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_593d4fb61cf2b45be4fee22c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_593d4fb61cf2b45be4fee22c.json.gz",
+   "sha256": "21b468c95197b6ad4b6efaaa2f168d995e44dbafe5c5064f64696c54dd547dc8",
+   "fetched_at": "2026-11-15T06:17:37+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2020-03-15%2F2020-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_6dcde2d601503df180fc5699",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_6dcde2d601503df180fc5699.json.gz",
+   "sha256": "c270213678434185beb09b6aa72945f265a5cb034c32017b1872bcd439f15437",
+   "fetched_at": "2026-11-15T06:17:31+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2006-03-15%2F2006-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_80aaf9d99e8e25b607b8d406",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_80aaf9d99e8e25b607b8d406.json.gz",
+   "sha256": "b874e6676272cf91b0486a227349245a40c212f9b4a0913866156204235b86bd",
+   "fetched_at": "2026-11-15T06:17:29+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2001-03-15%2F2001-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_94d1de28736863dd1a2e9df3",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_94d1de28736863dd1a2e9df3.json.gz",
+   "sha256": "eef7d42b157cb2faf86d033e14b6713dcd228ab5599afc93bb560b91eef625d9",
+   "fetched_at": "2026-11-15T06:17:31+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2007-03-15%2F2007-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_99484839e984bb69b6e3b92b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_99484839e984bb69b6e3b92b.json.gz",
+   "sha256": "c85d4c4aaa6e8b8ac3c7fb34c3f0e81d089d8a9d6c75fef4266da9729a95efd6",
+   "fetched_at": "2026-11-15T06:17:33+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2011-03-15%2F2011-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_ad0a9f4e13802b8eadf34aa2",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_ad0a9f4e13802b8eadf34aa2.json.gz",
+   "sha256": "787d724fa7164a6401f1414088a5747b1f7ac4260ed9d2cf608d3bbc20cd09e1",
+   "fetched_at": "2026-11-15T06:17:35+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2015-03-15%2F2015-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_aecb887a784aaab2999bd370",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_aecb887a784aaab2999bd370.json.gz",
+   "sha256": "52bb81f927bc729dac449e21843dcaa8d76980dcf8aafed4b2b4582f176275fb",
+   "fetched_at": "2026-11-15T06:17:31+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2005-03-15%2F2005-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_b11cf788f7be22fb75bc520b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_b11cf788f7be22fb75bc520b.json.gz",
+   "sha256": "05d80a0cad2380021b3c02bfdff451761ab2cff64ebcd1552bd8637ca1a7c809",
+   "fetched_at": "2026-11-15T06:17:39+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_c15e2e8f79573b1b4730bbd8",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_c15e2e8f79573b1b4730bbd8.json.gz",
+   "sha256": "6778a84afeb0497cb3a65e161984c340ca8cccc2222a81c46aba909f39464dfd",
+   "fetched_at": "2026-11-15T06:17:36+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2016-03-15%2F2016-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_c64a8e8deffe12250ed82c9b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_c64a8e8deffe12250ed82c9b.json.gz",
+   "sha256": "8f14293143236ef14543dc6e3ab554c2e289121d524122cefac660569cdfd9a9",
+   "fetched_at": "2026-11-14T19:03:25+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=33.0000&longitude=-7.6200&band=250m_16_days_NDVI&startDate=A2009097&endDate=A2009241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_cacefc808978a6d1dafebdab",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_cacefc808978a6d1dafebdab.json.gz",
+   "sha256": "1ac789462c63d9c0442f00af1adb2c657c8082a0a09b1223c27519d60cca3d2d",
+   "fetched_at": "2026-11-15T06:17:35+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2012-03-15%2F2012-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_e054effa0061ca37aef097ab",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_e054effa0061ca37aef097ab.json.gz",
+   "sha256": "35e3d5b3c84c734cbafa003b50f7b32831e24d0705958a253cecbd40030f90e9",
+   "fetched_at": "2026-11-15T06:17:37+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2019-03-15%2F2019-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_eebc814726cf5fd5f31678b5",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_eebc814726cf5fd5f31678b5.json.gz",
+   "sha256": "f71edb123fe5282431a60f10ef2bfd8d3eda1023170c499a98c5df112ae2edde",
+   "fetched_at": "2026-11-15T06:17:32+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2008-03-15%2F2008-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+33.000_-7.620_f381d9c5af2a0f60104b8835",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+33.000_-7.620_f381d9c5af2a0f60104b8835.json.gz",
+   "sha256": "1af03b93e039c8f618c6fbe11ebe74d3294b91115cbc3f10e3655b8488b89f43",
+   "fetched_at": "2026-11-15T06:17:39+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-7.62000%2C33.00000%2C-7.62000%2C33.00000&datetime=2022-03-15%2F2022-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_07ae96e3740486565eae95df",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_07ae96e3740486565eae95df.json.gz",
+   "sha256": "3a0203b7b0a00e6ba2d4e2cc0e660fa7bc49b9ae224b0a25f3d67ee93861aa6d",
+   "fetched_at": "2026-11-15T06:18:14+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2021-03-15%2F2021-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_0c32b14aa3f7d6ec0ae738a7",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_0c32b14aa3f7d6ec0ae738a7.json.gz",
+   "sha256": "f372f9ef5415adbbea58ef328f98b428fdd157752f56803c3afa0a79e57d6b0e",
+   "fetched_at": "2026-11-15T06:18:15+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_0d11c85111eae4d5377bc3bb",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_0d11c85111eae4d5377bc3bb.json.gz",
+   "sha256": "43186c54b8abd766d0ef456240b618caf77370eb55c21ced9d5fb8500d6e34e6",
+   "fetched_at": "2026-11-15T06:18:11+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2014-03-15%2F2014-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_0d5be3b53001385bd3cf4934",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_0d5be3b53001385bd3cf4934.json.gz",
+   "sha256": "ded449ddb30a5f65ceb575ce91d109a5cc191633f9987ca4cc55a91d8cd206c2",
+   "fetched_at": "2026-11-15T06:18:12+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2015-03-15%2F2015-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_0f282c776b27c82244a56156",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_0f282c776b27c82244a56156.json.gz",
+   "sha256": "a0eb7ed9a5209b2a959fd217823981cdf66851ae3516872d324d2ad7f02f012d",
+   "fetched_at": "2026-11-15T06:18:07+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2004-03-15%2F2004-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_145263108b69b6bf82f55593",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_145263108b69b6bf82f55593.json.gz",
+   "sha256": "57ceb88c536366fee311521f3f249c3cd151a54ee5823c441a303692d915c307",
+   "fetched_at": "2026-11-15T06:18:11+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2013-03-15%2F2013-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_1b2aadafca7066e0d32e9e25",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_1b2aadafca7066e0d32e9e25.json.gz",
+   "sha256": "dd3e66c815f62f85bc0e8e2ec5b25044e7c6e1c960bd89b02079070f37916a49",
+   "fetched_at": "2026-11-15T06:18:08+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2006-03-15%2F2006-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_1feb55c2104d091c0b7422c3",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_1feb55c2104d091c0b7422c3.json.gz",
+   "sha256": "092293c651c263fee07e6cf206e462ca07e56a701d1f09f9919651aba589b902",
+   "fetched_at": "2026-11-15T06:18:14+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2022-03-15%2F2022-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_2524cc7f57f2f516342c399d",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_2524cc7f57f2f516342c399d.json.gz",
+   "sha256": "7cb020b03b4a40cf5e47214284c0c67722596cdb50cb1691afe358116cefd56f",
+   "fetched_at": "2026-11-15T06:18:14+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2020-03-15%2F2020-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_2fe0ece562333ecc7673a186",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_2fe0ece562333ecc7673a186.json.gz",
+   "sha256": "21286bff794ac8e1897e39f72244c178b24aaf8fc434c94a3141c4f9737d6695",
+   "fetched_at": "2026-11-15T06:18:13+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2018-03-15%2F2018-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_361dbcab0a808d8d81628324",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_361dbcab0a808d8d81628324.json.gz",
+   "sha256": "bf6d28f6267b34f17dd355e70eee348e579dc969256be171949c75d4b03b408e",
+   "fetched_at": "2026-11-15T06:18:13+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2019-03-15%2F2019-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_4c0684a171ee9b1bc31f167d",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_4c0684a171ee9b1bc31f167d.json.gz",
+   "sha256": "2736b06f89723d33b4b6ba4e5d58fa644ec908df5f8ea0fe9c03535f7147ffcd",
+   "fetched_at": "2026-11-15T06:18:09+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2010-03-15%2F2010-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_5c741717c143ae5dc111dc8f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_5c741717c143ae5dc111dc8f.json.gz",
+   "sha256": "77780d0a67eb72d62dfb5370eefb5a2b54e1db47f71b2adecb74252cd80631ad",
+   "fetched_at": "2026-11-15T06:18:10+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2011-03-15%2F2011-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_65663754cde7963af08e4e39",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_65663754cde7963af08e4e39.json.gz",
+   "sha256": "74f2c1f64255ec4def722f68927f4dfdbf45cfb96c6d147f21f855ca807f2eb9",
+   "fetched_at": "2026-11-15T06:18:09+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2008-03-15%2F2008-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_6d40ffe16274053c55043045",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_6d40ffe16274053c55043045.json.gz",
+   "sha256": "64b0a9f60cd5175e88018b8688446c81ca6fcf73723b6ec4abe6db5a33f4b4cf",
+   "fetched_at": "2026-11-15T06:18:12+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2017-03-15%2F2017-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_83a3d24fc2d9ed8fefd2016a",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_83a3d24fc2d9ed8fefd2016a.json.gz",
+   "sha256": "6d08c8a8632d2fb926ff1bf30db3744ad7c2f25ec095bc643e96e23d705212c7",
+   "fetched_at": "2026-11-15T06:18:07+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2005-03-15%2F2005-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_9a1b64767baf241c45151ce1",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_9a1b64767baf241c45151ce1.json.gz",
+   "sha256": "408fea1c6b0a172d25ff972d751d31683e34cd6e05bcddb9598175391d6e4c4e",
+   "fetched_at": "2026-11-15T06:18:08+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2007-03-15%2F2007-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_b8a90f0900c501cf4000ee08",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_b8a90f0900c501cf4000ee08.json.gz",
+   "sha256": "9badf107502fdf0b245dd13b9b7a5508aac7d94327a5af01c2157372040d37b8",
+   "fetched_at": "2026-11-15T06:18:06+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2003-03-15%2F2003-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_be4e5a90be0c6a4c4a6ac8bd",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_be4e5a90be0c6a4c4a6ac8bd.json.gz",
+   "sha256": "a4ca6fe1493a6752b89203d31d2256def7ed5b44ad66f905e9f3df1d7e4b7da7",
+   "fetched_at": "2026-11-15T06:18:06+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2002-03-15%2F2002-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_c7baab1cbb2612671f5ee137",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_c7baab1cbb2612671f5ee137.json.gz",
+   "sha256": "6bd62fd315c15e32969e3a2e595aaee8b31bc559912a56a98b6a2384a5cddf64",
+   "fetched_at": "2026-11-15T06:18:12+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2016-03-15%2F2016-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_ce956090e27bde624552e87b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_ce956090e27bde624552e87b.json.gz",
+   "sha256": "11c24c1e8be7a2ecb74c20f7cfec9d7584b6f6dab8f51ea2fb90b84e9050c158",
+   "fetched_at": "2026-11-15T06:18:09+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2009-03-15%2F2009-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_edd62ba93ef0f2c85c264b64",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_edd62ba93ef0f2c85c264b64.json.gz",
+   "sha256": "e1bbf6c4b3ebe02f0e84b0793f65e33a6385796400364482f2c34aa771c0b5a5",
+   "fetched_at": "2026-11-15T06:18:11+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2012-03-15%2F2012-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.360_-98.760_f209b9ee42a629232769a1a9",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.360_-98.760_f209b9ee42a629232769a1a9.json.gz",
+   "sha256": "3a0016b5bfb7e9512890b5c8f70fb723677694ca4e40e405e3216a5bd9bb23a5",
+   "fetched_at": "2026-11-15T06:18:07+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-98.76000%2C38.36000%2C-98.76000%2C38.36000&datetime=2001-03-15%2F2001-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_1180f30f7f315b7195d74ecf",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_1180f30f7f315b7195d74ecf.json.gz",
+   "sha256": "8d447ff32a4fcae539298bb276d3f1cd3401541557592aa1e70b5b7c986f2b9f",
+   "fetched_at": "2026-11-14T18:38:37+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2009097&endDate=A2009241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_1686b32d289432a5b0ee1f6e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_1686b32d289432a5b0ee1f6e.json.gz",
+   "sha256": "75ee984642be6bbb1c2024e55e9ec2cff61eccb381ea4ae8e9734ba9ae481d02",
+   "fetched_at": "2026-11-14T15:49:16+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2004097&endDate=A2004241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_1a7e5bd074b97add50ba9681",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_1a7e5bd074b97add50ba9681.json.gz",
+   "sha256": "e88803fb52e0c399be763b765c5a4870664d4dcabacd89e065a4655899039767",
+   "fetched_at": "2026-11-14T15:57:43+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2013097&endDate=A2013241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_1e1e5cd28c5a8619d103bc8b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_1e1e5cd28c5a8619d103bc8b.json.gz",
+   "sha256": "d60875a1c716ff36e717f7e7b83b4f1bdcf05e54a6cdd5a50e65d166c50d888b",
+   "fetched_at": "2026-11-14T18:49:00+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2025097&endDate=A2025241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_1f8734528f1b3ee56b41938f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_1f8734528f1b3ee56b41938f.json.gz",
+   "sha256": "8935c7914e192abb798e5acc54b5ad9db6da92e415b494489f13ccfce4b0752f",
+   "fetched_at": "2026-11-14T15:50:10+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2006097&endDate=A2006241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_3441980712583e6226e791ba",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_3441980712583e6226e791ba.json.gz",
+   "sha256": "1f285ef3d63e597f910b0c6da3ebdf2d91ffdbcf9dc0f2fbe347a1ea34738b7e",
+   "fetched_at": "2026-11-14T18:38:36+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2010097&endDate=A2010241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_3ff950d84143a6fb23ff79e8",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_3ff950d84143a6fb23ff79e8.json.gz",
+   "sha256": "f4ccdb1bebae963d88406c92e8d90330deb85dd77e757c4dbfd7408c6a90956d",
+   "fetched_at": "2026-11-14T18:41:35+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2017097&endDate=A2017241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_67777cdf9536626d3abb7665",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_67777cdf9536626d3abb7665.json.gz",
+   "sha256": "0e203f19a483b19885b1681fa2384245df797cd9231f0dfaafd4fb5fc3ab1e8d",
+   "fetched_at": "2026-11-14T18:40:40+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2015097&endDate=A2015241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_6903e03436b27c29d0c13cce",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_6903e03436b27c29d0c13cce.json.gz",
+   "sha256": "27edda8edcc734d39cad51e831eebeafceb707114ad8e482ce3005a7fd10f129",
+   "fetched_at": "2026-11-15T06:17:19+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.93000%2C38.65000%2C32.93000%2C38.65000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_7119e6ff8d3522b4fcf4170d",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_7119e6ff8d3522b4fcf4170d.json.gz",
+   "sha256": "420047a1d498051fa9d49622b2b33a67c56af5a58e04a4dc6f75664d5a0816b6",
+   "fetched_at": "2026-11-14T18:38:39+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2007097&endDate=A2007241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_85260f4e84eac2df98110f8c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_85260f4e84eac2df98110f8c.json.gz",
+   "sha256": "72e07e89c60466985d226a8ae3a5907bc56d40bd36f9a45e47adee3a294c7127",
+   "fetched_at": "2026-11-14T15:58:20+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2014097&endDate=A2014241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_8996a21f92d32393603647bb",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_8996a21f92d32393603647bb.json.gz",
+   "sha256": "ed4c22f9988961612c38f08b668dcd39c79aa7693d13ee16deb0e8bfa1a0c7f0",
+   "fetched_at": "2026-11-14T15:49:09+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2003097&endDate=A2003241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_92062331d5e350fb286f1aaf",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_92062331d5e350fb286f1aaf.json.gz",
+   "sha256": "94736ae0317c410a32d1dcf2a9a498c58220f9969453daa81f2c8ae42cd1153d",
+   "fetched_at": "2026-11-14T18:40:44+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2016097&endDate=A2016241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_a82aef4aabbe7b619c820e59",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_a82aef4aabbe7b619c820e59.json.gz",
+   "sha256": "1439cf0ac831c8631ac10a1c218ed7325ed8c0d3ff33d53e2006ad84bb156416",
+   "fetched_at": "2026-11-14T18:41:24+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2018097&endDate=A2018241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_b0830ad46a407f6b8cfeb720",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_b0830ad46a407f6b8cfeb720.json.gz",
+   "sha256": "99ace4c4a99e12da97eaaf5e1ff70e71db705ce88723c6678371d4a2affc0250",
+   "fetched_at": "2026-11-14T18:48:40+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2022097&endDate=A2022241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_b19fcfae5ae83e14b206d20b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_b19fcfae5ae83e14b206d20b.json.gz",
+   "sha256": "ea2c7333aec7d87588c798d008885f4be5bfa220fab5ba9a5d1eaf70e44fad6d",
+   "fetched_at": "2026-11-14T18:43:59+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2019097&endDate=A2019241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_b1abb1c871ded910a6a56598",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_b1abb1c871ded910a6a56598.json.gz",
+   "sha256": "18a1ac4acd30eb76ea9c128cd17ed1134699afde4e4ee3c996ea1a12f1bfc8ab",
+   "fetched_at": "2026-11-14T15:49:12+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2002097&endDate=A2002241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_b7993e88d149501f48e6fbf1",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_b7993e88d149501f48e6fbf1.json.gz",
+   "sha256": "9c30fa79baa5df9f27c5398bc8afb3890cafb79dd1cab340d449d2fd807806e9",
+   "fetched_at": "2026-11-14T15:57:29+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2011097&endDate=A2011241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_c0a315a87f41f64a1de54194",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_c0a315a87f41f64a1de54194.json.gz",
+   "sha256": "5836530c63c21fb245d581ce6ee76e7f7ebeeaae8611dfa6d22be4ef3711dacc",
+   "fetched_at": "2026-11-14T15:47:18+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2001097&endDate=A2001241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_c26ce9f28f781fd2cd086c79",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_c26ce9f28f781fd2cd086c79.json.gz",
+   "sha256": "232dbe16a70cb21f564a5aea8432a1804231465b6c51311b09fe96a5af71bc04",
+   "fetched_at": "2026-11-14T15:52:09+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2005097&endDate=A2005241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_d5942389bb69928f2c4b04f9",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_d5942389bb69928f2c4b04f9.json.gz",
+   "sha256": "d2b9f6022c674832a084a1b236065baa938eeeb6d188864acc25d27f2fb0e8b1",
+   "fetched_at": "2026-11-14T18:43:37+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2020097&endDate=A2020241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_ef75ca2e6757fdc9e2319d0b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_ef75ca2e6757fdc9e2319d0b.json.gz",
+   "sha256": "4c4e3f17121d2cfa13e5ce1a50ec2415f5fb61a41159d1940d5750c61d080f48",
+   "fetched_at": "2026-11-14T15:52:02+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2008097&endDate=A2008241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_f231cbdea4de4c2f57d883e4",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_f231cbdea4de4c2f57d883e4.json.gz",
+   "sha256": "afd344216491e74fee8837172a8938c920ddba6a01b58d2a7f3e3cf015f06a15",
+   "fetched_at": "2026-11-14T18:44:00+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2021097&endDate=A2021241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+38.650_+32.930_f9d778f642e859bab29197bb",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+38.650_+32.930_f9d778f642e859bab29197bb.json.gz",
+   "sha256": "9635289efab0deedde7478995910228fb62368988cc1aa12c714c50ba517c30b",
+   "fetched_at": "2026-11-14T18:40:47+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=38.6500&longitude=32.9300&band=250m_16_days_NDVI&startDate=A2012097&endDate=A2012241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_13934b8ca995465407c64979",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_13934b8ca995465407c64979.json.gz",
+   "sha256": "9df79d9cd2826d9c638f025680455e8279c8fb5912f316066bc6f494b62d534c",
+   "fetched_at": "2026-11-14T18:52:34+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2007097&endDate=A2007241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_1965f15aed5e0e80f7f8020f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_1965f15aed5e0e80f7f8020f.json.gz",
+   "sha256": "2e3a5cd6fe4129a54eeeec74cf9cf9e687ca45741c14fc9a46d320be2fb66a2a",
+   "fetched_at": "2026-11-15T06:17:20+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2009-03-15%2F2009-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_49df656223fe715332f6ba9b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_49df656223fe715332f6ba9b.json.gz",
+   "sha256": "01ba8fb6fbfd419e2237ed8cd5272f59c9ba91fa670b5cb98c2e2c92043324d7",
+   "fetched_at": "2026-11-14T18:49:41+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2006097&endDate=A2006241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_5ff9d0d5e4dcfbcf04ece90c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_5ff9d0d5e4dcfbcf04ece90c.json.gz",
+   "sha256": "9b7340a3b068b233ea3f8e4c33a859342f6dce7ccc1747c9d93b09846499b261",
+   "fetched_at": "2026-11-15T06:17:22+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2013-03-15%2F2013-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_615e7c9f274347f60099f6e3",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_615e7c9f274347f60099f6e3.json.gz",
+   "sha256": "997fa8bb43680b65ca45c709dafb09954f585ac9f372c736090739b604324854",
+   "fetched_at": "2026-11-15T06:17:26+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2022-03-15%2F2022-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_7a79e554f39214185232e15c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_7a79e554f39214185232e15c.json.gz",
+   "sha256": "7051f163b81791c624673a11e011c962b47a86f306d1ad862b1c71222e72cbbb",
+   "fetched_at": "2026-11-15T06:17:22+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2012-03-15%2F2012-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_819443f00afc5f753ec7a471",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_819443f00afc5f753ec7a471.json.gz",
+   "sha256": "c96c88881e0b7485792e6e6a330aa6851928c2979bcc0c5e82ba729a2fcbfec7",
+   "fetched_at": "2026-11-14T18:49:36+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2005097&endDate=A2005241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_971de7838c39d7bde0512d34",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_971de7838c39d7bde0512d34.json.gz",
+   "sha256": "f631bc19a6315920a9cd90d4610d32b96172e53727196292da04e44c3c35282f",
+   "fetched_at": "2026-11-15T06:17:25+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2018-03-15%2F2018-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_990ba89395ae367e76e91c7a",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_990ba89395ae367e76e91c7a.json.gz",
+   "sha256": "899bf70916b60f237c8d889e69631076f3bfeac8cf4ac981e9f1795e49e63137",
+   "fetched_at": "2026-11-15T06:17:22+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2014-03-15%2F2014-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_9ffd0369aa0a32103d5bb4cf",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_9ffd0369aa0a32103d5bb4cf.json.gz",
+   "sha256": "1b4904438da07ee16c559d967311c5ca8ceb1f6f17c265198e9dd791d3b6a680",
+   "fetched_at": "2026-11-15T06:17:25+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2019-03-15%2F2019-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_ac1fe37e367274cebcad1beb",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_ac1fe37e367274cebcad1beb.json.gz",
+   "sha256": "48d72040f84e61259a1305371966d52356a5849a24cdd40e383b317b9c5c38f3",
+   "fetched_at": "2026-11-14T15:58:20+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2002097&endDate=A2002241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_af264b41870ff345cb9625e5",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_af264b41870ff345cb9625e5.json.gz",
+   "sha256": "7316bbce769227812d24276653152bdc46659a5e92ce9a83149ea7f07aa63182",
+   "fetched_at": "2026-11-15T06:17:23+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2017-03-15%2F2017-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_b01a85e207080e1b6bf0c797",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_b01a85e207080e1b6bf0c797.json.gz",
+   "sha256": "b025f873a1034258abb5b44111ab108ca60f89e5f3f5ce786cf27608a096f3f4",
+   "fetched_at": "2026-11-15T06:17:23+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2015-03-15%2F2015-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_b2621890f5ad34d21bf89f37",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_b2621890f5ad34d21bf89f37.json.gz",
+   "sha256": "d30bc1d5168876db537810c17fc90fc9eb51864d5116e35bfc81ad507e60522d",
+   "fetched_at": "2026-11-14T18:52:14+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2008097&endDate=A2008241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_b8bbe5f59cbb6063ed2876ec",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_b8bbe5f59cbb6063ed2876ec.json.gz",
+   "sha256": "280720f0b880e52f9e80f074fbfbf2515e6808fed622dd8ff69579c34123850e",
+   "fetched_at": "2026-11-15T06:17:20+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2011-03-15%2F2011-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_b9d77e4f81864038b29d6f7a",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_b9d77e4f81864038b29d6f7a.json.gz",
+   "sha256": "89f0c2137895ce669a9d1755e0f864025b7d44da9113705747e54f8c11b3bac7",
+   "fetched_at": "2026-11-15T06:17:26+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_c2466d3959fcd822390c071e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_c2466d3959fcd822390c071e.json.gz",
+   "sha256": "7f5b10903a3ad3a13be2c34dd10526b3579265b09571d107971efcd223252012",
+   "fetched_at": "2026-11-15T06:17:25+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2020-03-15%2F2020-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_cd4e582547cec49389a76805",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_cd4e582547cec49389a76805.json.gz",
+   "sha256": "ead0cb36f4ad214d67bd7aa43eef7465787781757ff2fdef4044fdd70a8d9906",
+   "fetched_at": "2026-11-15T06:17:23+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2016-03-15%2F2016-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_cf5c2255c2a50c5d000646ab",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_cf5c2255c2a50c5d000646ab.json.gz",
+   "sha256": "dfd2a7f4b566fb1f0d448f56141f177b9cd27a98267a35232107158205d95b24",
+   "fetched_at": "2026-11-14T18:48:52+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2001097&endDate=A2001241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_d75da5346e1466ca1587f66a",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_d75da5346e1466ca1587f66a.json.gz",
+   "sha256": "0a3d94336e7d8776fe127f0dda3b3b89f6737048dff435204da72392b54433c8",
+   "fetched_at": "2026-11-15T06:17:26+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2021-03-15%2F2021-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_de437a572bf08ed1fba8be85",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_de437a572bf08ed1fba8be85.json.gz",
+   "sha256": "431bd8750b6ce918c2279bcb7681ebf45ec9d715adf65fb0b6b5818077cb8c78",
+   "fetched_at": "2026-11-14T18:50:06+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2004097&endDate=A2004241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_df16ecb77b67cf5cae85c2a4",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_df16ecb77b67cf5cae85c2a4.json.gz",
+   "sha256": "d7180163ce7fa97c8ba07e77309d2523a00742ef75f2b345ac9b172ec85fce9b",
+   "fetched_at": "2026-11-14T18:48:45+00:00",
+   "url": "https://modis.ornl.gov/rst/api/v1/MOD13Q1/subset?latitude=39.5800&longitude=32.1500&band=250m_16_days_NDVI&startDate=A2003097&endDate=A2003241&kmAboveBelow=0&kmLeftRight=0"
+  },
+  {
+   "key": "modis_mod13q1/+39.580_+32.150_e04533717c558ea4fce3d44f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+39.580_+32.150_e04533717c558ea4fce3d44f.json.gz",
+   "sha256": "3ef536b0bae7d2aae8343f0df5697f7b7c6df718e6e795c7cd3673b2c430e710",
+   "fetched_at": "2026-11-15T06:17:20+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=32.15000%2C39.58000%2C32.15000%2C39.58000&datetime=2010-03-15%2F2010-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_0deee6edd86ed1534c8dfb5e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_0deee6edd86ed1534c8dfb5e.json.gz",
+   "sha256": "ac0da690af458c146d5e732e8667a253c2c2f04ff131f08b7c4e0a4a09cd8e60",
+   "fetched_at": "2026-11-15T06:17:44+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2008-03-15%2F2008-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_1ae353cfbc94bff493060a6c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_1ae353cfbc94bff493060a6c.json.gz",
+   "sha256": "10fb8b2f72946c6bab5537a057231014a85325579b45e19311204b7c3dd3b487",
+   "fetched_at": "2026-11-15T06:17:45+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2009-03-15%2F2009-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_26c8634f4b370c602fb9775d",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_26c8634f4b370c602fb9775d.json.gz",
+   "sha256": "7ec455f26f415f95217626d1062fc1d8a662bea012dbebf8fa2c6a053a39319b",
+   "fetched_at": "2026-11-15T06:17:50+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2018-03-15%2F2018-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_3e898a34b956343866602832",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_3e898a34b956343866602832.json.gz",
+   "sha256": "a17a9124c2cedb7fa4b65b17542396df262cbb5790989d7d37ad07a3faede3c9",
+   "fetched_at": "2026-11-15T06:17:51+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_3fade528596ce89e348a3b91",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_3fade528596ce89e348a3b91.json.gz",
+   "sha256": "5c44b4d39f64fa13b3369702e8115c567f09bb4fb716df289445f2840f89161c",
+   "fetched_at": "2026-11-15T06:17:50+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2021-03-15%2F2021-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_5305433e561a0122bc7120c3",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_5305433e561a0122bc7120c3.json.gz",
+   "sha256": "f566f96e5f3ad39d853273880c606bce6a9af0cc8259683b2b8134759640abff",
+   "fetched_at": "2026-11-15T06:17:48+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2017-03-15%2F2017-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_5579ba5541c5a9c4b370dedc",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_5579ba5541c5a9c4b370dedc.json.gz",
+   "sha256": "7c44a6eaaa861cd6f51c331ccb4c00dc92bd6a6c35ffa7fbbe9cb47ae792732d",
+   "fetched_at": "2026-11-15T06:17:43+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2006-03-15%2F2006-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_60780c8781bc193fb568960c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_60780c8781bc193fb568960c.json.gz",
+   "sha256": "b206d6c63aef51b87cd3c83fc53977551e3c5adc5453c8b6cc80b4b95c833aa4",
+   "fetched_at": "2026-11-15T06:17:50+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2022-03-15%2F2022-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_615777e0a951fb040753a02e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_615777e0a951fb040753a02e.json.gz",
+   "sha256": "c5870e6e68bbf23df08e2b6753adb4497bf02cd7049745b4655fef3e5d216f2f",
+   "fetched_at": "2026-11-15T06:17:47+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2015-03-15%2F2015-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_6ffeda21febc3c7851371939",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_6ffeda21febc3c7851371939.json.gz",
+   "sha256": "3f7cf2d9a76a6b680b232c83f496cc67db800c2d10023061aa187f780ce36325",
+   "fetched_at": "2026-11-15T06:17:48+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2016-03-15%2F2016-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_77a7d75e8f6637adac0fdd14",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_77a7d75e8f6637adac0fdd14.json.gz",
+   "sha256": "7469430559aadfe1c1d43d8ea9a839eb3108a32025e2f89635785d73e9c03adb",
+   "fetched_at": "2026-11-15T06:17:45+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2007-03-15%2F2007-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_7af4b0de2e4d5faf1142a959",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_7af4b0de2e4d5faf1142a959.json.gz",
+   "sha256": "c90bc9cb7b41c7ef4494d6b97432db17bf4d8fa09ab9117ad2cc267b4dda0c33",
+   "fetched_at": "2026-11-15T06:17:41+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2002-03-15%2F2002-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_7c60e2c08e6e29b418b0dfcf",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_7c60e2c08e6e29b418b0dfcf.json.gz",
+   "sha256": "8654366f8f508258b137f7d42b8266a27b73701e0cf6ae1b82918719e05f69d3",
+   "fetched_at": "2026-11-15T06:17:46+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2012-03-15%2F2012-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_8290f6350c6112b05294686e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_8290f6350c6112b05294686e.json.gz",
+   "sha256": "6c67540b1d6345f8d684d900230b1443edc936155cf98df86c08ec2d03b4871f",
+   "fetched_at": "2026-11-15T06:17:43+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2005-03-15%2F2005-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_856f85d5cba2034563a3808e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_856f85d5cba2034563a3808e.json.gz",
+   "sha256": "f1d8d6890857a8192bfed2ea028b2b11192d0bb00e565b9b09f0c09087e0e4ee",
+   "fetched_at": "2026-11-15T06:17:47+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2014-03-15%2F2014-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_ac06f9e8f4f55b569d66cf6e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_ac06f9e8f4f55b569d66cf6e.json.gz",
+   "sha256": "f53d59e916b0d3f07d5aab8844648faf0ef764d50732201771873c57dafeb661",
+   "fetched_at": "2026-11-15T06:17:45+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2010-03-15%2F2010-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_b0ce0e3850ca06d870f86104",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_b0ce0e3850ca06d870f86104.json.gz",
+   "sha256": "9e293a96f43fcbaf754c2a43f443de7ace2cb763f4bde34c6a91212d9bb084f0",
+   "fetched_at": "2026-11-15T06:17:43+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2004-03-15%2F2004-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_b3047fb7dd21dbdb6b1734e2",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_b3047fb7dd21dbdb6b1734e2.json.gz",
+   "sha256": "ef1f9c434efce3f4f185a1373fdfe13de1edd0ddc757b66d35af6ff67d4b30e1",
+   "fetched_at": "2026-11-15T06:17:49+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2020-03-15%2F2020-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_c19096261bde7d9886dd1ecc",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_c19096261bde7d9886dd1ecc.json.gz",
+   "sha256": "24d592d749a597fb99e2d62b4b941c7452a3ed81657123b58bc1d295d3f6471f",
+   "fetched_at": "2026-11-15T06:17:42+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2001-03-15%2F2001-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_e565bfa8cf69cb66aa84fa1e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_e565bfa8cf69cb66aa84fa1e.json.gz",
+   "sha256": "1263e807c7b4cd73d15300b9f7907ee2b624c9cf9e4252211b16b50eb99716d6",
+   "fetched_at": "2026-11-15T06:17:46+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2011-03-15%2F2011-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_e5d2d0637698a520604c2e3f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_e5d2d0637698a520604c2e3f.json.gz",
+   "sha256": "133ae994fa338b60e823384032f1be612ec415d5f2f33776b81be4db8ddea1b8",
+   "fetched_at": "2026-11-15T06:17:46+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2013-03-15%2F2013-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_e76e1edb77af112ece3d1820",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_e76e1edb77af112ece3d1820.json.gz",
+   "sha256": "d2dceb5314e3c91cadeff073d90fb340b3199ad4992eca58604cb85a61417bca",
+   "fetched_at": "2026-11-15T06:17:49+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2019-03-15%2F2019-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+41.950_-4.950_edba0ee508ccfcd9cf7a6476",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+41.950_-4.950_edba0ee508ccfcd9cf7a6476.json.gz",
+   "sha256": "7d038b9a75161b0c35317001dd3c1209c2f61d5e290906ccd94513f9ba95a286",
+   "fetched_at": "2026-11-15T06:17:42+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=-4.95000%2C41.95000%2C-4.95000%2C41.95000&datetime=2003-03-15%2F2003-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_00684ed35d39d766cbd05558",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_00684ed35d39d766cbd05558.json.gz",
+   "sha256": "32b809b46fe8246f7d8c8154df4e1bd06edf2f0189096374256b86a11010baec",
+   "fetched_at": "2026-11-15T06:18:03+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_10da60b4365cd34bf0df46ce",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_10da60b4365cd34bf0df46ce.json.gz",
+   "sha256": "8b3823babce9ff947c77318d8d359bd54e977b2ddd1927726867f6837ccf0198",
+   "fetched_at": "2026-11-15T06:17:54+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2005-03-15%2F2005-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_283e7f46ea86ec28870eac50",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_283e7f46ea86ec28870eac50.json.gz",
+   "sha256": "2825b51a47b5211549c3e2dc0da0d36eec5c7d4b3dcc1ae28e3a9e6e7d001ea7",
+   "fetched_at": "2026-11-15T06:17:52+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2001-03-15%2F2001-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_2d2dbff9daa9ab814556ce3a",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_2d2dbff9daa9ab814556ce3a.json.gz",
+   "sha256": "e51ae991946d35c8072f0b45c366340456e1e9a3a647619d057da6cd49612f8c",
+   "fetched_at": "2026-11-15T06:17:55+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2008-03-15%2F2008-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_36d90271aa276a974b27f17e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_36d90271aa276a974b27f17e.json.gz",
+   "sha256": "1fc705f37c30abfc4db0bf923e3d71708ffa0be21e853f6695a165ffe4be652e",
+   "fetched_at": "2026-11-15T06:17:57+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2011-03-15%2F2011-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_447ce016928ad63e5b22b141",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_447ce016928ad63e5b22b141.json.gz",
+   "sha256": "3f4a3f1387f8f447e23c092dac33758972c969a8ba1063544623dbb81b0775b9",
+   "fetched_at": "2026-11-15T06:18:01+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2020-03-15%2F2020-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_4d83aa4c03dc82c09835c65d",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_4d83aa4c03dc82c09835c65d.json.gz",
+   "sha256": "a4c24dc182e429bd9983ac02a746c2ded6dde351ca1f95c36baeec870ca8cf1e",
+   "fetched_at": "2026-11-15T06:17:59+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2015-03-15%2F2015-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_58e46a9a565b611700674cf4",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_58e46a9a565b611700674cf4.json.gz",
+   "sha256": "b3028ccb63d42f95ad6d2040c2cd28f7084c5f26b32e4e5d94f6df2cdba63492",
+   "fetched_at": "2026-11-15T06:17:54+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2006-03-15%2F2006-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_5fdd33390aeba23d239aa647",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_5fdd33390aeba23d239aa647.json.gz",
+   "sha256": "6dc09cb6788c7d878d6fefe3da04965b53dd39808fc8634d5c29285c224b08c7",
+   "fetched_at": "2026-11-15T06:18:01+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2019-03-15%2F2019-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_77c379cd87cbfcd9ee2d1bb7",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_77c379cd87cbfcd9ee2d1bb7.json.gz",
+   "sha256": "08e13d489f4ac821f960670d1aa8ea83e668bf2446c9a10be1f3454ddac09d7b",
+   "fetched_at": "2026-11-15T06:17:58+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2012-03-15%2F2012-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_7888c8272b02d99b8bc019ec",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_7888c8272b02d99b8bc019ec.json.gz",
+   "sha256": "d69e1783c07b11e3249d3a08001daa0e58b0e79dc0597c768e38cdf84c69f6d4",
+   "fetched_at": "2026-11-15T06:17:58+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2013-03-15%2F2013-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_79b0e1d1db7ade6e7417ea9e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_79b0e1d1db7ade6e7417ea9e.json.gz",
+   "sha256": "e42d5f11f82dbca6419895a4f170efca46f49e8c19ea4a4ff3de377d4a48e3e7",
+   "fetched_at": "2026-11-15T06:17:58+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2014-03-15%2F2014-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_7a7536ea4a5d727b1383859f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_7a7536ea4a5d727b1383859f.json.gz",
+   "sha256": "497b5754fc2207c7782deed1000d4d2a211a9f6819053e7cf1caacd4ca264040",
+   "fetched_at": "2026-11-15T06:17:55+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2007-03-15%2F2007-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_8567b8ae9be0b2f8e86dd6d7",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_8567b8ae9be0b2f8e86dd6d7.json.gz",
+   "sha256": "8f2dc253b63cb25a6e69b6801b25c3a64a3688c522ef21da9c8dac681298806f",
+   "fetched_at": "2026-11-15T06:18:03+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2021-03-15%2F2021-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_8c103eb40ab80651ae349470",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_8c103eb40ab80651ae349470.json.gz",
+   "sha256": "3e7b52dcb67ad285266c2fd13b8d94a86e1dbd2c002d876648f25a52a52c2cb7",
+   "fetched_at": "2026-11-15T06:17:52+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2002-03-15%2F2002-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_974c3d3def7fca04200d8b57",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_974c3d3def7fca04200d8b57.json.gz",
+   "sha256": "ee1de81a1e143252a9ca62b439e3f8b2dfeff2152cd1dcbb0b7a3bb2777988f2",
+   "fetched_at": "2026-11-15T06:17:59+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2017-03-15%2F2017-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_9c1e61eb101fb3786bd03046",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_9c1e61eb101fb3786bd03046.json.gz",
+   "sha256": "332f17b7338490a039c11063ef1ecf5bd4954058211922bb85a6ebb66892835e",
+   "fetched_at": "2026-11-15T06:18:03+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2022-03-15%2F2022-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_a3ae3baa99fddbc4a4f3ad0e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_a3ae3baa99fddbc4a4f3ad0e.json.gz",
+   "sha256": "a0f323e965a1568c148e29b1fc4b403a1d8e8cedbf28843ecab2a8f40151f03d",
+   "fetched_at": "2026-11-15T06:17:57+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2010-03-15%2F2010-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_ac369cb5f6e81ba939a562cd",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_ac369cb5f6e81ba939a562cd.json.gz",
+   "sha256": "635bd2892dd05726f631bb58e4cde5fda44ad004d483237cc1d349edd295dff5",
+   "fetched_at": "2026-11-15T06:17:56+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2009-03-15%2F2009-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_b797c1b2599943676a94079e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_b797c1b2599943676a94079e.json.gz",
+   "sha256": "162b69e95f2aa213350e84da1202b129b2da61225a82540b26c35d1bb36c06b9",
+   "fetched_at": "2026-11-15T06:17:54+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2004-03-15%2F2004-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_ca409377c04ce2ad7af55301",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_ca409377c04ce2ad7af55301.json.gz",
+   "sha256": "35ac61c5ded2920ff734f1c08fd5bd3bf974f3a497c7b4fcd4e935527f28a553",
+   "fetched_at": "2026-11-15T06:17:59+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2016-03-15%2F2016-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_caaa04ca279e6be352675f47",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_caaa04ca279e6be352675f47.json.gz",
+   "sha256": "e6b1486516d871e3884976a5dac772c7df17055816026817939d507e5777eef9",
+   "fetched_at": "2026-11-15T06:18:01+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2018-03-15%2F2018-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+44.350_+27.200_cc5679323077a458b2161546",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+44.350_+27.200_cc5679323077a458b2161546.json.gz",
+   "sha256": "1baea675802ef2ae8ec67d7229b25afd4a7b6253957ab5a203a9ac4204c05304",
+   "fetched_at": "2026-11-15T06:17:53+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=27.20000%2C44.35000%2C27.20000%2C44.35000&datetime=2003-03-15%2F2003-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_19bf6b1f7d614da08e36c229",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_19bf6b1f7d614da08e36c229.json.gz",
+   "sha256": "dfde084d55d87a51ba12995660eed47e6b36ffb856c8eeba37b7bfba4a8455b1",
+   "fetched_at": "2026-11-15T06:18:17+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2002-03-15%2F2002-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_1a2eadac74636bb122f9e54d",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_1a2eadac74636bb122f9e54d.json.gz",
+   "sha256": "73b8e9d58960fc388f0724c585bb3e3348017201d21028d5d55c9c6c22c15308",
+   "fetched_at": "2026-11-15T06:18:19+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2005-03-15%2F2005-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_1cdc23d5980172be53a0fe53",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_1cdc23d5980172be53a0fe53.json.gz",
+   "sha256": "cb387e9f6f0513154fe5161d4a3ae3b5e5b79c2b93fd82a4e8aa20eff4892cc5",
+   "fetched_at": "2026-11-15T06:18:26+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2020-03-15%2F2020-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_26d191db76cd40bf39897ce3",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_26d191db76cd40bf39897ce3.json.gz",
+   "sha256": "3758661d5bd695835e1f10a4bf04717bf24d8277f6d6648c68e8b2bbf55c8859",
+   "fetched_at": "2026-11-15T06:18:19+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2006-03-15%2F2006-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_26db432f82841f5722d5d079",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_26db432f82841f5722d5d079.json.gz",
+   "sha256": "4c2e45f7a0878aed9b5ccf7106fb51d965d0fbdbc59ea3a93c5a18a0e3d13455",
+   "fetched_at": "2026-11-15T06:18:25+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2019-03-15%2F2019-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_32623e037d75e230c2f3286b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_32623e037d75e230c2f3286b.json.gz",
+   "sha256": "9349dbeb231f24ff027a25242fec96993c02f28f8b10d76af453d287fda361e3",
+   "fetched_at": "2026-11-15T06:18:25+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2018-03-15%2F2018-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_32ac62b73450c2541d1f619e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_32ac62b73450c2541d1f619e.json.gz",
+   "sha256": "325706da1160efd44b436f8682e10347f9b954e7d70fc6e1982ebb86a163fac3",
+   "fetched_at": "2026-11-15T06:18:27+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2023-03-15%2F2023-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_355c21bb80d56aba56889a30",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_355c21bb80d56aba56889a30.json.gz",
+   "sha256": "c67474b6c15fb5803a986e0ebde203c9ce95c3ad7afc23fe076c3ef677a863d0",
+   "fetched_at": "2026-11-15T06:18:24+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2016-03-15%2F2016-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_3a38aebf01483dceb563a902",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_3a38aebf01483dceb563a902.json.gz",
+   "sha256": "b42686ae621e3ebee547fc43d3c3fae35706de63c54aa48f38143b90ba75a948",
+   "fetched_at": "2026-11-15T06:18:24+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2017-03-15%2F2017-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_3e8caa050296b9656f7022e9",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_3e8caa050296b9656f7022e9.json.gz",
+   "sha256": "61be06573949fc21689918b16ddd0412f56d57b5397b58917f1eede70fd2e07d",
+   "fetched_at": "2026-11-15T06:18:22+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2013-03-15%2F2013-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_3ee86edd31bf9cf334983690",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_3ee86edd31bf9cf334983690.json.gz",
+   "sha256": "72c005ccb4eca9bfb8122e363b50c1fb0f6cf2704b66a6a1080d2889307e7199",
+   "fetched_at": "2026-11-15T06:18:19+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2007-03-15%2F2007-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_5fa3f49cd79d9d976a9f4f35",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_5fa3f49cd79d9d976a9f4f35.json.gz",
+   "sha256": "32409aed49028e5f80930625850058a82221d70c2c21eada30200e591b4eb8d4",
+   "fetched_at": "2026-11-15T06:18:22+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2011-03-15%2F2011-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_655544c70d6822432b5de812",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_655544c70d6822432b5de812.json.gz",
+   "sha256": "01e9e67812fc83014375414e1dfbc69ca79906fbf8fb7c47f831f68b00df8bb8",
+   "fetched_at": "2026-11-15T06:18:26+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2021-03-15%2F2021-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_6cfb656ca1ab5cfdc97f02bb",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_6cfb656ca1ab5cfdc97f02bb.json.gz",
+   "sha256": "f82e5fe0d24e79a4cd9de20c393b38c85bbb8a23335f29b10699a60d020ea624",
+   "fetched_at": "2026-11-15T06:18:17+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2003-03-15%2F2003-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_75d69b23a8fdf1e8c405f498",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_75d69b23a8fdf1e8c405f498.json.gz",
+   "sha256": "65cfab43c7894c0f35effb935bbc52a4edcfae022ea20ac3f6ab4e7fc9ff5ce9",
+   "fetched_at": "2026-11-15T06:18:20+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2008-03-15%2F2008-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_7d31b8cb1e937813b654255f",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_7d31b8cb1e937813b654255f.json.gz",
+   "sha256": "198a51ff779db11daa1fbdb6cd82e7e1727710fc53fc3e83bbfaa4132d86d7c0",
+   "fetched_at": "2026-11-15T06:18:20+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2010-03-15%2F2010-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_a77d800b0838fd2babc54909",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_a77d800b0838fd2babc54909.json.gz",
+   "sha256": "98ac377f639ca160c449b6db0c69f25ddfb06ded87ac8a47f6f21d785983cc4f",
+   "fetched_at": "2026-11-15T06:18:23+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2014-03-15%2F2014-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_bad2f56983797cdc6e2f301b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_bad2f56983797cdc6e2f301b.json.gz",
+   "sha256": "df006a4e520a2a30555db94886b46a15f5a46887969628eea633016f50260a03",
+   "fetched_at": "2026-11-15T06:18:20+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2009-03-15%2F2009-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_c668569ab196f78628044e8b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_c668569ab196f78628044e8b.json.gz",
+   "sha256": "dc07fd2bd4496b92ecfb4930b69d361c647e1fc2118547bce6c783e0b8d722b9",
+   "fetched_at": "2026-11-15T06:18:27+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2022-03-15%2F2022-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_d46f4ac26c74ecb543fd011b",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_d46f4ac26c74ecb543fd011b.json.gz",
+   "sha256": "32cd173af233377b34481b10cca170d6858193d43e1d7db6a83e78852c521e63",
+   "fetched_at": "2026-11-15T06:18:17+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2001-03-15%2F2001-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_e1d3ea63624217ea9fd0168c",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_e1d3ea63624217ea9fd0168c.json.gz",
+   "sha256": "991ab89cc77adcd7003527bac83ad3a942e0add96f507d95007f248315b0c272",
+   "fetched_at": "2026-11-15T06:18:22+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2012-03-15%2F2012-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_eddce913d63d18793f16f9a1",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_eddce913d63d18793f16f9a1.json.gz",
+   "sha256": "6bc47528dd320407522cd6c9031440208f183f8e1788c1867e60ece1ff76076c",
+   "fetched_at": "2026-11-15T06:18:18+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2004-03-15%2F2004-10-15&limit=100"
+  },
+  {
+   "key": "modis_mod13q1/+48.250_+1.750_fc4d3089be9a4e2c371df80e",
+   "source": "modis_mod13q1",
+   "file": "files/modis_mod13q1/+48.250_+1.750_fc4d3089be9a4e2c371df80e.json.gz",
+   "sha256": "9e04712426c31419520815bb47d9a28e20beec61c713221db69db6d8d884debe",
+   "fetched_at": "2026-11-15T06:18:23+00:00",
+   "url": "https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=modis-13Q1-061&bbox=1.75000%2C48.25000%2C1.75000%2C48.25000&datetime=2015-03-15%2F2015-10-15&limit=100"
+  }
+ ],
+ "showcase_sites": [
+  {
+   "id": "tr-saraykoy",
+   "name": "Sarayk\u00f6y, Denizli, T\u00fcrkiye",
+   "lat": 37.89,
+   "lon": 28.98
+  },
+  {
+   "id": "tr-cihanbeyli",
+   "name": "Cihanbeyli, Konya, T\u00fcrkiye",
+   "lat": 38.65,
+   "lon": 32.93
+  },
+  {
+   "id": "tr-polatli",
+   "name": "Polatl\u0131, Ankara, T\u00fcrkiye",
+   "lat": 39.58,
+   "lon": 32.15
+  },
+  {
+   "id": "ma-settat",
+   "name": "Settat, Chaouia, Morocco",
+   "lat": 33.0,
+   "lon": -7.62
+  },
+  {
+   "id": "es-tierra-de-campos",
+   "name": "Tierra de Campos, Valladolid, Spain",
+   "lat": 41.95,
+   "lon": -4.95
+  },
+  {
+   "id": "ro-baragan",
+   "name": "B\u0103r\u0103gan plain, C\u0103l\u0103ra\u0219i, Romania",
+   "lat": 44.35,
+   "lon": 27.2
+  },
+  {
+   "id": "us-kansas",
+   "name": "Great Bend, Kansas, USA",
+   "lat": 38.36,
+   "lon": -98.76
+  },
+  {
+   "id": "fr-beauce",
+   "name": "Beauce, Eure-et-Loir, France",
+   "lat": 48.25,
+   "lon": 1.75
   }
  ]
 }
